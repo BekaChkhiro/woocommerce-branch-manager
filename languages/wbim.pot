@@ -1,0 +1,602 @@
+# Copyright (C) 2024 WooCommerce Branch Inventory Manager
+# This file is distributed under the same license as the WooCommerce Branch Inventory Manager plugin.
+msgid ""
+msgstr ""
+"Project-Id-Version: WooCommerce Branch Inventory Manager 1.0.0\n"
+"Report-Msgid-Bugs-To: https://example.com/wbim\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2024-01-01T00:00:00+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI\n"
+"X-Domain: wbim\n"
+
+#: woo-branch-inventory-manager.php
+msgid "WooCommerce Branch Inventory Manager"
+msgstr ""
+
+#: woo-branch-inventory-manager.php
+msgid "%s requires WooCommerce to be installed and activated."
+msgstr ""
+
+#: woo-branch-inventory-manager.php
+msgid "%s requires WooCommerce version %s or higher."
+msgstr ""
+
+#: includes/class-wbim-activator.php
+msgid "WooCommerce Branch Inventory Manager requires WordPress 5.8 or higher."
+msgstr ""
+
+#: includes/class-wbim-activator.php
+msgid "WooCommerce Branch Inventory Manager requires PHP 7.4 or higher."
+msgstr ""
+
+#: includes/class-wbim-activator.php
+msgid "Plugin Activation Error"
+msgstr ""
+
+#: includes/models/class-wbim-branch.php
+msgid "Could not create branch. Database error."
+msgstr ""
+
+#: includes/models/class-wbim-branch.php
+msgid "Branch not found."
+msgstr ""
+
+#: includes/models/class-wbim-branch.php
+msgid "Could not update branch. Database error."
+msgstr ""
+
+#: includes/models/class-wbim-branch.php
+msgid "Cannot delete branch with stock records. Remove stock first or use soft delete."
+msgstr ""
+
+#: includes/models/class-wbim-branch.php
+msgid "Could not delete branch. Database error."
+msgstr ""
+
+#: includes/models/class-wbim-branch.php
+msgid "Could not update branch status."
+msgstr ""
+
+#: includes/models/class-wbim-branch.php
+msgid "Branch name is required."
+msgstr ""
+
+#: includes/models/class-wbim-branch.php
+msgid "Branch name must be 255 characters or less."
+msgstr ""
+
+#: includes/models/class-wbim-branch.php
+msgid "Please enter a valid email address."
+msgstr ""
+
+#: includes/models/class-wbim-branch.php
+msgid "Latitude must be between -90 and 90."
+msgstr ""
+
+#: includes/models/class-wbim-branch.php
+msgid "Longitude must be between -180 and 180."
+msgstr ""
+
+#: includes/models/class-wbim-branch.php
+msgid "Selected manager does not exist."
+msgstr ""
+
+#: includes/models/class-wbim-branch.php
+msgid "Invalid order data provided."
+msgstr ""
+
+#: includes/models/class-wbim-stock.php
+msgid "Failed to update stock quantity."
+msgstr ""
+
+#: includes/models/class-wbim-stock.php
+msgid "Insufficient stock for this operation."
+msgstr ""
+
+#: includes/models/class-wbim-stock.php
+msgid "Failed to adjust stock quantity."
+msgstr ""
+
+#: includes/models/class-wbim-stock.php
+msgid "Stock record not found."
+msgstr ""
+
+#: includes/models/class-wbim-transfer.php
+msgid "Both source and destination branches are required."
+msgstr ""
+
+#: includes/models/class-wbim-transfer.php
+msgid "Source and destination branches must be different."
+msgstr ""
+
+#: includes/models/class-wbim-transfer.php
+msgid "At least one item is required for transfer."
+msgstr ""
+
+#: includes/models/class-wbim-transfer.php
+msgid "Failed to create transfer."
+msgstr ""
+
+#: includes/models/class-wbim-transfer.php
+msgid "Invalid transfer status."
+msgstr ""
+
+#: includes/models/class-wbim-transfer.php
+msgid "Transfer not found."
+msgstr ""
+
+#: includes/models/class-wbim-transfer.php
+msgid "Transfer #%d out"
+msgstr ""
+
+#: includes/models/class-wbim-transfer.php
+msgid "Transfer #%d in"
+msgstr ""
+
+#: includes/models/class-wbim-transfer.php
+msgid "Only pending or cancelled transfers can be deleted."
+msgstr ""
+
+#: includes/models/class-wbim-stock-log.php
+msgid "Failed to log stock change."
+msgstr ""
+
+#: includes/models/class-wbim-stock-log.php
+msgid "Sale"
+msgstr ""
+
+#: includes/models/class-wbim-stock-log.php
+msgid "Restock"
+msgstr ""
+
+#: includes/models/class-wbim-stock-log.php
+msgid "Transfer In"
+msgstr ""
+
+#: includes/models/class-wbim-stock-log.php
+msgid "Transfer Out"
+msgstr ""
+
+#: includes/models/class-wbim-stock-log.php
+msgid "Adjustment"
+msgstr ""
+
+#: includes/models/class-wbim-stock-log.php
+msgid "Return"
+msgstr ""
+
+#: includes/helpers/class-wbim-utils.php
+msgid "Security check failed. Please refresh the page and try again."
+msgstr ""
+
+#: includes/helpers/class-wbim-utils.php
+msgid "You do not have permission to perform this action."
+msgstr ""
+
+#: includes/helpers/class-wbim-utils.php
+msgid "Active"
+msgstr ""
+
+#: includes/helpers/class-wbim-utils.php
+msgid "Inactive"
+msgstr ""
+
+#: includes/helpers/class-wbim-utils.php
+msgid "Pending"
+msgstr ""
+
+#: includes/helpers/class-wbim-utils.php
+msgid "In Transit"
+msgstr ""
+
+#: includes/helpers/class-wbim-utils.php
+msgid "Completed"
+msgstr ""
+
+#: includes/helpers/class-wbim-utils.php
+msgid "Cancelled"
+msgstr ""
+
+#: admin/class-wbim-admin.php
+msgid "Branch created successfully."
+msgstr ""
+
+#: admin/class-wbim-admin.php
+msgid "Branch updated successfully."
+msgstr ""
+
+#: admin/class-wbim-admin.php
+msgid "Permission denied."
+msgstr ""
+
+#: admin/class-wbim-admin.php
+msgid "No order data provided."
+msgstr ""
+
+#: admin/class-wbim-admin.php
+msgid "Order saved successfully."
+msgstr ""
+
+#: admin/class-wbim-admin.php
+msgid "Invalid branch ID."
+msgstr ""
+
+#: admin/class-wbim-admin.php
+msgid "Status updated successfully."
+msgstr ""
+
+#: admin/class-wbim-admin.php
+msgid "Branch deleted successfully."
+msgstr ""
+
+#: admin/class-wbim-admin.php
+msgid "Are you sure you want to delete this branch?"
+msgstr ""
+
+#: admin/class-wbim-admin.php
+msgid "Are you sure you want to deactivate this branch?"
+msgstr ""
+
+#: admin/class-wbim-admin.php
+msgid "Saving..."
+msgstr ""
+
+#: admin/class-wbim-admin.php
+msgid "Saved!"
+msgstr ""
+
+#: admin/class-wbim-admin.php
+msgid "An error occurred. Please try again."
+msgstr ""
+
+#: admin/class-wbim-admin.php
+msgid "Click on the map to set location"
+msgstr ""
+
+#: admin/class-wbim-admin-menus.php
+msgid "Branch Inventory"
+msgstr ""
+
+#: admin/class-wbim-admin-menus.php
+msgid "Dashboard"
+msgstr ""
+
+#: admin/class-wbim-admin-menus.php
+msgid "Branches"
+msgstr ""
+
+#: admin/class-wbim-admin-menus.php
+msgid "Stock"
+msgstr ""
+
+#: admin/class-wbim-admin-menus.php
+msgid "Transfers"
+msgstr ""
+
+#: admin/class-wbim-admin-menus.php
+msgid "Reports"
+msgstr ""
+
+#: admin/class-wbim-admin-menus.php
+msgid "History"
+msgstr ""
+
+#: admin/class-wbim-admin-menus.php
+msgid "Settings"
+msgstr ""
+
+#. Georgian menu labels
+#: admin/class-wbim-admin-menus.php
+msgid "ფილიალები"
+msgstr ""
+
+#: admin/class-wbim-admin-menus.php
+msgid "მარაგები"
+msgstr ""
+
+#: admin/class-wbim-admin-menus.php
+msgid "გადატანები"
+msgstr ""
+
+#: admin/class-wbim-admin-menus.php
+msgid "რეპორტები"
+msgstr ""
+
+#: admin/class-wbim-admin-menus.php
+msgid "ისტორია"
+msgstr ""
+
+#: admin/class-wbim-admin-menus.php
+msgid "პარამეტრები"
+msgstr ""
+
+#: admin/class-wbim-admin-menus.php
+msgid "You do not have permission to access this page."
+msgstr ""
+
+#: admin/class-wbim-admin-menus.php
+msgid "Stock management functionality will be available in a future update."
+msgstr ""
+
+#: admin/class-wbim-admin-menus.php
+msgid "Transfer management functionality will be available in a future update."
+msgstr ""
+
+#: admin/class-wbim-admin-menus.php
+msgid "Reporting functionality will be available in a future update."
+msgstr ""
+
+#: admin/class-wbim-admin-menus.php
+msgid "History functionality will be available in a future update."
+msgstr ""
+
+#: admin/class-wbim-admin-menus.php
+msgid "Settings functionality will be available in a future update."
+msgstr ""
+
+#: admin/class-wbim-admin-menus.php
+msgid "Stock Management"
+msgstr ""
+
+#: admin/class-wbim-admin-menus.php
+msgid "Stock Transfers"
+msgstr ""
+
+#: admin/class-wbim-admin-menus.php
+msgid "Stock History"
+msgstr ""
+
+#: admin/views/dashboard.php
+msgid "Branch Inventory Manager"
+msgstr ""
+
+#: admin/views/dashboard.php
+msgid "Welcome to Branch Inventory Manager!"
+msgstr ""
+
+#: admin/views/dashboard.php
+msgid "Manage your inventory across multiple branches and locations."
+msgstr ""
+
+#: admin/views/dashboard.php
+msgid "Total Branches"
+msgstr ""
+
+#: admin/views/dashboard.php
+msgid "Active Branches"
+msgstr ""
+
+#: admin/views/dashboard.php
+msgid "Inactive Branches"
+msgstr ""
+
+#: admin/views/dashboard.php
+msgid "Pending Transfers"
+msgstr ""
+
+#: admin/views/dashboard.php
+msgid "Quick Actions"
+msgstr ""
+
+#: admin/views/dashboard.php
+msgid "Add Branch"
+msgstr ""
+
+#: admin/views/dashboard.php
+msgid "View Stock"
+msgstr ""
+
+#: admin/views/dashboard.php
+msgid "Create Transfer"
+msgstr ""
+
+#: admin/views/dashboard.php
+msgid "Recent Branches"
+msgstr ""
+
+#: admin/views/dashboard.php
+msgid "Name"
+msgstr ""
+
+#: admin/views/dashboard.php
+msgid "City"
+msgstr ""
+
+#: admin/views/dashboard.php
+msgid "Status"
+msgstr ""
+
+#: admin/views/dashboard.php
+msgid "Created"
+msgstr ""
+
+#: admin/views/dashboard.php
+msgid "View all branches"
+msgstr ""
+
+#: admin/views/dashboard.php
+msgid "No Branches Yet"
+msgstr ""
+
+#: admin/views/dashboard.php
+msgid "Get started by creating your first branch."
+msgstr ""
+
+#: admin/views/dashboard.php
+msgid "Create First Branch"
+msgstr ""
+
+#: admin/views/branches/list.php
+msgid "Branch"
+msgstr ""
+
+#: admin/views/branches/list.php
+msgid "ID"
+msgstr ""
+
+#. Georgian column labels
+#: admin/views/branches/list.php
+msgid "სახელი"
+msgstr ""
+
+#: admin/views/branches/list.php
+msgid "ქალაქი"
+msgstr ""
+
+#: admin/views/branches/list.php
+msgid "მენეჯერი"
+msgstr ""
+
+#: admin/views/branches/list.php
+msgid "სტატუსი"
+msgstr ""
+
+#: admin/views/branches/list.php
+msgid "თარიღი"
+msgstr ""
+
+#: admin/views/branches/list.php
+msgid "Activate"
+msgstr ""
+
+#: admin/views/branches/list.php
+msgid "Deactivate"
+msgstr ""
+
+#: admin/views/branches/list.php
+msgid "Delete"
+msgstr ""
+
+#: admin/views/branches/list.php
+msgid "Selected branches have been activated."
+msgstr ""
+
+#: admin/views/branches/list.php
+msgid "Selected branches have been deactivated."
+msgstr ""
+
+#: admin/views/branches/list.php
+msgid "Selected branches have been deleted."
+msgstr ""
+
+#: admin/views/branches/list.php
+msgid "Edit"
+msgstr ""
+
+#: admin/views/branches/list.php
+msgid "No branches found."
+msgstr ""
+
+#: admin/views/branches/list.php
+msgid "Add New"
+msgstr ""
+
+#: admin/views/branches/list.php
+msgid "Search Branches"
+msgstr ""
+
+#: admin/views/branches/edit.php
+msgid "Edit Branch"
+msgstr ""
+
+#: admin/views/branches/edit.php
+msgid "Add New Branch"
+msgstr ""
+
+#: admin/views/branches/edit.php
+msgid "Branch name displayed throughout the system."
+msgstr ""
+
+#. Georgian form labels
+#: admin/views/branches/edit.php
+msgid "მისამართი"
+msgstr ""
+
+#: admin/views/branches/edit.php
+msgid "ტელეფონი"
+msgstr ""
+
+#: admin/views/branches/edit.php
+msgid "ელფოსტა"
+msgstr ""
+
+#: admin/views/branches/edit.php
+msgid "— Select Manager —"
+msgstr ""
+
+#: admin/views/branches/edit.php
+msgid "Location"
+msgstr ""
+
+#: admin/views/branches/edit.php
+msgid "განედი"
+msgstr ""
+
+#: admin/views/branches/edit.php
+msgid "გრძედი"
+msgstr ""
+
+#: admin/views/branches/edit.php
+msgid "Clear"
+msgstr ""
+
+#: admin/views/branches/edit.php
+msgid "Click on the map to set the branch location."
+msgstr ""
+
+#: admin/views/branches/edit.php
+msgid "To use the map picker, please configure your Google Maps API key in the %s."
+msgstr ""
+
+#: admin/views/branches/edit.php
+msgid "settings"
+msgstr ""
+
+#: admin/views/branches/edit.php
+msgid "რიგითობა"
+msgstr ""
+
+#: admin/views/branches/edit.php
+msgid "Lower numbers appear first."
+msgstr ""
+
+#: admin/views/branches/edit.php
+msgid "აქტიური"
+msgstr ""
+
+#: admin/views/branches/edit.php
+msgid "This branch is active and can receive stock"
+msgstr ""
+
+#: admin/views/branches/edit.php
+msgid "Actions"
+msgstr ""
+
+#: admin/views/branches/edit.php
+msgid "Update Branch"
+msgstr ""
+
+#: admin/views/branches/edit.php
+msgid "Create Branch"
+msgstr ""
+
+#: admin/views/branches/edit.php
+msgid "Cancel"
+msgstr ""
+
+#: admin/views/branches/edit.php
+msgid "Information"
+msgstr ""
+
+#: admin/views/branches/edit.php
+msgid "Created:"
+msgstr ""
+
+#: admin/views/branches/edit.php
+msgid "Last Updated:"
+msgstr ""

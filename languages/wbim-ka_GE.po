@@ -1,0 +1,751 @@
+# Georgian translation for WooCommerce Branch Inventory Manager
+# Copyright (C) 2024 WooCommerce Branch Inventory Manager
+# This file is distributed under the same license as the WooCommerce Branch Inventory Manager package.
+msgid ""
+msgstr ""
+"Project-Id-Version: WooCommerce Branch Inventory Manager 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-01-01 00:00:00+00:00\n"
+"PO-Revision-Date: 2024-01-01 00:00:00+00:00\n"
+"Last-Translator: \n"
+"Language-Team: Georgian\n"
+"Language: ka_GE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# Dashboard
+msgid "Branch Inventory Manager"
+msgstr "ფილიალების მარაგის მენეჯერი"
+
+msgid "Branches"
+msgstr "ფილიალები"
+
+msgid "Stock"
+msgstr "მარაგი"
+
+msgid "Transfers"
+msgstr "გადატანები"
+
+msgid "Reports"
+msgstr "რეპორტები"
+
+msgid "Settings"
+msgstr "პარამეტრები"
+
+msgid "Total Stock"
+msgstr "სულ მარაგი"
+
+msgid "Low Stock"
+msgstr "დაბალი მარაგი"
+
+msgid "Pending Transfers"
+msgstr "მოლოდინში გადატანები"
+
+msgid "Stock Value"
+msgstr "მარაგის ღირებულება"
+
+msgid "Out of Stock"
+msgstr "ნულოვანი მარაგი"
+
+msgid "Sales Last 7 Days"
+msgstr "გაყიდვები ბოლო 7 დღე"
+
+msgid "Stock by Branch"
+msgstr "მარაგი ფილიალების მიხედვით"
+
+msgid "Today's Orders"
+msgstr "დღევანდელი შეკვეთები"
+
+msgid "Low Stock Alerts"
+msgstr "დაბალი მარაგის შეტყობინებები"
+
+msgid "Quick Actions"
+msgstr "სწრაფი მოქმედებები"
+
+msgid "Add Branch"
+msgstr "ფილიალის დამატება"
+
+msgid "Create Transfer"
+msgstr "გადატანის შექმნა"
+
+# Reports
+msgid "Stock Report"
+msgstr "მარაგის რეპორტი"
+
+msgid "Sales Report"
+msgstr "გაყიდვების რეპორტი"
+
+msgid "Transfers Report"
+msgstr "გადატანების რეპორტი"
+
+msgid "Low Stock Report"
+msgstr "დაბალი მარაგის რეპორტი"
+
+msgid "Movement History"
+msgstr "მოძრაობის ისტორია"
+
+msgid "Filter"
+msgstr "ფილტრი"
+
+msgid "Export"
+msgstr "ექსპორტი"
+
+msgid "From Date"
+msgstr "თარიღიდან"
+
+msgid "To Date"
+msgstr "თარიღამდე"
+
+msgid "Branch"
+msgstr "ფილიალი"
+
+msgid "All Branches"
+msgstr "ყველა ფილიალი"
+
+msgid "Category"
+msgstr "კატეგორია"
+
+msgid "All Categories"
+msgstr "ყველა კატეგორია"
+
+msgid "Status"
+msgstr "სტატუსი"
+
+msgid "All Statuses"
+msgstr "ყველა სტატუსი"
+
+msgid "Product"
+msgstr "პროდუქტი"
+
+msgid "SKU"
+msgstr "SKU"
+
+msgid "Quantity"
+msgstr "რაოდენობა"
+
+msgid "Total"
+msgstr "ჯამი"
+
+msgid "Value"
+msgstr "ღირებულება"
+
+msgid "Orders"
+msgstr "შეკვეთები"
+
+msgid "Revenue"
+msgstr "შემოსავალი"
+
+msgid "Average Order"
+msgstr "საშუალო შეკვეთა"
+
+msgid "Units Sold"
+msgstr "გაყიდული ერთეულები"
+
+msgid "No data found."
+msgstr "მონაცემები არ მოიძებნა."
+
+msgid "View All"
+msgstr "ყველას ნახვა"
+
+# Transfers
+msgid "Draft"
+msgstr "დრაფტი"
+
+msgid "Pending"
+msgstr "მოლოდინში"
+
+msgid "In Transit"
+msgstr "ტრანზიტში"
+
+msgid "Completed"
+msgstr "დასრულებული"
+
+msgid "Cancelled"
+msgstr "გაუქმებული"
+
+msgid "From Branch"
+msgstr "საიდან"
+
+msgid "To Branch"
+msgstr "სად"
+
+msgid "Transfer Number"
+msgstr "გადატანის ნომერი"
+
+msgid "Items"
+msgstr "ერთეულები"
+
+msgid "Created By"
+msgstr "შემქმნელი"
+
+msgid "Created At"
+msgstr "შექმნის თარიღი"
+
+msgid "Actions"
+msgstr "მოქმედებები"
+
+msgid "View"
+msgstr "ნახვა"
+
+msgid "Edit"
+msgstr "რედაქტირება"
+
+msgid "Delete"
+msgstr "წაშლა"
+
+msgid "Send"
+msgstr "გაგზავნა"
+
+msgid "Receive"
+msgstr "მიღება"
+
+msgid "Cancel"
+msgstr "გაუქმება"
+
+msgid "Source and destination branches cannot be the same."
+msgstr "წყარო და დანიშნულების ფილიალი არ შეიძლება იყოს ერთი და იგივე."
+
+msgid "Insufficient stock in source branch."
+msgstr "არასაკმარისი მარაგი წყარო ფილიალში."
+
+# API
+msgid "Authentication required."
+msgstr "ავტორიზაცია საჭიროა."
+
+msgid "Branch not found."
+msgstr "ფილიალი ვერ მოიძებნა."
+
+msgid "Transfer not found."
+msgstr "გადატანა ვერ მოიძებნა."
+
+msgid "Updated via API."
+msgstr "API-ით განახლებული."
+
+# Export
+msgid "Could not create file."
+msgstr "ფაილის შექმნა ვერ მოხერხდა."
+
+msgid "Generated:"
+msgstr "გენერირებულია:"
+
+# Checkout
+msgid "Select Branch"
+msgstr "აირჩიეთ ფილიალი"
+
+msgid "Choose a branch for pickup"
+msgstr "აირჩიეთ ფილიალი პროდუქტის წასაღებად"
+
+# Notifications
+msgid "Transfer Request"
+msgstr "გადატანის მოთხოვნა"
+
+msgid "Transfer Completed"
+msgstr "გადატანა დასრულებულია"
+
+msgid "Low Stock Alert"
+msgstr "დაბალი მარაგის შეტყობინება"
+
+# User Roles
+msgid "Branch Manager"
+msgstr "ფილიალის მენეჯერი"
+
+# Settings
+msgid "General Settings"
+msgstr "ზოგადი პარამეტრები"
+
+msgid "Checkout Settings"
+msgstr "გადახდის პარამეტრები"
+
+msgid "Stock Settings"
+msgstr "მარაგის პარამეტრები"
+
+msgid "Notification Settings"
+msgstr "შეტყობინებების პარამეტრები"
+
+msgid "Transfer Settings"
+msgstr "გადატანების პარამეტრები"
+
+msgid "API Settings"
+msgstr "API პარამეტრები"
+
+msgid "PDF Settings"
+msgstr "PDF პარამეტრები"
+
+msgid "Save Settings"
+msgstr "პარამეტრების შენახვა"
+
+# Common
+msgid "Yes"
+msgstr "დიახ"
+
+msgid "No"
+msgstr "არა"
+
+msgid "Save"
+msgstr "შენახვა"
+
+msgid "Cancel"
+msgstr "გაუქმება"
+
+msgid "Search"
+msgstr "ძებნა"
+
+msgid "Name"
+msgstr "სახელი"
+
+msgid "Address"
+msgstr "მისამართი"
+
+msgid "City"
+msgstr "ქალაქი"
+
+msgid "Phone"
+msgstr "ტელეფონი"
+
+msgid "Email"
+msgstr "ელ-ფოსტა"
+
+msgid "Manager"
+msgstr "მენეჯერი"
+
+msgid "Active"
+msgstr "აქტიური"
+
+msgid "Inactive"
+msgstr "არააქტიური"
+
+msgid "Date"
+msgstr "თარიღი"
+
+msgid "Notes"
+msgstr "შენიშვნები"
+
+msgid "Print"
+msgstr "დაბეჭდვა"
+
+msgid "Download"
+msgstr "ჩამოტვირთვა"
+
+msgid "Group by"
+msgstr "დაჯგუფება"
+
+msgid "Day"
+msgstr "დღე"
+
+msgid "Week"
+msgstr "კვირა"
+
+msgid "Month"
+msgstr "თვე"
+
+msgid "Critical"
+msgstr "კრიტიკული"
+
+msgid "Warning"
+msgstr "გაფრთხილება"
+
+msgid "Normal"
+msgstr "ნორმალური"
+
+msgid "Threshold"
+msgstr "ზღვარი"
+
+msgid "Available"
+msgstr "ხელმისაწვდომი"
+
+msgid "Not Available"
+msgstr "არ არის ხელმისაწვდომი"
+
+msgid "Transfer"
+msgstr "გადატანა"
+
+msgid "Adjustment"
+msgstr "კორექტირება"
+
+msgid "Sale"
+msgstr "გაყიდვა"
+
+msgid "Restock"
+msgstr "შევსება"
+
+msgid "Return"
+msgstr "დაბრუნება"
+
+msgid "User"
+msgstr "მომხმარებელი"
+
+msgid "Note"
+msgstr "შენიშვნა"
+
+msgid "Before"
+msgstr "წინა"
+
+msgid "After"
+msgstr "შემდეგ"
+
+msgid "Change"
+msgstr "ცვლილება"
+
+msgid "Type"
+msgstr "ტიპი"
+
+msgid "All Types"
+msgstr "ყველა ტიპი"
+
+msgid "Products"
+msgstr "პროდუქტები"
+
+msgid "No branches found."
+msgstr "ფილიალები არ მოიძებნა."
+
+msgid "No low stock products found!"
+msgstr "დაბალი მარაგის პროდუქტები არ მოიძებნა!"
+
+msgid "No orders today."
+msgstr "დღეს შეკვეთები არ არის."
+
+msgid "Permission denied."
+msgstr "წვდომა აკრძალულია."
+
+msgid "An error occurred."
+msgstr "მოხდა შეცდომა."
+
+msgid "Success!"
+msgstr "წარმატება!"
+
+msgid "Are you sure?"
+msgstr "დარწმუნებული ხართ?"
+
+msgid "This action cannot be undone."
+msgstr "ეს მოქმედება ვერ გაუქმდება."
+
+msgid "Confirm"
+msgstr "დადასტურება"
+
+msgid "Loading..."
+msgstr "იტვირთება..."
+
+msgid "Search products..."
+msgstr "პროდუქტის ძებნა..."
+
+msgid "No results found."
+msgstr "შედეგები არ მოიძებნა."
+
+msgid "Add Item"
+msgstr "ერთეულის დამატება"
+
+msgid "Remove"
+msgstr "წაშლა"
+
+msgid "Update"
+msgstr "განახლება"
+
+msgid "Create"
+msgstr "შექმნა"
+
+msgid "Submit"
+msgstr "გაგზავნა"
+
+msgid "Close"
+msgstr "დახურვა"
+
+msgid "Back"
+msgstr "უკან"
+
+msgid "Next"
+msgstr "შემდეგი"
+
+msgid "Previous"
+msgstr "წინა"
+
+msgid "First"
+msgstr "პირველი"
+
+msgid "Last"
+msgstr "ბოლო"
+
+msgid "Page"
+msgstr "გვერდი"
+
+msgid "of"
+msgstr "-დან"
+
+msgid "Showing"
+msgstr "ნაჩვენებია"
+
+msgid "entries"
+msgstr "ჩანაწერი"
+
+msgid "Select"
+msgstr "აირჩიეთ"
+
+msgid "None"
+msgstr "არცერთი"
+
+msgid "All"
+msgstr "ყველა"
+
+msgid "Default"
+msgstr "ნაგულისხმევი"
+
+msgid "Custom"
+msgstr "მორგებული"
+
+msgid "Enable"
+msgstr "ჩართვა"
+
+msgid "Disable"
+msgstr "გამორთვა"
+
+msgid "Enabled"
+msgstr "ჩართული"
+
+msgid "Disabled"
+msgstr "გამორთული"
+
+# Settings Page Additional
+msgid "Low stock threshold"
+msgstr "დაბალი მარაგის ზღვარი"
+
+msgid "Default branch"
+msgstr "ნაგულისხმევი ფილიალი"
+
+msgid "Delete data on uninstall"
+msgstr "მონაცემების წაშლა"
+
+msgid "Show branch stock on product page"
+msgstr "მარაგი პროდუქტის გვერდზე"
+
+msgid "Show branch stock on archive"
+msgstr "მარაგი არქივში"
+
+msgid "Show exact quantity"
+msgstr "ზუსტი რაოდენობა"
+
+msgid "Show branch in cart"
+msgstr "ფილიალი კალათაში"
+
+msgid "Show branch contact"
+msgstr "ფილიალის კონტაქტი"
+
+msgid "Enable checkout selection"
+msgstr "ფილიალის არჩევა გადახდისას"
+
+msgid "Selector type"
+msgstr "არჩევის ტიპი"
+
+msgid "Dropdown"
+msgstr "ჩამოსაშლელი მენიუ"
+
+msgid "Radio buttons"
+msgstr "რადიო ღილაკები"
+
+msgid "Map"
+msgstr "რუკა"
+
+msgid "Auto select method"
+msgstr "ავტომატური არჩევა"
+
+msgid "Most stock"
+msgstr "ყველაზე მეტი მარაგი"
+
+msgid "Nearest"
+msgstr "უახლოესი"
+
+msgid "Show stock at checkout"
+msgstr "მარაგი გადახდისას"
+
+msgid "Require branch selection"
+msgstr "სავალდებულო არჩევა"
+
+msgid "Enable transfer notifications"
+msgstr "გადატანის შეტყობინებები"
+
+msgid "Enable low stock notifications"
+msgstr "დაბალი მარაგის შეტყობინებები"
+
+msgid "Enable order notifications"
+msgstr "შეკვეთის შეტყობინებები"
+
+msgid "Enable REST API"
+msgstr "REST API ჩართვა"
+
+msgid "Company name"
+msgstr "კომპანიის სახელი"
+
+msgid "PDF footer text"
+msgstr "PDF Footer ტექსტი"
+
+msgid "Google Maps API Key"
+msgstr "Google Maps API Key"
+
+msgid "Display"
+msgstr "ჩვენება"
+
+msgid "Checkout"
+msgstr "გადახდა"
+
+msgid "Notifications"
+msgstr "შეტყობინებები"
+
+msgid "Export/PDF"
+msgstr "ექსპორტი/PDF"
+
+# Documentation Page
+msgid "Documentation"
+msgstr "დოკუმენტაცია"
+
+msgid "Documentation and Instructions"
+msgstr "დოკუმენტაცია და ინსტრუქცია"
+
+msgid "Overview"
+msgstr "მიმოხილვა"
+
+msgid "Stock Management"
+msgstr "მარაგის მართვა"
+
+msgid "Orders"
+msgstr "შეკვეთები"
+
+msgid "Roles and Permissions"
+msgstr "როლები და უფლებები"
+
+msgid "FAQ"
+msgstr "ხშირი კითხვები"
+
+msgid "Quick Start"
+msgstr "სწრაფი დაწყება"
+
+msgid "Tip:"
+msgstr "რჩევა:"
+
+msgid "Note:"
+msgstr "შენიშვნა:"
+
+msgid "Warning:"
+msgstr "გაფრთხილება:"
+
+msgid "Branch Fields"
+msgstr "ფილიალის ველები"
+
+msgid "Field"
+msgstr "ველი"
+
+msgid "Description"
+msgstr "აღწერა"
+
+msgid "Required"
+msgstr "სავალდებულო"
+
+msgid "Code"
+msgstr "კოდი"
+
+msgid "Coordinates"
+msgstr "კოორდინატები"
+
+msgid "Edit and Delete Branch"
+msgstr "ფილიალის რედაქტირება და წაშლა"
+
+msgid "View and Edit Stock"
+msgstr "მარაგის ნახვა და რედაქტირება"
+
+msgid "Import Stock from CSV"
+msgstr "მარაგის იმპორტი CSV-დან"
+
+msgid "Low Stock Notifications"
+msgstr "დაბალი მარაგის შეტყობინებები"
+
+msgid "Stock Adjustment"
+msgstr "მარაგის კორექტირება"
+
+msgid "Automatic Update:"
+msgstr "ავტომატური განახლება:"
+
+msgid "Transfer Statuses"
+msgstr "გადატანის სტატუსები"
+
+msgid "Stock Change"
+msgstr "მარაგის ცვლილება"
+
+msgid "Does not change"
+msgstr "არ იცვლება"
+
+msgid "Decreases in source"
+msgstr "მცირდება წყაროში"
+
+msgid "Increases in destination"
+msgstr "იზრდება დანიშნულებაში"
+
+msgid "Returns to source (if was in transit)"
+msgstr "უბრუნდება წყაროს (თუ იყო ტრანზიტში)"
+
+msgid "Create Transfer"
+msgstr "გადატანის შექმნა"
+
+msgid "PDF Document"
+msgstr "PDF დოკუმენტი"
+
+msgid "Checkout Settings"
+msgstr "გადახდის პარამეტრები"
+
+msgid "Stock Decrease"
+msgstr "მარაგის შემცირება"
+
+msgid "Branch Info in Order"
+msgstr "ფილიალის ინფორმაცია შეკვეთაში"
+
+msgid "Available Reports"
+msgstr "ხელმისაწვდომი რეპორტები"
+
+msgid "1. Stock Report"
+msgstr "1. მარაგის რეპორტი"
+
+msgid "2. Sales Report"
+msgstr "2. გაყიდვების რეპორტი"
+
+msgid "3. Transfers Report"
+msgstr "3. გადატანების რეპორტი"
+
+msgid "4. Low Stock Report"
+msgstr "4. დაბალი მარაგის რეპორტი"
+
+msgid "5. Movement History"
+msgstr "5. მოძრაობის ისტორია"
+
+msgid "Authentication"
+msgstr "ავტორიზაცია"
+
+msgid "Base URL"
+msgstr "Base URL"
+
+msgid "Endpoints"
+msgstr "Endpoints"
+
+msgid "Method"
+msgstr "მეთოდი"
+
+msgid "Examples"
+msgstr "მაგალითები"
+
+msgid "Set Stock"
+msgstr "მარაგის დაყენება"
+
+msgid "Branch Manager"
+msgstr "ფილიალის მენეჯერი"
+
+msgid "Manager Permissions:"
+msgstr "მენეჯერის უფლებები:"
+
+msgid "Permission"
+msgstr "უფლება"
+
+msgid "Assign Manager"
+msgstr "მენეჯერის დანიშვნა"
+
+msgid "Administrator Permissions"
+msgstr "ადმინისტრატორის უფლებები"
+
+msgid "Frequently Asked Questions"
+msgstr "ხშირად დასმული კითხვები"

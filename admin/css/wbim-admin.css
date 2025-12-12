@@ -1,0 +1,1707 @@
+/**
+ * WooCommerce Branch Inventory Manager - Admin Styles
+ *
+ * @package WBIM
+ * @since 1.0.0
+ */
+
+/* ==========================================================================
+   Dashboard Styles
+   ========================================================================== */
+
+.wbim-dashboard {
+    max-width: 1200px;
+}
+
+/* Welcome Panel */
+.wbim-welcome-panel {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    padding: 20px 30px;
+    margin: 20px 0;
+}
+
+.wbim-welcome-panel h2 {
+    margin: 0 0 10px;
+    font-size: 23px;
+    font-weight: 400;
+}
+
+.wbim-welcome-panel .about-description {
+    margin: 0;
+    color: #646970;
+}
+
+/* Stats Cards */
+.wbim-stats-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.wbim-stat-card {
+    flex: 1;
+    min-width: 200px;
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: box-shadow 0.2s;
+}
+
+.wbim-stat-card:hover {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.wbim-stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.wbim-stat-icon .dashicons {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+}
+
+.wbim-stat-total .wbim-stat-icon {
+    background: #e5f3ff;
+    color: #0073aa;
+}
+
+.wbim-stat-active .wbim-stat-icon {
+    background: #e7f7e7;
+    color: #46b450;
+}
+
+.wbim-stat-inactive .wbim-stat-icon {
+    background: #fde7e7;
+    color: #dc3232;
+}
+
+.wbim-stat-transfers .wbim-stat-icon {
+    background: #fff3e0;
+    color: #ffb900;
+}
+
+.wbim-stat-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.wbim-stat-number {
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 1;
+    color: #1d2327;
+}
+
+.wbim-stat-label {
+    font-size: 13px;
+    color: #646970;
+    margin-top: 5px;
+}
+
+/* Quick Actions */
+.wbim-quick-actions {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    padding: 20px 30px;
+    margin: 20px 0;
+}
+
+.wbim-quick-actions h2 {
+    margin: 0 0 15px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.wbim-action-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.wbim-action-buttons .button-hero {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    height: auto;
+    line-height: 1.5;
+}
+
+.wbim-action-buttons .dashicons {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+
+/* Recent Branches Table */
+.wbim-recent-branches {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    padding: 20px 30px;
+    margin: 20px 0;
+}
+
+.wbim-recent-branches h2 {
+    margin: 0 0 15px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.wbim-recent-branches .wp-list-table {
+    margin: 0;
+}
+
+.wbim-recent-branches p {
+    margin: 15px 0 0;
+}
+
+/* Empty State */
+.wbim-empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    margin: 20px 0;
+}
+
+.wbim-empty-state .dashicons {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: #c3c4c7;
+}
+
+.wbim-empty-state h3 {
+    margin: 20px 0 10px;
+    font-size: 18px;
+}
+
+.wbim-empty-state p {
+    margin: 0 0 20px;
+    color: #646970;
+}
+
+/* ==========================================================================
+   Status Badges
+   ========================================================================== */
+
+.wbim-status-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.wbim-status-active {
+    background: #e7f7e7;
+    color: #1e7e1e;
+}
+
+.wbim-status-inactive {
+    background: #fde7e7;
+    color: #b32d2e;
+}
+
+.wbim-status-pending {
+    background: #fff3e0;
+    color: #996800;
+}
+
+.wbim-status-transit {
+    background: #e5f3ff;
+    color: #0073aa;
+}
+
+.wbim-status-completed {
+    background: #e7f7e7;
+    color: #1e7e1e;
+}
+
+.wbim-status-cancelled {
+    background: #f0f0f1;
+    color: #646970;
+}
+
+/* ==========================================================================
+   Branch Edit Form
+   ========================================================================== */
+
+.wbim-branch-edit .form-table th {
+    padding-left: 0;
+}
+
+.wbim-branch-edit .required {
+    color: #dc3232;
+}
+
+.wbim-form-container {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.wbim-form-main {
+    flex: 1;
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    padding: 20px;
+}
+
+.wbim-form-sidebar {
+    width: 280px;
+    flex-shrink: 0;
+}
+
+.wbim-form-box {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.wbim-form-box h3 {
+    margin: 0;
+    padding: 12px 15px;
+    border-bottom: 1px solid #c3c4c7;
+    font-size: 13px;
+    background: #f6f7f7;
+}
+
+.wbim-form-box-content {
+    padding: 15px;
+}
+
+.wbim-form-box-content .button {
+    margin-right: 5px;
+}
+
+.wbim-meta-info p {
+    margin: 0 0 10px;
+}
+
+.wbim-meta-info p:last-child {
+    margin-bottom: 0;
+}
+
+/* Coordinates Fields */
+.wbim-coordinates-fields {
+    display: flex;
+    align-items: flex-end;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.wbim-coord-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.wbim-coord-field label {
+    font-weight: 500;
+    font-size: 12px;
+}
+
+.wbim-coord-field input {
+    width: 150px;
+}
+
+/* Map Container */
+#wbim-map-container {
+    margin-top: 15px;
+}
+
+#wbim-map {
+    width: 100%;
+    height: 350px;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    background: #f0f0f1;
+}
+
+#wbim-map-container .description {
+    margin-top: 10px;
+}
+
+.wbim-map-notice {
+    margin-top: 10px !important;
+}
+
+.wbim-map-notice.inline {
+    padding: 10px 15px;
+}
+
+/* ==========================================================================
+   Branches List
+   ========================================================================== */
+
+.wbim-branches-list .wp-list-table .column-drag {
+    width: 30px;
+    padding: 8px 0;
+    cursor: move;
+}
+
+.wbim-branches-list .wp-list-table .column-id {
+    width: 50px;
+}
+
+.wbim-branches-list .wp-list-table .column-status {
+    width: 100px;
+}
+
+.wbim-branches-list .wp-list-table .column-manager {
+    width: 150px;
+}
+
+.wbim-branches-list .wp-list-table .column-created_at {
+    width: 140px;
+}
+
+/* Drag Handle */
+.wbim-drag-handle {
+    color: #a7aaad;
+    cursor: move;
+    font-size: 18px;
+}
+
+.wbim-drag-handle:hover {
+    color: #646970;
+}
+
+/* Sortable Rows */
+.wbim-branches-list .wp-list-table tbody tr {
+    transition: background-color 0.15s ease;
+}
+
+.wbim-branches-list .wp-list-table tbody tr.ui-sortable-helper {
+    background: #fff;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+.wbim-branches-list .wp-list-table tbody tr.ui-sortable-placeholder {
+    background: #f0f6fc;
+    border: 2px dashed #0073aa;
+    visibility: visible !important;
+}
+
+.wbim-branches-list .wp-list-table tbody tr.ui-sortable-placeholder td {
+    visibility: hidden;
+}
+
+/* Row Actions */
+.wbim-branches-list .row-actions a.wbim-toggle-status {
+    color: #0073aa;
+}
+
+.wbim-branches-list .row-actions a.wbim-delete-branch {
+    color: #b32d2e;
+}
+
+/* ==========================================================================
+   Placeholder Notice
+   ========================================================================== */
+
+.wbim-placeholder-notice {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-left: 4px solid #0073aa;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.wbim-placeholder-notice p {
+    margin: 0;
+    font-size: 14px;
+}
+
+/* ==========================================================================
+   Responsive Styles
+   ========================================================================== */
+
+@media screen and (max-width: 782px) {
+    .wbim-stats-cards {
+        flex-direction: column;
+    }
+
+    .wbim-stat-card {
+        min-width: 100%;
+    }
+
+    .wbim-form-container {
+        flex-direction: column;
+    }
+
+    .wbim-form-sidebar {
+        width: 100%;
+    }
+
+    .wbim-coordinates-fields {
+        flex-wrap: wrap;
+    }
+
+    .wbim-action-buttons {
+        flex-direction: column;
+    }
+
+    .wbim-action-buttons .button-hero {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* ==========================================================================
+   Print Styles
+   ========================================================================== */
+
+@media print {
+    .wbim-quick-actions,
+    .wbim-form-sidebar,
+    .row-actions {
+        display: none !important;
+    }
+}
+
+/* ==========================================================================
+   Sortable Branches
+   ========================================================================== */
+
+.wbim-sortable-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.wbim-sortable-item {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    padding: 10px 15px;
+    margin-bottom: 5px;
+    cursor: move;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.wbim-sortable-item:hover {
+    background: #f6f7f7;
+}
+
+.wbim-sortable-item .dashicons-menu {
+    color: #a7aaad;
+}
+
+.wbim-sortable-item.ui-sortable-helper {
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+.wbim-sortable-placeholder {
+    background: #f0f6fc;
+    border: 2px dashed #0073aa;
+    height: 40px;
+    margin-bottom: 5px;
+}
+
+/* ==========================================================================
+   Loading States
+   ========================================================================== */
+
+.wbim-loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.wbim-loading::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #0073aa;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: wbim-spin 0.8s linear infinite;
+}
+
+@keyframes wbim-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ==========================================================================
+   Notifications
+   ========================================================================== */
+
+.wbim-toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    padding: 12px 20px;
+    background: #1d2327;
+    color: #fff;
+    border-radius: 4px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    z-index: 100000;
+    animation: wbim-slide-in 0.3s ease-out;
+}
+
+.wbim-toast.success {
+    background: #46b450;
+}
+
+.wbim-toast.error {
+    background: #dc3232;
+}
+
+@keyframes wbim-slide-in {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* ==========================================================================
+   Stock Management Styles
+   ========================================================================== */
+
+/* Stock List Table */
+.wbim-stock-list .wp-list-table {
+    border-spacing: 0;
+}
+
+.wbim-stock-list .wp-list-table th,
+.wbim-stock-list .wp-list-table td {
+    vertical-align: middle;
+}
+
+.wbim-stock-list .wp-list-table .column-product {
+    width: 25%;
+}
+
+.wbim-stock-list .wp-list-table .column-sku {
+    width: 100px;
+}
+
+.wbim-stock-list .wp-list-table .column-total {
+    width: 80px;
+    text-align: center;
+}
+
+/* Stock Input */
+.wbim-stock-input {
+    width: 70px !important;
+    text-align: center;
+    padding: 4px 6px !important;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    transition: all 0.2s;
+}
+
+.wbim-stock-input:focus {
+    border-color: #0073aa;
+    box-shadow: 0 0 0 1px #0073aa;
+    outline: none;
+}
+
+.wbim-stock-input.wbim-modified {
+    background: #fff8e5;
+    border-color: #ffb900;
+}
+
+.wbim-stock-input.wbim-saving {
+    background: #e5f3ff;
+    border-color: #0073aa;
+    animation: wbim-pulse 1s ease-in-out infinite;
+}
+
+.wbim-stock-input.wbim-saved {
+    background: #e7f7e7;
+    border-color: #46b450;
+    transition: all 0.3s;
+}
+
+@keyframes wbim-pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.6;
+    }
+}
+
+.wbim-stock-input.wbim-low-stock {
+    background: #fde7e7;
+    border-color: #dc3232;
+    color: #dc3232;
+}
+
+.wbim-cell-editing {
+    background: #f0f6fc !important;
+}
+
+/* Stock Actions */
+.wbim-stock-actions {
+    margin-top: 20px;
+    padding: 15px;
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.wbim-save-status {
+    color: #646970;
+    font-style: italic;
+}
+
+.wbim-save-status.wbim-success {
+    color: #46b450;
+}
+
+.wbim-save-status.wbim-error {
+    color: #dc3232;
+}
+
+/* ==========================================================================
+   Stock Import Styles
+   ========================================================================== */
+
+.wbim-import-container {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.wbim-import-main {
+    flex: 1;
+}
+
+.wbim-import-sidebar {
+    width: 300px;
+    flex-shrink: 0;
+}
+
+/* Upload Area */
+.wbim-upload-area {
+    border: 2px dashed #c3c4c7;
+    border-radius: 4px;
+    padding: 40px 20px;
+    text-align: center;
+    transition: all 0.2s;
+    background: #f6f7f7;
+}
+
+.wbim-upload-area:hover,
+.wbim-upload-area.wbim-drag-over {
+    border-color: #0073aa;
+    background: #f0f6fc;
+}
+
+.wbim-upload-content .dashicons {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: #c3c4c7;
+    margin-bottom: 10px;
+}
+
+.wbim-upload-content p {
+    margin: 0 0 15px;
+    color: #646970;
+}
+
+.wbim-file-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.wbim-file-info .dashicons {
+    color: #0073aa;
+}
+
+.wbim-file-name {
+    font-weight: 500;
+}
+
+.wbim-remove-file {
+    background: none;
+    border: none;
+    color: #dc3232;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0 5px;
+}
+
+/* Import Options */
+.wbim-import-options {
+    margin: 20px 0;
+    padding: 15px;
+    background: #f6f7f7;
+    border-radius: 4px;
+}
+
+.wbim-import-options h4 {
+    margin: 0 0 10px;
+    font-size: 13px;
+}
+
+.wbim-import-options p {
+    margin: 0 0 5px;
+}
+
+.wbim-import-options .description {
+    color: #646970;
+    font-size: 12px;
+}
+
+/* Import Actions */
+.wbim-import-actions {
+    display: flex;
+    gap: 10px;
+}
+
+/* Progress Bar */
+.wbim-progress-bar {
+    width: 100%;
+    height: 20px;
+    background: #e0e0e0;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.wbim-progress-fill {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #0073aa 0%, #005f8b 50%, #0073aa 100%);
+    background-size: 200% 100%;
+    animation: wbim-progress 1.5s ease-in-out infinite;
+}
+
+@keyframes wbim-progress {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.wbim-progress-text {
+    text-align: center;
+    color: #646970;
+}
+
+/* Import Results */
+#wbim-import-results ul {
+    margin: 15px 0;
+    padding-left: 20px;
+}
+
+.wbim-error-list {
+    max-height: 200px;
+    overflow-y: auto;
+    background: #fde7e7;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #b32d2e;
+}
+
+/* Import Preview */
+.wbim-preview-container {
+    background: #fff;
+    padding: 20px;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+}
+
+.wbim-preview-container h3 {
+    margin-top: 0;
+}
+
+.wbim-preview-loading {
+    text-align: center;
+    padding: 40px;
+    color: #646970;
+}
+
+.wbim-preview-summary {
+    background: #f6f7f7;
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.wbim-preview-summary p {
+    margin: 5px 0;
+}
+
+.wbim-preview-errors {
+    color: #dc3232;
+}
+
+.wbim-preview-table-wrapper {
+    max-height: 400px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+}
+
+.wbim-preview-table-wrapper .widefat {
+    margin: 0;
+}
+
+.wbim-status-valid td {
+    background: #e7f7e7;
+}
+
+.wbim-status-invalid td {
+    background: #fde7e7;
+}
+
+.wbim-preview-errors-list {
+    margin: 15px 0;
+}
+
+.wbim-preview-errors-list h4 {
+    color: #dc3232;
+    margin-bottom: 10px;
+}
+
+.wbim-preview-errors-list ul {
+    background: #fde7e7;
+    padding: 10px 30px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #b32d2e;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.wbim-preview-actions {
+    display: flex;
+    gap: 10px;
+    padding-top: 15px;
+    border-top: 1px solid #c3c4c7;
+}
+
+/* ==========================================================================
+   Stock History Styles
+   ========================================================================== */
+
+.wbim-history-list .wp-list-table .column-created_at {
+    width: 140px;
+}
+
+.wbim-history-list .wp-list-table .column-action_type {
+    width: 100px;
+}
+
+.wbim-history-list .wp-list-table .column-quantity_change {
+    width: 80px;
+    text-align: center;
+}
+
+.wbim-history-list .wp-list-table .column-stock_levels {
+    width: 100px;
+    text-align: center;
+}
+
+.wbim-history-list .wp-list-table .column-user {
+    width: 120px;
+}
+
+/* ==========================================================================
+   WooCommerce Product Tab Styles
+   ========================================================================== */
+
+#woocommerce-product-data ul.wc-tabs li.wbim_inventory_options a::before {
+    content: "\f312";
+    font-family: dashicons;
+}
+
+/* Variation Inventory Fields */
+.wbim-variation-inventory-wrapper {
+    margin: 15px 0;
+    padding: 0;
+    background: #f8f9fa;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.wbim-variation-inventory-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 15px;
+    background: #fff;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.wbim-variation-inventory-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    font-size: 13px;
+    color: #1d2327;
+}
+
+.wbim-variation-inventory-title .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: #2271b1;
+}
+
+.wbim-variation-inventory-total {
+    font-size: 12px;
+    color: #646970;
+}
+
+.wbim-variation-inventory-total strong {
+    display: inline-block;
+    min-width: 24px;
+    padding: 2px 8px;
+    margin-left: 5px;
+    background: #2271b1;
+    color: #fff;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 12px;
+}
+
+.wbim-variation-inventory-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 0;
+}
+
+.wbim-variation-branch-item {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 12px;
+    border-right: 1px solid #e0e0e0;
+    border-bottom: 1px solid #e0e0e0;
+    background: #fff;
+}
+
+.wbim-variation-branch-item:hover {
+    background: #f0f6fc;
+}
+
+.wbim-variation-branch-item .wbim-branch-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: #646970;
+    margin-bottom: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wbim-variation-stock-input {
+    width: 100% !important;
+    max-width: 80px;
+    padding: 5px 8px !important;
+    font-size: 13px !important;
+    border: 1px solid #ddd !important;
+    border-radius: 4px !important;
+    text-align: center;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.wbim-variation-stock-input:focus {
+    border-color: #2271b1 !important;
+    box-shadow: 0 0 0 1px #2271b1 !important;
+    outline: none;
+}
+
+.wbim-variation-stock-input::-webkit-inner-spin-button,
+.wbim-variation-stock-input::-webkit-outer-spin-button {
+    opacity: 1;
+}
+
+/* ==========================================================================
+   Responsive Stock Styles
+   ========================================================================== */
+
+@media screen and (max-width: 782px) {
+    .wbim-import-container {
+        flex-direction: column;
+    }
+
+    .wbim-import-sidebar {
+        width: 100%;
+    }
+
+    .wbim-stock-input {
+        width: 60px !important;
+    }
+
+    .wbim-stock-actions {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+/* ==========================================================================
+   Reports Styles
+   ========================================================================== */
+
+.wbim-reports-wrap {
+    max-width: 1400px;
+}
+
+.wbim-report-content {
+    margin-top: 20px;
+}
+
+/* Report Filters */
+.wbim-report-filters {
+    background: #fff;
+    padding: 20px;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.wbim-filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: flex-end;
+}
+
+.wbim-filter-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.wbim-filter-item label {
+    font-weight: 500;
+    font-size: 12px;
+    color: #1d2327;
+}
+
+.wbim-filter-item select,
+.wbim-filter-item input[type="text"],
+.wbim-filter-item input[type="date"] {
+    min-width: 150px;
+    height: 32px;
+}
+
+.wbim-export-buttons {
+    margin-left: auto;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 10px !important;
+}
+
+.wbim-export-btn {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 5px;
+}
+
+.wbim-export-btn .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+/* Summary Cards */
+.wbim-summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.wbim-summary-card {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: box-shadow 0.2s;
+}
+
+.wbim-summary-card:hover {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.wbim-card-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e5f3ff;
+}
+
+.wbim-card-icon .dashicons {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    color: #0073aa;
+}
+
+.wbim-summary-card:nth-child(2) .wbim-card-icon {
+    background: #e7f7e7;
+}
+
+.wbim-summary-card:nth-child(2) .wbim-card-icon .dashicons {
+    color: #46b450;
+}
+
+.wbim-summary-card:nth-child(3) .wbim-card-icon {
+    background: #fff3e0;
+}
+
+.wbim-summary-card:nth-child(3) .wbim-card-icon .dashicons {
+    color: #ffb900;
+}
+
+.wbim-summary-card:nth-child(4) .wbim-card-icon {
+    background: #f3e5f5;
+}
+
+.wbim-summary-card:nth-child(4) .wbim-card-icon .dashicons {
+    color: #9c27b0;
+}
+
+.wbim-card-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.wbim-card-value {
+    font-size: 24px;
+    font-weight: 600;
+    color: #1d2327;
+    line-height: 1.2;
+}
+
+.wbim-card-label {
+    font-size: 12px;
+    color: #646970;
+    margin-top: 3px;
+}
+
+/* Report Tables */
+.wbim-report-table-wrapper {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    overflow-x: auto;
+}
+
+.wbim-report-table {
+    margin: 0 !important;
+}
+
+.wbim-report-table th {
+    background: #f6f7f7;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.wbim-report-table .column-product {
+    min-width: 200px;
+}
+
+.wbim-report-table .column-sku {
+    width: 100px;
+}
+
+.wbim-report-table .column-branch {
+    text-align: center;
+    min-width: 80px;
+}
+
+.wbim-report-table .column-total,
+.wbim-report-table .column-value {
+    text-align: right;
+    min-width: 100px;
+}
+
+.wbim-report-table .out-of-stock {
+    background: #fde7e7 !important;
+    color: #b32d2e;
+    font-weight: 600;
+}
+
+.wbim-report-table .low-stock {
+    background: #fff8e5 !important;
+    color: #996800;
+}
+
+.wbim-report-table .totals-row {
+    background: #f0f6fc !important;
+}
+
+.wbim-report-table .totals-row td {
+    border-top: 2px solid #0073aa;
+}
+
+/* Charts Section */
+.wbim-charts-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.wbim-chart-container {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    padding: 20px;
+}
+
+.wbim-chart-container h3 {
+    margin: 0 0 15px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1d2327;
+}
+
+.wbim-chart-wrapper {
+    position: relative;
+    height: 300px;
+}
+
+/* Stats Grid */
+.wbim-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.wbim-stat-box {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    padding: 20px;
+    text-align: center;
+}
+
+.wbim-stat-box .stat-value {
+    font-size: 28px;
+    font-weight: 600;
+    color: #1d2327;
+    display: block;
+}
+
+.wbim-stat-box .stat-label {
+    font-size: 12px;
+    color: #646970;
+    margin-top: 5px;
+    display: block;
+}
+
+.wbim-stat-box.stat-primary .stat-value {
+    color: #0073aa;
+}
+
+.wbim-stat-box.stat-success .stat-value {
+    color: #46b450;
+}
+
+.wbim-stat-box.stat-warning .stat-value {
+    color: #ffb900;
+}
+
+.wbim-stat-box.stat-danger .stat-value {
+    color: #dc3232;
+}
+
+/* Report Sections */
+.wbim-report-section {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.wbim-report-section-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #c3c4c7;
+    background: #f6f7f7;
+}
+
+.wbim-report-section-header h3 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.wbim-report-section-content {
+    padding: 20px;
+}
+
+/* Low Stock Alerts */
+.wbim-low-stock-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 15px;
+    border-bottom: 1px solid #f0f0f1;
+}
+
+.wbim-low-stock-item:last-child {
+    border-bottom: none;
+}
+
+.wbim-low-stock-item .product-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.wbim-low-stock-item .product-name {
+    font-weight: 500;
+    color: #1d2327;
+}
+
+.wbim-low-stock-item .product-meta {
+    font-size: 12px;
+    color: #646970;
+}
+
+.wbim-low-stock-item .stock-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.wbim-low-stock-item .stock-badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.wbim-low-stock-item .stock-badge.critical {
+    background: #fde7e7;
+    color: #b32d2e;
+}
+
+.wbim-low-stock-item .stock-badge.warning {
+    background: #fff8e5;
+    color: #996800;
+}
+
+.wbim-low-stock-item .available-badge {
+    font-size: 12px;
+    color: #46b450;
+}
+
+/* Transfers Report */
+.wbim-transfers-stats {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.wbim-transfer-stat {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    padding: 15px;
+    text-align: center;
+}
+
+.wbim-transfer-stat .stat-count {
+    font-size: 24px;
+    font-weight: 600;
+    display: block;
+}
+
+.wbim-transfer-stat .stat-label {
+    font-size: 11px;
+    color: #646970;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.wbim-transfer-stat.stat-draft .stat-count {
+    color: #646970;
+}
+
+.wbim-transfer-stat.stat-pending .stat-count {
+    color: #996800;
+}
+
+.wbim-transfer-stat.stat-transit .stat-count {
+    color: #0073aa;
+}
+
+.wbim-transfer-stat.stat-completed .stat-count {
+    color: #46b450;
+}
+
+.wbim-transfer-stat.stat-cancelled .stat-count {
+    color: #dc3232;
+}
+
+/* Top Items Lists */
+.wbim-top-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.wbim-top-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f1;
+}
+
+.wbim-top-list li:last-child {
+    border-bottom: none;
+}
+
+.wbim-top-list .item-rank {
+    width: 24px;
+    height: 24px;
+    background: #f0f0f1;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: #646970;
+    margin-right: 10px;
+}
+
+.wbim-top-list .item-name {
+    flex: 1;
+    font-weight: 500;
+}
+
+.wbim-top-list .item-value {
+    font-weight: 600;
+    color: #0073aa;
+}
+
+/* Movement History */
+.wbim-movement-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f1;
+}
+
+.wbim-movement-item:last-child {
+    border-bottom: none;
+}
+
+.wbim-movement-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+}
+
+.wbim-movement-icon.type-sale {
+    background: #e7f7e7;
+    color: #46b450;
+}
+
+.wbim-movement-icon.type-transfer {
+    background: #e5f3ff;
+    color: #0073aa;
+}
+
+.wbim-movement-icon.type-adjustment {
+    background: #fff3e0;
+    color: #ffb900;
+}
+
+.wbim-movement-icon.type-import {
+    background: #f3e5f5;
+    color: #9c27b0;
+}
+
+.wbim-movement-details {
+    flex: 1;
+}
+
+.wbim-movement-title {
+    font-weight: 500;
+    color: #1d2327;
+}
+
+.wbim-movement-meta {
+    font-size: 12px;
+    color: #646970;
+}
+
+.wbim-movement-change {
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 4px;
+}
+
+.wbim-movement-change.positive {
+    background: #e7f7e7;
+    color: #46b450;
+}
+
+.wbim-movement-change.negative {
+    background: #fde7e7;
+    color: #dc3232;
+}
+
+/* Pagination */
+.wbim-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    margin-top: 20px;
+}
+
+.wbim-pagination a,
+.wbim-pagination span {
+    display: inline-block;
+    padding: 5px 12px;
+    border: 1px solid #c3c4c7;
+    border-radius: 3px;
+    text-decoration: none;
+    color: #2271b1;
+}
+
+.wbim-pagination a:hover {
+    background: #f6f7f7;
+}
+
+.wbim-pagination .current {
+    background: #2271b1;
+    border-color: #2271b1;
+    color: #fff;
+}
+
+/* Report Empty State */
+.wbim-report-empty {
+    text-align: center;
+    padding: 60px 20px;
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+}
+
+.wbim-report-empty .dashicons {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: #c3c4c7;
+}
+
+.wbim-report-empty h3 {
+    margin: 20px 0 10px;
+    color: #1d2327;
+}
+
+.wbim-report-empty p {
+    color: #646970;
+    margin: 0;
+}
+
+/* Reports Responsive */
+@media screen and (max-width: 1200px) {
+    .wbim-charts-section {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media screen and (max-width: 782px) {
+    .wbim-filter-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .wbim-filter-item {
+        width: 100%;
+    }
+
+    .wbim-filter-item select,
+    .wbim-filter-item input {
+        width: 100%;
+    }
+
+    .wbim-export-buttons {
+        margin-left: 0;
+        justify-content: flex-start;
+    }
+
+    .wbim-summary-cards {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .wbim-transfers-stats {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .wbim-report-table-wrapper {
+        font-size: 12px;
+    }
+
+    .wbim-chart-wrapper {
+        height: 250px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .wbim-summary-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .wbim-transfers-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
