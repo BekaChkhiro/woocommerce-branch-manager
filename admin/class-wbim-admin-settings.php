@@ -91,6 +91,11 @@ class WBIM_Admin_Settings {
         // Map settings
         $sanitized['google_maps_api_key'] = isset( $input['google_maps_api_key'] ) ? sanitize_text_field( $input['google_maps_api_key'] ) : '';
 
+        // Bulk Pricing settings
+        $sanitized['enable_bulk_pricing'] = isset( $input['enable_bulk_pricing'] ) ? 'yes' : 'no';
+        $sanitized['show_savings_badge'] = isset( $input['show_savings_badge'] ) ? 'yes' : 'no';
+        $sanitized['bulk_pricing_label'] = isset( $input['bulk_pricing_label'] ) ? sanitize_text_field( $input['bulk_pricing_label'] ) : '';
+
         return $sanitized;
     }
 
@@ -141,6 +146,10 @@ class WBIM_Admin_Settings {
             'company_name'                  => get_bloginfo( 'name' ),
             'pdf_footer_text'               => '',
             'google_maps_api_key'           => '',
+            // Bulk Pricing
+            'enable_bulk_pricing'           => 'yes',
+            'show_savings_badge'            => 'yes',
+            'bulk_pricing_label'            => '',
         );
 
         $settings = get_option( $this->option_key, array() );
@@ -174,6 +183,7 @@ class WBIM_Admin_Settings {
             'general'       => __( 'ზოგადი', 'wbim' ),
             'display'       => __( 'ჩვენება', 'wbim' ),
             'checkout'      => __( 'გადახდა', 'wbim' ),
+            'pricing'       => __( 'ფასები', 'wbim' ),
             'notifications' => __( 'შეტყობინებები', 'wbim' ),
             'api'           => __( 'API', 'wbim' ),
             'export'        => __( 'ექსპორტი/PDF', 'wbim' ),
@@ -203,6 +213,9 @@ class WBIM_Admin_Settings {
                             break;
                         case 'checkout':
                             $this->render_checkout_settings( $settings, $branches );
+                            break;
+                        case 'pricing':
+                            $this->render_pricing_settings( $settings );
                             break;
                         case 'notifications':
                             $this->render_notification_settings( $settings );
@@ -740,6 +753,88 @@ class WBIM_Admin_Settings {
                         <?php esc_html_e( 'დამატებითი ტექსტი PDF დოკუმენტის ბოლოს', 'wbim' ); ?>
                     </p>
                 </div>
+            </div>
+        </div>
+        <?php
+    }
+
+    /**
+     * Render pricing settings
+     *
+     * @param array $settings Current settings.
+     * @return void
+     */
+    private function render_pricing_settings( $settings ) {
+        ?>
+        <div class="wbim-settings-section">
+            <h2><?php esc_html_e( 'საბითუმო/რაოდენობაზე დაფუძნებული ფასდაკლება', 'wbim' ); ?></h2>
+
+            <div class="wbim-settings-row">
+                <div class="wbim-settings-label">
+                    <label for="enable_bulk_pricing"><?php esc_html_e( 'საბითუმო ფასების ჩართვა', 'wbim' ); ?></label>
+                </div>
+                <div class="wbim-settings-field">
+                    <div class="wbim-settings-checkbox">
+                        <input type="checkbox" id="enable_bulk_pricing" name="wbim_settings[enable_bulk_pricing]"
+                               value="yes" <?php checked( $settings['enable_bulk_pricing'], 'yes' ); ?>>
+                        <label for="enable_bulk_pricing">
+                            <?php esc_html_e( 'გლობალურად ჩართეთ რაოდენობაზე დაფუძნებული ფასდაკლების ფუნქცია', 'wbim' ); ?>
+                        </label>
+                    </div>
+                    <p class="wbim-settings-description">
+                        <?php esc_html_e( 'როცა ეს გამორთულია, საბითუმო ფასები არ მუშაობს არცერთ პროდუქტზე, მიუხედავად პროდუქტის პარამეტრებისა.', 'wbim' ); ?>
+                    </p>
+                </div>
+            </div>
+
+            <div class="wbim-settings-row">
+                <div class="wbim-settings-label">
+                    <label for="show_savings_badge"><?php esc_html_e( 'ფასდაკლების ბეჯი', 'wbim' ); ?></label>
+                </div>
+                <div class="wbim-settings-field">
+                    <div class="wbim-settings-checkbox">
+                        <input type="checkbox" id="show_savings_badge" name="wbim_settings[show_savings_badge]"
+                               value="yes" <?php checked( $settings['show_savings_badge'], 'yes' ); ?>>
+                        <label for="show_savings_badge">
+                            <?php esc_html_e( 'აჩვენეთ "დაზოგე X%" ბეჯი რაოდენობის ღილაკებზე', 'wbim' ); ?>
+                        </label>
+                    </div>
+                    <p class="wbim-settings-description">
+                        <?php esc_html_e( 'მწვანე ბეჯი გვიჩვენებს რამდენ პროცენტს ზოგავს მომხმარებელი საბითუმო შეძენისას.', 'wbim' ); ?>
+                    </p>
+                </div>
+            </div>
+
+            <div class="wbim-settings-row">
+                <div class="wbim-settings-label">
+                    <label for="bulk_pricing_label"><?php esc_html_e( 'სათაურის ტექსტი', 'wbim' ); ?></label>
+                </div>
+                <div class="wbim-settings-field">
+                    <input type="text" id="bulk_pricing_label" name="wbim_settings[bulk_pricing_label]"
+                           value="<?php echo esc_attr( $settings['bulk_pricing_label'] ); ?>"
+                           placeholder="<?php esc_attr_e( 'აირჩიეთ რაოდენობა:', 'wbim' ); ?>">
+                    <p class="wbim-settings-description">
+                        <?php esc_html_e( 'მორგებული სათაური რაოდენობის ღილაკების ზემოთ. დატოვეთ ცარიელი ნაგულისხმევისთვის.', 'wbim' ); ?>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="wbim-settings-section">
+            <h2><?php esc_html_e( 'როგორ მუშაობს', 'wbim' ); ?></h2>
+            <div class="wbim-api-info">
+                <h3><?php esc_html_e( 'კონფიგურაციის ინსტრუქცია', 'wbim' ); ?></h3>
+                <ol style="margin-left: 20px; line-height: 1.8;">
+                    <li><?php esc_html_e( 'გადადით პროდუქტის რედაქტირების გვერდზე', 'wbim' ); ?></li>
+                    <li><?php esc_html_e( 'იპოვეთ "საბითუმო ფასები" tab პროდუქტის მონაცემებში', 'wbim' ); ?></li>
+                    <li><?php esc_html_e( 'ჩართეთ საბითუმო ფასები და რაოდენობის ღილაკები', 'wbim' ); ?></li>
+                    <li><?php esc_html_e( 'დააყენეთ 3 საფეხურის რაოდენობა და შესაბამისი ერთეულის ფასი', 'wbim' ); ?></li>
+                    <li><?php esc_html_e( 'შეინახეთ პროდუქტი', 'wbim' ); ?></li>
+                </ol>
+                <p style="margin-top: 15px;">
+                    <strong><?php esc_html_e( 'მაგალითი:', 'wbim' ); ?></strong>
+                    <?php esc_html_e( 'თუ regular ფასი არის ₾10 და დააყენებთ: 10 ცალი @ ₾9, 25 ცალი @ ₾8.50, 50 ცალი @ ₾8 - მომხმარებელს გამოუჩნდება ღილაკები შესაბამისი ფასებითა და დაზოგვის პროცენტით.', 'wbim' ); ?>
+                </p>
             </div>
         </div>
         <?php

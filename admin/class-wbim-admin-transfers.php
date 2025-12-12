@@ -505,6 +505,19 @@ class WBIM_Admin_Transfers {
             wp_die( __( 'გადატანა ვერ მოიძებნა.', 'wbim' ) );
         }
 
+        // Fix empty status (database migration issue)
+        if ( empty( $transfer->status ) ) {
+            global $wpdb;
+            $wpdb->update(
+                $wpdb->prefix . 'wbim_transfers',
+                array( 'status' => WBIM_Transfer::STATUS_DRAFT ),
+                array( 'id' => $transfer_id ),
+                array( '%s' ),
+                array( '%d' )
+            );
+            $transfer->status = WBIM_Transfer::STATUS_DRAFT;
+        }
+
         // Check permission
         if ( ! WBIM_Transfer::user_can_manage( $transfer_id ) ) {
             wp_die( __( 'არ გაქვთ უფლება ამ გადატანის სანახავად.', 'wbim' ) );

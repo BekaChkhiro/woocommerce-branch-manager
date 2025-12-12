@@ -55,12 +55,19 @@ class WBIM_Reports {
         }
 
         // Build branch columns
+        // For variations: match by variation_id, for simple products: match by product_id with variation_id = 0
         $branch_selects = array();
         $branch_ids = array();
         foreach ( $branches as $branch ) {
             $branch_ids[] = $branch->id;
             $branch_selects[] = $wpdb->prepare(
-                "COALESCE((SELECT SUM(s.quantity) FROM {$stock_table} s WHERE s.product_id = p.ID AND s.branch_id = %d), 0) as branch_%d",
+                "COALESCE((SELECT SUM(s.quantity) FROM {$stock_table} s
+                  WHERE s.branch_id = %d
+                  AND (
+                      (p.post_type = 'product_variation' AND s.variation_id = p.ID)
+                      OR (p.post_type = 'product' AND s.product_id = p.ID AND s.variation_id = 0)
+                  )
+                ), 0) as branch_%d",
                 $branch->id,
                 $branch->id
             );
@@ -73,7 +80,10 @@ class WBIM_Reports {
 
         // Branch filter
         if ( ! empty( $args['branch_id'] ) ) {
-            $where[] = "EXISTS (SELECT 1 FROM {$stock_table} s WHERE s.product_id = p.ID AND s.branch_id = %d AND s.quantity > 0)";
+            $where[] = "EXISTS (SELECT 1 FROM {$stock_table} s WHERE s.branch_id = %d AND s.quantity > 0 AND (
+                (p.post_type = 'product_variation' AND s.variation_id = p.ID)
+                OR (p.post_type = 'product' AND s.product_id = p.ID AND s.variation_id = 0)
+            ))";
             $values[] = absint( $args['branch_id'] );
         }
 
@@ -102,7 +112,10 @@ class WBIM_Reports {
                 p.post_type,
                 pm_sku.meta_value as sku,
                 pm_price.meta_value as price,
-                COALESCE((SELECT SUM(quantity) FROM {$stock_table} WHERE product_id = p.ID), 0) as total_stock,
+                COALESCE((SELECT SUM(quantity) FROM {$stock_table} s2
+                    WHERE (p.post_type = 'product_variation' AND s2.variation_id = p.ID)
+                       OR (p.post_type = 'product' AND s2.product_id = p.ID AND s2.variation_id = 0)
+                ), 0) as total_stock,
                 {$branch_select_sql}
             FROM {$wpdb->posts} p
             LEFT JOIN {$wpdb->postmeta} pm_sku ON p.ID = pm_sku.post_id AND pm_sku.meta_key = '_sku'
@@ -601,7 +614,10 @@ class WBIM_Reports {
                 s.branch_id,
                 s.quantity,
                 s.low_stock_threshold,
-                p.post_title as product_name,
+                CASE
+                    WHEN s.variation_id > 0 THEN CONCAT(parent.post_title, ' - ', p.post_title)
+                    ELSE p.post_title
+                END as product_name,
                 pm_sku.meta_value as sku,
                 b.name as branch_name,
                 CASE
@@ -611,8 +627,14 @@ class WBIM_Reports {
                     ELSE 'normal'
                 END as status
             FROM {$stock_table} s
-            INNER JOIN {$wpdb->posts} p ON s.product_id = p.ID
-            LEFT JOIN {$wpdb->postmeta} pm_sku ON p.ID = pm_sku.post_id AND pm_sku.meta_key = '_sku'
+            INNER JOIN {$wpdb->posts} p ON (
+                (s.variation_id > 0 AND s.variation_id = p.ID)
+                OR (s.variation_id = 0 AND s.product_id = p.ID)
+            )
+            LEFT JOIN {$wpdb->posts} parent ON (s.variation_id > 0 AND s.product_id = parent.ID)
+            LEFT JOIN {$wpdb->postmeta} pm_sku ON (
+                CASE WHEN s.variation_id > 0 THEN s.variation_id ELSE s.product_id END
+            ) = pm_sku.post_id AND pm_sku.meta_key = '_sku'
             INNER JOIN {$branches_table} b ON s.branch_id = b.id
             {$join_terms}
             WHERE {$where_clause}

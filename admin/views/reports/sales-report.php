@@ -120,12 +120,16 @@ if ( ! defined( 'ABSPATH' ) ) {
     <div class="wbim-charts-row">
         <div class="wbim-chart-container">
             <h3><?php esc_html_e( 'გაყიდვები დროის მიხედვით', 'wbim' ); ?></h3>
-            <canvas id="wbim-sales-line-chart"></canvas>
+            <div style="position: relative; height: 300px; width: 100%;">
+                <canvas id="wbim-sales-line-chart"></canvas>
+            </div>
         </div>
 
         <div class="wbim-chart-container">
             <h3><?php esc_html_e( 'შემოსავალი ფილიალების მიხედვით', 'wbim' ); ?></h3>
-            <canvas id="wbim-revenue-pie-chart"></canvas>
+            <div style="position: relative; height: 300px; width: 100%;">
+                <canvas id="wbim-revenue-pie-chart"></canvas>
+            </div>
         </div>
     </div>
 

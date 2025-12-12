@@ -105,6 +105,10 @@ class WBIM_Autoloader {
             array_unshift( $paths, self::$include_path . 'public/' );
         }
 
+        if ( strpos( $class, 'wbim_bulk_pricing' ) !== false && strpos( $class, 'admin' ) === false ) {
+            array_unshift( $paths, self::$include_path . 'includes/' );
+        }
+
         if ( strpos( $class, 'wbim_rest' ) !== false ) {
             array_unshift( $paths, self::$include_path . 'api/' );
         }

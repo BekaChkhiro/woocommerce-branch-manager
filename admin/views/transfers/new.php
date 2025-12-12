@@ -72,14 +72,6 @@ if ( ! defined( 'ABSPATH' ) ) {
     </form>
 </div>
 
-<style>
-.wbim-new-transfer-page .form-table th {
-    width: 200px;
-}
-.wbim-new-transfer-page .required {
-    color: #dc3232;
-}
-</style>
 
 <script type="text/javascript">
 jQuery(document).ready(function($) {

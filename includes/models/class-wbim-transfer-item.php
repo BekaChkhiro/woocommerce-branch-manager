@@ -97,6 +97,19 @@ class WBIM_Transfer_Item {
             return false;
         }
 
+        // Fix empty status (database migration issue)
+        if ( empty( $transfer->status ) ) {
+            global $wpdb;
+            $wpdb->update(
+                $wpdb->prefix . 'wbim_transfers',
+                array( 'status' => WBIM_Transfer::STATUS_DRAFT ),
+                array( 'id' => $transfer_id ),
+                array( '%s' ),
+                array( '%d' )
+            );
+            $transfer->status = WBIM_Transfer::STATUS_DRAFT;
+        }
+
         // Only allow adding items to draft transfers
         if ( $transfer->status !== WBIM_Transfer::STATUS_DRAFT ) {
             return false;
@@ -174,7 +187,23 @@ class WBIM_Transfer_Item {
 
         // Validate transfer is editable
         $transfer = WBIM_Transfer::get_by_id( $item->transfer_id );
-        if ( ! $transfer || $transfer->status !== WBIM_Transfer::STATUS_DRAFT ) {
+        if ( ! $transfer ) {
+            return false;
+        }
+
+        // Fix empty status
+        if ( empty( $transfer->status ) ) {
+            $wpdb->update(
+                $wpdb->prefix . 'wbim_transfers',
+                array( 'status' => WBIM_Transfer::STATUS_DRAFT ),
+                array( 'id' => $item->transfer_id ),
+                array( '%s' ),
+                array( '%d' )
+            );
+            $transfer->status = WBIM_Transfer::STATUS_DRAFT;
+        }
+
+        if ( $transfer->status !== WBIM_Transfer::STATUS_DRAFT ) {
             return false;
         }
 
@@ -227,7 +256,23 @@ class WBIM_Transfer_Item {
 
         // Validate transfer is editable
         $transfer = WBIM_Transfer::get_by_id( $item->transfer_id );
-        if ( ! $transfer || $transfer->status !== WBIM_Transfer::STATUS_DRAFT ) {
+        if ( ! $transfer ) {
+            return false;
+        }
+
+        // Fix empty status
+        if ( empty( $transfer->status ) ) {
+            $wpdb->update(
+                $wpdb->prefix . 'wbim_transfers',
+                array( 'status' => WBIM_Transfer::STATUS_DRAFT ),
+                array( 'id' => $item->transfer_id ),
+                array( '%s' ),
+                array( '%d' )
+            );
+            $transfer->status = WBIM_Transfer::STATUS_DRAFT;
+        }
+
+        if ( $transfer->status !== WBIM_Transfer::STATUS_DRAFT ) {
             return false;
         }
 

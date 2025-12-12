@@ -158,9 +158,9 @@ if ( ! defined( 'ABSPATH' ) ) {
                             <a href="<?php echo esc_url( admin_url( 'admin.php?page=wbim-transfers&action=edit&id=' . $transfer->id ) ); ?>" class="button button-small">
                                 <?php echo $transfer->status === WBIM_Transfer::STATUS_DRAFT ? esc_html__( 'რედაქტირება', 'wbim' ) : esc_html__( 'ნახვა', 'wbim' ); ?>
                             </a>
-                            <?php if ( $transfer->status === WBIM_Transfer::STATUS_COMPLETED ) : ?>
-                                <a href="<?php echo esc_url( admin_url( 'admin.php?page=wbim-transfers&action=pdf&id=' . $transfer->id ) ); ?>" class="button button-small" target="_blank">
-                                    <?php esc_html_e( 'PDF', 'wbim' ); ?>
+                            <?php if ( $transfer->status !== WBIM_Transfer::STATUS_DRAFT && ! empty( $transfer->status ) ) : ?>
+                                <a href="<?php echo esc_url( admin_url( 'admin.php?page=wbim-transfers&action=pdf&id=' . $transfer->id ) ); ?>" class="button button-small" title="<?php esc_attr_e( 'PDF გადმოწერა', 'wbim' ); ?>">
+                                    <span class="dashicons dashicons-pdf" style="vertical-align: middle;"></span>
                                 </a>
                             <?php endif; ?>
                         </td>
@@ -232,35 +232,3 @@ if ( ! defined( 'ABSPATH' ) ) {
     <?php endif; ?>
 </div>
 
-<style>
-.wbim-transfers-page .wbim-filters {
-    margin: 20px 0;
-    padding: 15px;
-    background: #fff;
-    border: 1px solid #ccd0d4;
-}
-.wbim-transfers-page .wbim-filters select {
-    margin-right: 10px;
-}
-.wbim-transfers-table .column-number { width: 120px; }
-.wbim-transfers-table .column-source,
-.wbim-transfers-table .column-destination { width: 150px; }
-.wbim-transfers-table .column-items { width: 150px; }
-.wbim-transfers-table .column-status { width: 100px; }
-.wbim-transfers-table .column-created { width: 130px; }
-.wbim-transfers-table .column-actions { width: 120px; }
-.wbim-transfers-table .wbim-no-items { text-align: center; padding: 30px !important; }
-
-.wbim-status {
-    display: inline-block;
-    padding: 3px 8px;
-    border-radius: 3px;
-    font-size: 12px;
-    font-weight: 500;
-}
-.wbim-status-draft { background: #e0e0e0; color: #333; }
-.wbim-status-pending { background: #fff3cd; color: #856404; }
-.wbim-status-in_transit { background: #cce5ff; color: #004085; }
-.wbim-status-completed { background: #d4edda; color: #155724; }
-.wbim-status-cancelled { background: #f8d7da; color: #721c24; }
-</style>

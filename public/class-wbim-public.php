@@ -281,7 +281,15 @@ class WBIM_Public {
      */
     public function validate_branch_selection( $passed, $product_id, $quantity, $variation_id = 0, $variations = array() ) {
         $settings = get_option( 'wbim_settings', array() );
-        $required = ! empty( $settings['require_branch_selection'] ) && 'yes' === $settings['require_branch_selection'];
+        $global_required = ! empty( $settings['require_branch_selection'] ) && 'yes' === $settings['require_branch_selection'];
+
+        // Check if product has any branch stock records
+        $has_branch_stock = $this->product_has_branch_stock( $product_id, $variation_id );
+
+        // Require branch selection if:
+        // 1. Global setting is enabled, OR
+        // 2. Product has branch stock records
+        $required = $global_required || $has_branch_stock;
 
         if ( ! $required ) {
             return $passed;
@@ -290,12 +298,15 @@ class WBIM_Public {
         $branch_id = isset( $_POST['wbim_branch_id'] ) ? absint( $_POST['wbim_branch_id'] ) : 0;
 
         if ( ! $branch_id ) {
-            wc_add_notice( __( 'გთხოვთ აირჩიოთ ფილიალი.', 'wbim' ), 'error' );
+            if ( $has_branch_stock ) {
+                wc_add_notice( __( 'გთხოვთ აირჩიოთ ფილიალი საიდანაც გსურთ პროდუქტის შეძენა.', 'wbim' ), 'error' );
+            } else {
+                wc_add_notice( __( 'გთხოვთ აირჩიოთ ფილიალი.', 'wbim' ), 'error' );
+            }
             return false;
         }
 
         // Check stock in selected branch
-        $check_product_id = $variation_id ? $variation_id : $product_id;
         $stock = WBIM_Stock::get( $product_id, $branch_id, $variation_id );
         $available_qty = $stock ? $stock->quantity : 0;
 
@@ -314,6 +325,30 @@ class WBIM_Public {
         }
 
         return $passed;
+    }
+
+    /**
+     * Check if product has any branch stock records
+     *
+     * @param int $product_id   Product ID.
+     * @param int $variation_id Variation ID.
+     * @return bool
+     */
+    private function product_has_branch_stock( $product_id, $variation_id = 0 ) {
+        $branches = WBIM_Branch::get_active();
+
+        if ( empty( $branches ) ) {
+            return false;
+        }
+
+        foreach ( $branches as $branch ) {
+            $stock = WBIM_Stock::get( $product_id, $branch->id, $variation_id );
+            if ( $stock && $stock->quantity > 0 ) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

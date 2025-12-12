@@ -93,10 +93,11 @@ $status_class = 'wbim-status-' . $transfer->status;
                 <div class="inside">
                     <div class="wbim-search-container">
                         <input type="text" id="wbim-product-search" class="regular-text"
-                               placeholder="<?php esc_attr_e( 'მოძებნეთ პროდუქტი სახელით ან SKU-ით...', 'wbim' ); ?>">
+                               placeholder="<?php esc_attr_e( 'მოძებნეთ პროდუქტი სახელით ან SKU-ით...', 'wbim' ); ?>"
+                               autocomplete="off">
                         <span class="spinner"></span>
+                        <div id="wbim-search-results" class="wbim-search-results"></div>
                     </div>
-                    <div id="wbim-search-results" class="wbim-search-results"></div>
                 </div>
             </div>
             <?php endif; ?>
@@ -268,10 +269,11 @@ $status_class = 'wbim-status-' . $transfer->status;
                         <?php esc_html_e( 'უკან გადატანებზე', 'wbim' ); ?>
                     </a>
 
-                    <?php if ( $transfer->status === WBIM_Transfer::STATUS_COMPLETED ) : ?>
+                    <?php if ( $transfer->status !== WBIM_Transfer::STATUS_DRAFT ) : ?>
                         <a href="<?php echo esc_url( admin_url( 'admin.php?page=wbim-transfers&action=pdf&id=' . $transfer->id ) ); ?>"
-                           class="button button-block" target="_blank">
-                            <?php esc_html_e( 'PDF დოკუმენტი', 'wbim' ); ?>
+                           class="button button-block button-primary">
+                            <span class="dashicons dashicons-pdf" style="vertical-align: middle; margin-right: 5px;"></span>
+                            <?php esc_html_e( 'PDF გადმოწერა', 'wbim' ); ?>
                         </a>
                     <?php endif; ?>
 
@@ -286,181 +288,6 @@ $status_class = 'wbim-status-' . $transfer->status;
     </div>
 </div>
 
-<style>
-.wbim-edit-transfer-page h1 .wbim-status {
-    font-size: 14px;
-    vertical-align: middle;
-    margin-left: 10px;
-}
-.wbim-transfer-layout {
-    display: flex;
-    gap: 20px;
-    margin-top: 20px;
-}
-.wbim-transfer-main {
-    flex: 1;
-}
-.wbim-transfer-sidebar {
-    width: 280px;
-}
-.wbim-transfer-sidebar .postbox {
-    margin-bottom: 20px;
-}
-.wbim-info-table {
-    width: 100%;
-}
-.wbim-info-table th {
-    width: 140px;
-    padding: 8px 10px 8px 0;
-    text-align: left;
-    vertical-align: top;
-}
-.wbim-info-table td {
-    padding: 8px 0;
-}
-
-/* Product search */
-.wbim-search-container {
-    position: relative;
-}
-.wbim-search-container input {
-    width: 100%;
-}
-.wbim-search-container .spinner {
-    position: absolute;
-    right: 10px;
-    top: 5px;
-}
-.wbim-search-results {
-    max-height: 300px;
-    overflow-y: auto;
-    border: 1px solid #ddd;
-    display: none;
-    background: #fff;
-}
-.wbim-search-results.has-results {
-    display: block;
-}
-.wbim-search-result-item {
-    display: flex;
-    align-items: center;
-    padding: 10px;
-    cursor: pointer;
-    border-bottom: 1px solid #eee;
-}
-.wbim-search-result-item:hover {
-    background: #f5f5f5;
-}
-.wbim-search-result-item img {
-    width: 40px;
-    height: 40px;
-    object-fit: cover;
-    margin-right: 10px;
-}
-.wbim-search-result-item .product-info {
-    flex: 1;
-}
-.wbim-search-result-item .product-name {
-    font-weight: 500;
-}
-.wbim-search-result-item .product-sku,
-.wbim-search-result-item .product-stock {
-    font-size: 12px;
-    color: #666;
-}
-
-/* Items table */
-#wbim-items-table .column-image { width: 60px; }
-#wbim-items-table .column-product { width: auto; }
-#wbim-items-table .column-sku { width: 100px; }
-#wbim-items-table .column-stock { width: 80px; }
-#wbim-items-table .column-quantity { width: 100px; }
-#wbim-items-table .column-actions { width: 80px; }
-#wbim-items-table .column-image img {
-    width: 40px;
-    height: 40px;
-    object-fit: cover;
-}
-#wbim-items-table .wbim-no-items td {
-    text-align: center;
-    padding: 30px;
-}
-#wbim-items-table .wbim-stock-warning {
-    color: #dc3232;
-    font-weight: bold;
-}
-#wbim-items-table .wbim-total-label {
-    text-align: right;
-    font-weight: bold;
-}
-.wbim-item-qty {
-    width: 60px !important;
-}
-
-/* Status buttons */
-.wbim-status-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-.wbim-status-buttons .button {
-    width: 100%;
-    text-align: center;
-}
-.wbim-cancel-btn {
-    color: #a00 !important;
-    border-color: #a00 !important;
-}
-.wbim-cancel-btn:hover {
-    background: #fef7f7 !important;
-}
-
-/* Quick actions */
-.button-block {
-    display: block;
-    width: 100%;
-    text-align: center;
-    margin-bottom: 10px;
-}
-
-/* Status badges */
-.wbim-status {
-    display: inline-block;
-    padding: 3px 8px;
-    border-radius: 3px;
-    font-size: 12px;
-    font-weight: 500;
-}
-.wbim-status-draft { background: #e0e0e0; color: #333; }
-.wbim-status-pending { background: #fff3cd; color: #856404; }
-.wbim-status-in_transit { background: #cce5ff; color: #004085; }
-.wbim-status-completed { background: #d4edda; color: #155724; }
-.wbim-status-cancelled { background: #f8d7da; color: #721c24; }
-
-/* Notices */
-.wbim-notice {
-    padding: 12px;
-    margin-bottom: 10px;
-    border-left: 4px solid;
-}
-.wbim-notice-success {
-    background: #d4edda;
-    border-color: #28a745;
-}
-.wbim-notice-error {
-    background: #f8d7da;
-    border-color: #dc3545;
-}
-
-@media screen and (max-width: 960px) {
-    .wbim-transfer-layout {
-        flex-direction: column;
-    }
-    .wbim-transfer-sidebar {
-        width: 100%;
-    }
-}
-</style>
 
 <script type="text/javascript">
 jQuery(document).ready(function($) {

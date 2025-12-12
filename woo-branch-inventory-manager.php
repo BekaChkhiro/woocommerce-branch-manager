@@ -85,6 +85,9 @@ final class WBIM {
         // Check WooCommerce dependency
         add_action( 'plugins_loaded', array( $this, 'check_woocommerce' ) );
 
+        // Check database upgrades
+        add_action( 'plugins_loaded', array( $this, 'maybe_upgrade_database' ), 5 );
+
         // Load text domain
         add_action( 'init', array( $this, 'load_textdomain' ) );
 
@@ -102,6 +105,15 @@ final class WBIM {
 
         // Declare HPOS compatibility
         add_action( 'before_woocommerce_init', array( $this, 'declare_hpos_compatibility' ) );
+    }
+
+    /**
+     * Check and run database upgrades if needed
+     *
+     * @return void
+     */
+    public function maybe_upgrade_database() {
+        WBIM_Activator::maybe_upgrade_database();
     }
 
     /**
@@ -194,6 +206,7 @@ final class WBIM {
         new WBIM_Admin_Reports();
         new WBIM_Admin_Dashboard();
         new WBIM_Admin_Settings();
+        new WBIM_Admin_Bulk_Pricing();
     }
 
     /**
@@ -221,6 +234,9 @@ final class WBIM {
         // Public/Frontend (also needed for AJAX which runs in admin context)
         new WBIM_Public();
         new WBIM_Checkout();
+
+        // Bulk Pricing (frontend and cart)
+        new WBIM_Bulk_Pricing();
     }
 
     /**

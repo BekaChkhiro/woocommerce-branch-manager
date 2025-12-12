@@ -1,0 +1,734 @@
+/**
+ * WBIM Transfers Admin Styles
+ * Modern, clean design for transfer management pages
+ */
+
+/* ==========================================================================
+   Variables & Base
+   ========================================================================== */
+:root {
+    --wbim-primary: #2271b1;
+    --wbim-primary-hover: #135e96;
+    --wbim-success: #00a32a;
+    --wbim-success-light: #edfaef;
+    --wbim-warning: #dba617;
+    --wbim-warning-light: #fcf9e8;
+    --wbim-danger: #d63638;
+    --wbim-danger-light: #fcf0f1;
+    --wbim-info: #72aee6;
+    --wbim-info-light: #f0f6fc;
+    --wbim-gray-50: #f9fafb;
+    --wbim-gray-100: #f3f4f6;
+    --wbim-gray-200: #e5e7eb;
+    --wbim-gray-300: #d1d5db;
+    --wbim-gray-400: #9ca3af;
+    --wbim-gray-500: #6b7280;
+    --wbim-gray-600: #4b5563;
+    --wbim-gray-700: #374151;
+    --wbim-gray-800: #1f2937;
+    --wbim-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --wbim-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+    --wbim-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    --wbim-radius: 8px;
+    --wbim-radius-sm: 4px;
+}
+
+/* ==========================================================================
+   Page Headers
+   ========================================================================== */
+.wbim-transfers-page h1.wp-heading-inline,
+.wbim-new-transfer-page h1,
+.wbim-edit-transfer-page h1 {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--wbim-gray-800);
+    margin-bottom: 0;
+}
+
+.wbim-transfers-page .page-title-action,
+.wbim-new-transfer-page .page-title-action {
+    background: var(--wbim-primary);
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: var(--wbim-radius-sm);
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.2s ease;
+}
+
+.wbim-transfers-page .page-title-action:hover,
+.wbim-new-transfer-page .page-title-action:hover {
+    background: var(--wbim-primary-hover);
+    color: #fff;
+}
+
+/* ==========================================================================
+   Cards / Postboxes
+   ========================================================================== */
+.wbim-edit-transfer-page .postbox,
+.wbim-card {
+    background: #fff;
+    border: 1px solid var(--wbim-gray-200);
+    border-radius: var(--wbim-radius);
+    box-shadow: var(--wbim-shadow-sm);
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.wbim-edit-transfer-page .postbox .hndle,
+.wbim-card-header {
+    background: var(--wbim-gray-50);
+    border-bottom: 1px solid var(--wbim-gray-200);
+    padding: 14px 20px;
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--wbim-gray-700);
+}
+
+.wbim-edit-transfer-page .postbox .inside,
+.wbim-card-body {
+    padding: 20px;
+}
+
+/* ==========================================================================
+   Status Badges
+   ========================================================================== */
+.wbim-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.wbim-status::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin-right: 6px;
+}
+
+.wbim-status-draft {
+    background: var(--wbim-gray-100);
+    color: var(--wbim-gray-600);
+}
+.wbim-status-draft::before {
+    background: var(--wbim-gray-400);
+}
+
+.wbim-status-pending {
+    background: var(--wbim-warning-light);
+    color: #92400e;
+}
+.wbim-status-pending::before {
+    background: var(--wbim-warning);
+}
+
+.wbim-status-in_transit {
+    background: var(--wbim-info-light);
+    color: #1e40af;
+}
+.wbim-status-in_transit::before {
+    background: var(--wbim-info);
+}
+
+.wbim-status-completed {
+    background: var(--wbim-success-light);
+    color: #166534;
+}
+.wbim-status-completed::before {
+    background: var(--wbim-success);
+}
+
+.wbim-status-cancelled {
+    background: var(--wbim-danger-light);
+    color: #991b1b;
+}
+.wbim-status-cancelled::before {
+    background: var(--wbim-danger);
+}
+
+/* ==========================================================================
+   Filters Section
+   ========================================================================== */
+.wbim-filters {
+    background: #fff;
+    border: 1px solid var(--wbim-gray-200);
+    border-radius: var(--wbim-radius);
+    padding: 20px;
+    margin: 20px 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.wbim-filters select {
+    min-width: 180px;
+    padding: 8px 12px;
+    border: 1px solid var(--wbim-gray-300);
+    border-radius: var(--wbim-radius-sm);
+    background: #fff;
+    font-size: 14px;
+    color: var(--wbim-gray-700);
+}
+
+.wbim-filters select:focus {
+    border-color: var(--wbim-primary);
+    box-shadow: 0 0 0 1px var(--wbim-primary);
+    outline: none;
+}
+
+.wbim-filters .button {
+    padding: 8px 16px;
+    height: auto;
+    line-height: 1.4;
+}
+
+/* ==========================================================================
+   Tables
+   ========================================================================== */
+.wbim-transfers-table,
+#wbim-items-table {
+    border: 1px solid var(--wbim-gray-200);
+    border-radius: var(--wbim-radius);
+    overflow: hidden;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.wbim-transfers-table thead th,
+#wbim-items-table thead th {
+    background: var(--wbim-gray-50);
+    border-bottom: 2px solid var(--wbim-gray-200);
+    padding: 14px 16px;
+    font-weight: 600;
+    color: var(--wbim-gray-700);
+    text-align: left;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.wbim-transfers-table tbody td,
+#wbim-items-table tbody td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--wbim-gray-100);
+    vertical-align: middle;
+}
+
+.wbim-transfers-table tbody tr:hover,
+#wbim-items-table tbody tr:hover {
+    background: var(--wbim-gray-50);
+}
+
+.wbim-transfers-table tbody tr:last-child td,
+#wbim-items-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.wbim-transfers-table .column-number a {
+    color: var(--wbim-primary);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.wbim-transfers-table .column-number a:hover {
+    color: var(--wbim-primary-hover);
+    text-decoration: underline;
+}
+
+.wbim-no-items {
+    text-align: center;
+    padding: 40px !important;
+    color: var(--wbim-gray-500);
+    font-style: italic;
+}
+
+/* ==========================================================================
+   Buttons
+   ========================================================================== */
+.wbim-transfers-page .button,
+.wbim-new-transfer-page .button,
+.wbim-edit-transfer-page .button {
+    border-radius: var(--wbim-radius-sm);
+    font-weight: 500;
+    padding: 6px 14px;
+    height: auto;
+    line-height: 1.5;
+    transition: all 0.2s ease;
+}
+
+.wbim-transfers-page .button-primary,
+.wbim-new-transfer-page .button-primary,
+.wbim-edit-transfer-page .button-primary {
+    background: var(--wbim-primary);
+    border-color: var(--wbim-primary);
+}
+
+.wbim-transfers-page .button-primary:hover,
+.wbim-new-transfer-page .button-primary:hover,
+.wbim-edit-transfer-page .button-primary:hover {
+    background: var(--wbim-primary-hover);
+    border-color: var(--wbim-primary-hover);
+}
+
+.button-small {
+    padding: 4px 10px !important;
+    font-size: 12px !important;
+}
+
+/* Status action buttons */
+.wbim-status-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.wbim-status-buttons .button {
+    width: 100%;
+    text-align: center;
+    padding: 10px 16px;
+    font-size: 14px;
+}
+
+.wbim-complete-btn {
+    background: var(--wbim-success) !important;
+    border-color: var(--wbim-success) !important;
+    color: #fff !important;
+}
+
+.wbim-complete-btn:hover {
+    background: #008a20 !important;
+    border-color: #008a20 !important;
+}
+
+.wbim-cancel-btn {
+    color: var(--wbim-danger) !important;
+    border-color: var(--wbim-danger) !important;
+    background: #fff !important;
+}
+
+.wbim-cancel-btn:hover {
+    background: var(--wbim-danger-light) !important;
+}
+
+/* ==========================================================================
+   Forms
+   ========================================================================== */
+.wbim-new-transfer-page .form-table,
+.wbim-transfer-form .form-table {
+    background: #fff;
+    border: 1px solid var(--wbim-gray-200);
+    border-radius: var(--wbim-radius);
+    margin-top: 20px;
+}
+
+.wbim-new-transfer-page .form-table th,
+.wbim-transfer-form .form-table th {
+    padding: 20px;
+    width: 200px;
+    font-weight: 600;
+    color: var(--wbim-gray-700);
+    background: var(--wbim-gray-50);
+    border-right: 1px solid var(--wbim-gray-200);
+}
+
+.wbim-new-transfer-page .form-table td,
+.wbim-transfer-form .form-table td {
+    padding: 20px;
+}
+
+.wbim-new-transfer-page .form-table tr,
+.wbim-transfer-form .form-table tr {
+    border-bottom: 1px solid var(--wbim-gray-100);
+}
+
+.wbim-new-transfer-page .form-table tr:last-child,
+.wbim-transfer-form .form-table tr:last-child {
+    border-bottom: none;
+}
+
+.wbim-new-transfer-page select,
+.wbim-new-transfer-page textarea,
+.wbim-transfer-form select,
+.wbim-transfer-form textarea {
+    border: 1px solid var(--wbim-gray-300);
+    border-radius: var(--wbim-radius-sm);
+    padding: 10px 14px;
+    font-size: 14px;
+    width: 100%;
+    max-width: 400px;
+}
+
+.wbim-new-transfer-page select:focus,
+.wbim-new-transfer-page textarea:focus,
+.wbim-transfer-form select:focus,
+.wbim-transfer-form textarea:focus {
+    border-color: var(--wbim-primary);
+    box-shadow: 0 0 0 1px var(--wbim-primary);
+    outline: none;
+}
+
+.wbim-new-transfer-page .required {
+    color: var(--wbim-danger);
+}
+
+.wbim-new-transfer-page .description {
+    color: var(--wbim-gray-500);
+    margin-top: 8px;
+}
+
+.wbim-new-transfer-page .submit {
+    padding: 20px;
+    background: var(--wbim-gray-50);
+    border-top: 1px solid var(--wbim-gray-200);
+    margin: 0;
+    border-radius: 0 0 var(--wbim-radius) var(--wbim-radius);
+}
+
+/* ==========================================================================
+   Edit Page Layout
+   ========================================================================== */
+.wbim-transfer-layout {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 24px;
+    margin-top: 24px;
+}
+
+.wbim-transfer-main {
+    min-width: 0;
+}
+
+.wbim-transfer-sidebar {
+    min-width: 0;
+}
+
+/* Transfer Info Table */
+.wbim-info-table {
+    width: 100%;
+}
+
+.wbim-info-table tr {
+    border-bottom: 1px solid var(--wbim-gray-100);
+}
+
+.wbim-info-table tr:last-child {
+    border-bottom: none;
+}
+
+.wbim-info-table th {
+    padding: 12px 16px 12px 0;
+    text-align: left;
+    font-weight: 500;
+    color: var(--wbim-gray-500);
+    width: 140px;
+    vertical-align: top;
+}
+
+.wbim-info-table td {
+    padding: 12px 0;
+    color: var(--wbim-gray-800);
+}
+
+/* ==========================================================================
+   Product Search
+   ========================================================================== */
+.wbim-product-search {
+    margin-bottom: 24px;
+}
+
+.wbim-product-search.postbox {
+    overflow: visible;
+}
+
+.wbim-product-search .inside {
+    overflow: visible;
+}
+
+.wbim-search-container {
+    position: relative;
+}
+
+.wbim-search-container input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid var(--wbim-gray-200);
+    border-radius: var(--wbim-radius);
+    font-size: 14px;
+    transition: border-color 0.2s ease;
+}
+
+.wbim-search-container input:focus {
+    border-color: var(--wbim-primary);
+    outline: none;
+}
+
+.wbim-search-container input::placeholder {
+    color: var(--wbim-gray-400);
+}
+
+.wbim-search-container .spinner {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.wbim-search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: 350px;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid var(--wbim-gray-200);
+    border-radius: var(--wbim-radius);
+    box-shadow: var(--wbim-shadow-md);
+    display: none;
+    z-index: 999999;
+    margin-top: 4px;
+}
+
+.wbim-search-results.has-results {
+    display: block;
+}
+
+.wbim-search-result-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--wbim-gray-100);
+    transition: background 0.15s ease;
+}
+
+.wbim-search-result-item:last-child {
+    border-bottom: none;
+}
+
+.wbim-search-result-item:hover {
+    background: var(--wbim-gray-50);
+}
+
+.wbim-search-result-item img {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: var(--wbim-radius-sm);
+    margin-right: 14px;
+    border: 1px solid var(--wbim-gray-200);
+}
+
+.wbim-search-result-item .product-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.wbim-search-result-item .product-name {
+    font-weight: 600;
+    color: var(--wbim-gray-800);
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wbim-search-result-item .product-sku,
+.wbim-search-result-item .product-stock {
+    font-size: 12px;
+    color: var(--wbim-gray-500);
+}
+
+/* ==========================================================================
+   Items Table (Edit Page)
+   ========================================================================== */
+#wbim-items-table .column-image {
+    width: 70px;
+}
+
+#wbim-items-table .column-image img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: var(--wbim-radius-sm);
+    border: 1px solid var(--wbim-gray-200);
+}
+
+#wbim-items-table .column-product {
+    font-weight: 500;
+}
+
+#wbim-items-table .column-product a {
+    color: var(--wbim-primary);
+    text-decoration: none;
+}
+
+#wbim-items-table .column-product a:hover {
+    text-decoration: underline;
+}
+
+#wbim-items-table .column-product small {
+    display: block;
+    color: var(--wbim-gray-500);
+    font-weight: normal;
+    margin-top: 4px;
+}
+
+#wbim-items-table .column-sku {
+    width: 100px;
+    color: var(--wbim-gray-500);
+    font-family: monospace;
+}
+
+#wbim-items-table .column-stock {
+    width: 80px;
+}
+
+#wbim-items-table .column-quantity {
+    width: 100px;
+}
+
+#wbim-items-table .column-actions {
+    width: 90px;
+}
+
+.wbim-item-qty {
+    width: 70px !important;
+    padding: 6px 10px !important;
+    border: 1px solid var(--wbim-gray-300) !important;
+    border-radius: var(--wbim-radius-sm) !important;
+    text-align: center;
+}
+
+.wbim-stock-warning {
+    color: var(--wbim-danger);
+    font-weight: 600;
+}
+
+#wbim-items-table tfoot td {
+    background: var(--wbim-gray-50);
+    font-weight: 600;
+    padding: 14px 16px;
+}
+
+.wbim-total-label {
+    text-align: right;
+}
+
+/* ==========================================================================
+   Quick Actions (Sidebar)
+   ========================================================================== */
+.wbim-quick-actions .inside {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.button-block {
+    display: block;
+    width: 100%;
+    text-align: center;
+}
+
+/* ==========================================================================
+   Notices
+   ========================================================================== */
+.wbim-notice {
+    padding: 14px 18px;
+    margin-bottom: 16px;
+    border-radius: var(--wbim-radius-sm);
+    border-left: 4px solid;
+}
+
+.wbim-notice-success {
+    background: var(--wbim-success-light);
+    border-color: var(--wbim-success);
+    color: #166534;
+}
+
+.wbim-notice-error {
+    background: var(--wbim-danger-light);
+    border-color: var(--wbim-danger);
+    color: #991b1b;
+}
+
+/* ==========================================================================
+   Subsubsub Navigation
+   ========================================================================== */
+.wbim-transfers-page .subsubsub {
+    margin: 16px 0;
+    padding: 0;
+    list-style: none;
+}
+
+.wbim-transfers-page .subsubsub li {
+    display: inline;
+}
+
+.wbim-transfers-page .subsubsub a {
+    text-decoration: none;
+    color: var(--wbim-gray-600);
+    padding: 4px 8px;
+    border-radius: var(--wbim-radius-sm);
+}
+
+.wbim-transfers-page .subsubsub a:hover {
+    color: var(--wbim-primary);
+}
+
+.wbim-transfers-page .subsubsub a.current {
+    color: var(--wbim-gray-800);
+    font-weight: 600;
+}
+
+.wbim-transfers-page .subsubsub .count {
+    color: var(--wbim-gray-400);
+}
+
+/* ==========================================================================
+   Responsive Design
+   ========================================================================== */
+@media screen and (max-width: 1200px) {
+    .wbim-transfer-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .wbim-transfer-sidebar {
+        order: -1;
+    }
+}
+
+@media screen and (max-width: 782px) {
+    .wbim-filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .wbim-filters select {
+        width: 100%;
+    }
+
+    .wbim-new-transfer-page .form-table th,
+    .wbim-transfer-form .form-table th {
+        display: block;
+        width: 100%;
+        border-right: none;
+        border-bottom: none;
+        padding-bottom: 8px;
+    }
+
+    .wbim-new-transfer-page .form-table td,
+    .wbim-transfer-form .form-table td {
+        display: block;
+        padding-top: 0;
+    }
+}

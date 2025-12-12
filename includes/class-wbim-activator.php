@@ -35,6 +35,7 @@ class WBIM_Activator {
     public static function activate() {
         self::check_requirements();
         self::create_tables();
+        self::maybe_upgrade_database();
         self::create_options();
         self::create_capabilities();
 
@@ -43,6 +44,204 @@ class WBIM_Activator {
 
         // Store activation time
         update_option( 'wbim_activated_at', current_time( 'mysql' ) );
+    }
+
+    /**
+     * Check and upgrade database if needed
+     *
+     * @return void
+     */
+    public static function maybe_upgrade_database() {
+        global $wpdb;
+
+        // Always check for missing columns (fixes broken migrations)
+        self::ensure_transfers_table_columns();
+
+        $current_version = get_option( 'wbim_db_version', '1.0.0' );
+
+        // If already at latest version, skip
+        if ( version_compare( $current_version, self::DB_VERSION, '>=' ) ) {
+            return;
+        }
+
+        // Upgrade to 1.1.0 - ensure transfers table has all columns
+        if ( version_compare( $current_version, '1.1.0', '<' ) ) {
+            self::upgrade_to_1_1_0();
+        }
+
+        update_option( 'wbim_db_version', self::DB_VERSION );
+    }
+
+    /**
+     * Ensure transfers table has all required columns
+     *
+     * @return void
+     */
+    private static function ensure_transfers_table_columns() {
+        global $wpdb;
+
+        $table_transfers = $wpdb->prefix . 'wbim_transfers';
+
+        // Check if table exists
+        $table_exists = $wpdb->get_var( "SHOW TABLES LIKE '{$table_transfers}'" );
+        if ( ! $table_exists ) {
+            return;
+        }
+
+        // Get existing columns
+        $existing_columns = array();
+        $columns = $wpdb->get_results( "SHOW COLUMNS FROM {$table_transfers}" );
+        foreach ( $columns as $column ) {
+            $existing_columns[] = $column->Field;
+        }
+
+        // Add missing columns
+        if ( ! in_array( 'source_branch_id', $existing_columns, true ) ) {
+            $wpdb->query( "ALTER TABLE {$table_transfers} ADD COLUMN source_branch_id bigint(20) UNSIGNED NOT NULL DEFAULT 0" );
+        }
+
+        if ( ! in_array( 'destination_branch_id', $existing_columns, true ) ) {
+            $wpdb->query( "ALTER TABLE {$table_transfers} ADD COLUMN destination_branch_id bigint(20) UNSIGNED NOT NULL DEFAULT 0" );
+        }
+
+        if ( ! in_array( 'transfer_number', $existing_columns, true ) ) {
+            $wpdb->query( "ALTER TABLE {$table_transfers} ADD COLUMN transfer_number varchar(50) NOT NULL DEFAULT ''" );
+        }
+
+        if ( ! in_array( 'status', $existing_columns, true ) ) {
+            $wpdb->query( "ALTER TABLE {$table_transfers} ADD COLUMN status varchar(20) NOT NULL DEFAULT 'draft'" );
+        }
+
+        if ( ! in_array( 'notes', $existing_columns, true ) ) {
+            $wpdb->query( "ALTER TABLE {$table_transfers} ADD COLUMN notes text DEFAULT NULL" );
+        }
+
+        if ( ! in_array( 'created_by', $existing_columns, true ) ) {
+            $wpdb->query( "ALTER TABLE {$table_transfers} ADD COLUMN created_by bigint(20) UNSIGNED DEFAULT NULL" );
+        }
+
+        if ( ! in_array( 'sent_by', $existing_columns, true ) ) {
+            $wpdb->query( "ALTER TABLE {$table_transfers} ADD COLUMN sent_by bigint(20) UNSIGNED DEFAULT NULL" );
+        }
+
+        if ( ! in_array( 'received_by', $existing_columns, true ) ) {
+            $wpdb->query( "ALTER TABLE {$table_transfers} ADD COLUMN received_by bigint(20) UNSIGNED DEFAULT NULL" );
+        }
+
+        if ( ! in_array( 'created_at', $existing_columns, true ) ) {
+            $wpdb->query( "ALTER TABLE {$table_transfers} ADD COLUMN created_at datetime DEFAULT CURRENT_TIMESTAMP" );
+        }
+
+        if ( ! in_array( 'updated_at', $existing_columns, true ) ) {
+            $wpdb->query( "ALTER TABLE {$table_transfers} ADD COLUMN updated_at datetime DEFAULT NULL" );
+        }
+
+        if ( ! in_array( 'sent_at', $existing_columns, true ) ) {
+            $wpdb->query( "ALTER TABLE {$table_transfers} ADD COLUMN sent_at datetime DEFAULT NULL" );
+        }
+
+        if ( ! in_array( 'received_at', $existing_columns, true ) ) {
+            $wpdb->query( "ALTER TABLE {$table_transfers} ADD COLUMN received_at datetime DEFAULT NULL" );
+        }
+
+        // Fix any transfers with empty or NULL status - set to draft
+        $wpdb->query( "UPDATE {$table_transfers} SET status = 'draft' WHERE status IS NULL OR status = ''" );
+
+        // Also fix transfer_items table
+        self::ensure_transfer_items_table_columns();
+    }
+
+    /**
+     * Ensure transfer_items table has all required columns
+     *
+     * @return void
+     */
+    private static function ensure_transfer_items_table_columns() {
+        global $wpdb;
+
+        $table = $wpdb->prefix . 'wbim_transfer_items';
+
+        // Check if table exists
+        $table_exists = $wpdb->get_var( "SHOW TABLES LIKE '{$table}'" );
+        if ( ! $table_exists ) {
+            return;
+        }
+
+        // Get existing columns
+        $existing_columns = array();
+        $columns = $wpdb->get_results( "SHOW COLUMNS FROM {$table}" );
+        foreach ( $columns as $column ) {
+            $existing_columns[] = $column->Field;
+        }
+
+        // Add missing columns
+        if ( ! in_array( 'product_name', $existing_columns, true ) ) {
+            $wpdb->query( "ALTER TABLE {$table} ADD COLUMN product_name varchar(255) NOT NULL DEFAULT ''" );
+        }
+
+        if ( ! in_array( 'sku', $existing_columns, true ) ) {
+            $wpdb->query( "ALTER TABLE {$table} ADD COLUMN sku varchar(100) DEFAULT ''" );
+        }
+
+        if ( ! in_array( 'quantity', $existing_columns, true ) ) {
+            $wpdb->query( "ALTER TABLE {$table} ADD COLUMN quantity int(11) NOT NULL DEFAULT 0" );
+        }
+
+        if ( ! in_array( 'created_at', $existing_columns, true ) ) {
+            $wpdb->query( "ALTER TABLE {$table} ADD COLUMN created_at datetime DEFAULT CURRENT_TIMESTAMP" );
+        }
+
+        if ( ! in_array( 'updated_at', $existing_columns, true ) ) {
+            $wpdb->query( "ALTER TABLE {$table} ADD COLUMN updated_at datetime DEFAULT NULL" );
+        }
+    }
+
+    /**
+     * Upgrade database to version 1.1.0
+     *
+     * @return void
+     */
+    private static function upgrade_to_1_1_0() {
+        global $wpdb;
+
+        $table_transfers = $wpdb->prefix . 'wbim_transfers';
+
+        // Check if destination_branch_id column exists
+        $column_exists = $wpdb->get_results( "SHOW COLUMNS FROM {$table_transfers} LIKE 'destination_branch_id'" );
+
+        if ( empty( $column_exists ) ) {
+            $wpdb->query( "ALTER TABLE {$table_transfers} ADD COLUMN destination_branch_id bigint(20) UNSIGNED NOT NULL AFTER source_branch_id" );
+            $wpdb->query( "ALTER TABLE {$table_transfers} ADD KEY destination_branch_id (destination_branch_id)" );
+        }
+
+        // Check if source_branch_id column exists
+        $column_exists = $wpdb->get_results( "SHOW COLUMNS FROM {$table_transfers} LIKE 'source_branch_id'" );
+
+        if ( empty( $column_exists ) ) {
+            $wpdb->query( "ALTER TABLE {$table_transfers} ADD COLUMN source_branch_id bigint(20) UNSIGNED NOT NULL AFTER transfer_number" );
+            $wpdb->query( "ALTER TABLE {$table_transfers} ADD KEY source_branch_id (source_branch_id)" );
+        }
+
+        // Ensure all other columns exist
+        $columns_to_check = array(
+            'transfer_number' => "varchar(50) NOT NULL AFTER id",
+            'status'          => "varchar(20) NOT NULL DEFAULT 'draft' AFTER destination_branch_id",
+            'notes'           => "text DEFAULT NULL AFTER status",
+            'created_by'      => "bigint(20) UNSIGNED DEFAULT NULL AFTER notes",
+            'sent_by'         => "bigint(20) UNSIGNED DEFAULT NULL AFTER created_by",
+            'received_by'     => "bigint(20) UNSIGNED DEFAULT NULL AFTER sent_by",
+            'created_at'      => "datetime DEFAULT CURRENT_TIMESTAMP AFTER received_by",
+            'updated_at'      => "datetime DEFAULT NULL AFTER created_at",
+            'sent_at'         => "datetime DEFAULT NULL AFTER updated_at",
+            'received_at'     => "datetime DEFAULT NULL AFTER sent_at",
+        );
+
+        foreach ( $columns_to_check as $column => $definition ) {
+            $exists = $wpdb->get_results( "SHOW COLUMNS FROM {$table_transfers} LIKE '{$column}'" );
+            if ( empty( $exists ) ) {
+                $wpdb->query( "ALTER TABLE {$table_transfers} ADD COLUMN {$column} {$definition}" );
+            }
+        }
     }
 
     /**

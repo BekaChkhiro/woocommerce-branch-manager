@@ -40,15 +40,16 @@ class WBIM_Admin_Documentation {
         $tab = isset( $_GET['tab'] ) ? sanitize_key( $_GET['tab'] ) : 'overview';
 
         $tabs = array(
-            'overview'    => __( 'მიმოხილვა', 'wbim' ),
-            'branches'    => __( 'ფილიალები', 'wbim' ),
-            'stock'       => __( 'მარაგის მართვა', 'wbim' ),
-            'transfers'   => __( 'გადატანები', 'wbim' ),
-            'orders'      => __( 'შეკვეთები', 'wbim' ),
-            'reports'     => __( 'რეპორტები', 'wbim' ),
-            'api'         => __( 'REST API', 'wbim' ),
-            'roles'       => __( 'როლები და უფლებები', 'wbim' ),
-            'faq'         => __( 'ხშირი კითხვები', 'wbim' ),
+            'overview'      => __( 'მიმოხილვა', 'wbim' ),
+            'branches'      => __( 'ფილიალები', 'wbim' ),
+            'stock'         => __( 'მარაგის მართვა', 'wbim' ),
+            'transfers'     => __( 'გადატანები', 'wbim' ),
+            'bulk_pricing'  => __( 'საბითუმო ფასები', 'wbim' ),
+            'orders'        => __( 'შეკვეთები', 'wbim' ),
+            'reports'       => __( 'რეპორტები', 'wbim' ),
+            'api'           => __( 'REST API', 'wbim' ),
+            'roles'         => __( 'როლები და უფლებები', 'wbim' ),
+            'faq'           => __( 'ხშირი კითხვები', 'wbim' ),
         );
 
         ?>
@@ -78,6 +79,9 @@ class WBIM_Admin_Documentation {
                         break;
                     case 'transfers':
                         $this->render_transfers_docs();
+                        break;
+                    case 'bulk_pricing':
+                        $this->render_bulk_pricing_docs();
                         break;
                     case 'orders':
                         $this->render_orders_docs();
@@ -625,6 +629,245 @@ class WBIM_Admin_Documentation {
             <div class="wbim-doc-note">
                 <strong><?php esc_html_e( 'შენიშვნა:', 'wbim' ); ?></strong>
                 <?php esc_html_e( 'სისტემა ავტომატურად ამოწმებს არის თუ არა საკმარისი მარაგი წყარო ფილიალში გადატანის გაგზავნამდე.', 'wbim' ); ?>
+            </div>
+        </div>
+        <?php
+    }
+
+    /**
+     * Render bulk pricing documentation
+     *
+     * @return void
+     */
+    private function render_bulk_pricing_docs() {
+        ?>
+        <div class="wbim-doc-section">
+            <h2><?php esc_html_e( 'საბითუმო ფასები (Bulk Pricing)', 'wbim' ); ?></h2>
+
+            <p><?php esc_html_e( 'საბითუმო ფასების სისტემა საშუალებას გაძლევთ დააყენოთ ფასდაკლებები რაოდენობის მიხედვით. რაც მეტს იყიდის მომხმარებელი, მით უფრო დაბალ ფასს მიიღებს.', 'wbim' ); ?></p>
+
+            <div class="wbim-doc-feature-grid">
+                <div class="wbim-doc-feature-card">
+                    <h4><span class="dashicons dashicons-tag"></span> <?php esc_html_e( 'რაოდენობის ფასები', 'wbim' ); ?></h4>
+                    <p><?php esc_html_e( 'დააყენეთ სხვადასხვა ფასი სხვადასხვა რაოდენობისთვის (მაგ: 10+, 25+, 50+).', 'wbim' ); ?></p>
+                </div>
+                <div class="wbim-doc-feature-card">
+                    <h4><span class="dashicons dashicons-button"></span> <?php esc_html_e( 'რაოდენობის ღილაკები', 'wbim' ); ?></h4>
+                    <p><?php esc_html_e( 'მომხმარებელი ხედავს ღილაკებს წინასწარ განსაზღვრული რაოდენობებით.', 'wbim' ); ?></p>
+                </div>
+                <div class="wbim-doc-feature-card">
+                    <h4><span class="dashicons dashicons-chart-line"></span> <?php esc_html_e( 'დაზოგვის ჩვენება', 'wbim' ); ?></h4>
+                    <p><?php esc_html_e( 'ავტომატურად აჩვენებს რამდენს დაზოგავს მომხმარებელი თითოეულ საფეხურზე.', 'wbim' ); ?></p>
+                </div>
+                <div class="wbim-doc-feature-card">
+                    <h4><span class="dashicons dashicons-products"></span> <?php esc_html_e( 'ვარიაციების მხარდაჭერა', 'wbim' ); ?></h4>
+                    <p><?php esc_html_e( 'მუშაობს როგორც მარტივ, ასევე ვარიაციულ პროდუქტებზე.', 'wbim' ); ?></p>
+                </div>
+            </div>
+
+            <h3><?php esc_html_e( 'საბითუმო ფასის დაყენება', 'wbim' ); ?></h3>
+            <ol class="wbim-doc-steps">
+                <li>
+                    <strong><?php esc_html_e( 'გახსენით პროდუქტი რედაქტირებისთვის', 'wbim' ); ?></strong><br>
+                    <?php esc_html_e( 'გადადით WooCommerce → პროდუქტები და აირჩიეთ სასურველი პროდუქტი.', 'wbim' ); ?>
+                </li>
+                <li>
+                    <strong><?php esc_html_e( 'იპოვეთ "საბითუმო ფასები" ტაბი', 'wbim' ); ?></strong><br>
+                    <?php esc_html_e( 'პროდუქტის მონაცემების სექციაში ნახავთ ახალ ტაბს.', 'wbim' ); ?>
+                </li>
+                <li>
+                    <strong><?php esc_html_e( 'ჩართეთ საბითუმო ფასები', 'wbim' ); ?></strong><br>
+                    <?php esc_html_e( 'მონიშნეთ "საბითუმო ფასების ჩართვა" ჩექბოქსი.', 'wbim' ); ?>
+                </li>
+                <li>
+                    <strong><?php esc_html_e( 'შეავსეთ ფასების საფეხურები', 'wbim' ); ?></strong><br>
+                    <?php esc_html_e( 'მიუთითეთ რაოდენობა და შესაბამისი ფასი თითოეული საფეხურისთვის.', 'wbim' ); ?>
+                </li>
+            </ol>
+
+            <h3><?php esc_html_e( 'ფასების საფეხურების მაგალითი', 'wbim' ); ?></h3>
+            <table class="wbim-doc-table">
+                <thead>
+                    <tr>
+                        <th><?php esc_html_e( 'საფეხური', 'wbim' ); ?></th>
+                        <th><?php esc_html_e( 'მინ. რაოდენობა', 'wbim' ); ?></th>
+                        <th><?php esc_html_e( 'ერთეულის ფასი', 'wbim' ); ?></th>
+                        <th><?php esc_html_e( 'ჯამი', 'wbim' ); ?></th>
+                        <th><?php esc_html_e( 'ფასდაკლება', 'wbim' ); ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><?php esc_html_e( 'ჩვეულებრივი ფასი', 'wbim' ); ?></td>
+                        <td>1</td>
+                        <td>₾10.00</td>
+                        <td>-</td>
+                        <td>0%</td>
+                    </tr>
+                    <tr>
+                        <td><?php esc_html_e( 'საფეხური 1', 'wbim' ); ?></td>
+                        <td>10</td>
+                        <td>₾9.50</td>
+                        <td>₾95.00</td>
+                        <td>5%</td>
+                    </tr>
+                    <tr>
+                        <td><?php esc_html_e( 'საფეხური 2', 'wbim' ); ?></td>
+                        <td>25</td>
+                        <td>₾9.00</td>
+                        <td>₾225.00</td>
+                        <td>10%</td>
+                    </tr>
+                    <tr>
+                        <td><?php esc_html_e( 'საფეხური 3', 'wbim' ); ?></td>
+                        <td>50</td>
+                        <td>₾8.00</td>
+                        <td>₾400.00</td>
+                        <td>20%</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3><?php esc_html_e( 'რაოდენობის ღილაკები', 'wbim' ); ?></h3>
+            <p><?php esc_html_e( 'როცა "რაოდენობის ღილაკების ჩვენება" ჩართულია, მომხმარებელი დაინახავს ღილაკებს პროდუქტის გვერდზე:', 'wbim' ); ?></p>
+
+            <div style="background: #f6f7f7; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <p style="margin-bottom: 15px; font-weight: 600;"><?php esc_html_e( 'აირჩიეთ რაოდენობა:', 'wbim' ); ?></p>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <div style="background: #fff; border: 2px solid #2271b1; border-radius: 8px; padding: 15px 20px; text-align: center; min-width: 100px;">
+                        <div style="font-size: 18px; font-weight: bold;">10 ც</div>
+                        <div style="font-size: 16px; color: #2271b1;">₾95</div>
+                        <div style="font-size: 12px; color: #666;">₾9.50/ც</div>
+                    </div>
+                    <div style="background: #fff; border: 2px solid #ddd; border-radius: 8px; padding: 15px 20px; text-align: center; min-width: 100px;">
+                        <div style="font-size: 18px; font-weight: bold;">25 ც</div>
+                        <div style="font-size: 16px; color: #2271b1;">₾225</div>
+                        <div style="font-size: 12px; color: #666;">₾9.00/ც</div>
+                    </div>
+                    <div style="background: #fff; border: 2px solid #ddd; border-radius: 8px; padding: 15px 20px; text-align: center; min-width: 100px;">
+                        <div style="font-size: 18px; font-weight: bold;">50 ც</div>
+                        <div style="font-size: 16px; color: #2271b1;">₾400</div>
+                        <div style="font-size: 12px; color: #666;">₾8.00/ც</div>
+                        <div style="font-size: 11px; color: #00a32a; margin-top: 5px;">დაზოგე 20%</div>
+                    </div>
+                </div>
+            </div>
+
+            <h3><?php esc_html_e( 'ვარიაციული პროდუქტები', 'wbim' ); ?></h3>
+            <p><?php esc_html_e( 'ვარიაციული პროდუქტებისთვის გაქვთ ორი ვარიანტი:', 'wbim' ); ?></p>
+
+            <table class="wbim-doc-table">
+                <thead>
+                    <tr>
+                        <th><?php esc_html_e( 'მეთოდი', 'wbim' ); ?></th>
+                        <th><?php esc_html_e( 'აღწერა', 'wbim' ); ?></th>
+                        <th><?php esc_html_e( 'როდის გამოვიყენოთ', 'wbim' ); ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong><?php esc_html_e( 'გლობალური', 'wbim' ); ?></strong></td>
+                        <td><?php esc_html_e( 'მშობელ პროდუქტზე დაყენებული ფასები გავრცელდება ყველა ვარიაციაზე.', 'wbim' ); ?></td>
+                        <td><?php esc_html_e( 'როცა ყველა ვარიაციას ერთი და იგივე ფასდაკლება აქვს.', 'wbim' ); ?></td>
+                    </tr>
+                    <tr>
+                        <td><strong><?php esc_html_e( 'ინდივიდუალური', 'wbim' ); ?></strong></td>
+                        <td><?php esc_html_e( 'თითოეულ ვარიაციას აქვს საკუთარი საბითუმო ფასები.', 'wbim' ); ?></td>
+                        <td><?php esc_html_e( 'როცა ვარიაციებს სხვადასხვა ფასდაკლება სჭირდებათ.', 'wbim' ); ?></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="wbim-doc-note info">
+                <strong><?php esc_html_e( 'რჩევა:', 'wbim' ); ?></strong>
+                <?php esc_html_e( 'გლობალური პარამეტრისთვის მონიშნეთ "ყველა ვარიაციაზე გავრცელება" ჩექბოქსი მშობელი პროდუქტის საბითუმო ფასების ტაბში.', 'wbim' ); ?>
+            </div>
+
+            <h3><?php esc_html_e( 'ფასის გამოთვლა კალათაში', 'wbim' ); ?></h3>
+            <p><?php esc_html_e( 'საბითუმო ფასი ავტომატურად გამოითვლება კალათაში დამატებისას:', 'wbim' ); ?></p>
+            <ul>
+                <li><?php esc_html_e( 'თუ მომხმარებელი დაამატებს 15 ერთეულს და საფეხური 1 არის 10+, გამოყენებული იქნება საფეხური 1-ის ფასი.', 'wbim' ); ?></li>
+                <li><?php esc_html_e( 'თუ მომხმარებელი დაამატებს 30 ერთეულს და საფეხური 2 არის 25+, გამოყენებული იქნება საფეხური 2-ის ფასი.', 'wbim' ); ?></li>
+                <li><?php esc_html_e( 'ფასი დინამიურად განახლდება რაოდენობის ცვლილებისას.', 'wbim' ); ?></li>
+            </ul>
+
+            <h3><?php esc_html_e( 'პარამეტრების ველები', 'wbim' ); ?></h3>
+            <table class="wbim-doc-table">
+                <thead>
+                    <tr>
+                        <th><?php esc_html_e( 'ველი', 'wbim' ); ?></th>
+                        <th><?php esc_html_e( 'აღწერა', 'wbim' ); ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><?php esc_html_e( 'საბითუმო ფასების ჩართვა', 'wbim' ); ?></td>
+                        <td><?php esc_html_e( 'ჩართავს/გამორთავს საბითუმო ფასებს ამ პროდუქტისთვის.', 'wbim' ); ?></td>
+                    </tr>
+                    <tr>
+                        <td><?php esc_html_e( 'რაოდენობის ღილაკების ჩვენება', 'wbim' ); ?></td>
+                        <td><?php esc_html_e( 'აჩვენებს რაოდენობის ღილაკებს პროდუქტის გვერდზე.', 'wbim' ); ?></td>
+                    </tr>
+                    <tr>
+                        <td><?php esc_html_e( 'ყველა ვარიაციაზე გავრცელება', 'wbim' ); ?></td>
+                        <td><?php esc_html_e( 'ვარიაციული პროდუქტისთვის - გაავრცელებს მშობლის ფასებს ყველა ვარიაციაზე.', 'wbim' ); ?></td>
+                    </tr>
+                    <tr>
+                        <td><?php esc_html_e( 'რაოდენობა (საფეხური X)', 'wbim' ); ?></td>
+                        <td><?php esc_html_e( 'მინიმალური რაოდენობა ამ საფეხურის ფასის გასააქტიურებლად.', 'wbim' ); ?></td>
+                    </tr>
+                    <tr>
+                        <td><?php esc_html_e( 'ფასი (საფეხური X)', 'wbim' ); ?></td>
+                        <td><?php esc_html_e( 'ერთეულის ფასი ამ საფეხურზე.', 'wbim' ); ?></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="wbim-doc-note warning">
+                <strong><?php esc_html_e( 'მნიშვნელოვანი:', 'wbim' ); ?></strong>
+                <?php esc_html_e( 'რაოდენობები უნდა იყოს ზრდადი თანმიმდევრობით (მაგ: 10, 25, 50). ფასები უნდა იყოს კლებადი (მაგ: 9.50, 9.00, 8.00).', 'wbim' ); ?>
+            </div>
+
+            <h3><?php esc_html_e( 'ხშირი კითხვები', 'wbim' ); ?></h3>
+
+            <div class="wbim-faq-item">
+                <div class="wbim-faq-question">
+                    <?php esc_html_e( 'შემიძლია 3-ზე მეტი საფეხური დავამატო?', 'wbim' ); ?>
+                    <span class="wbim-faq-toggle dashicons dashicons-arrow-down-alt2"></span>
+                </div>
+                <div class="wbim-faq-answer">
+                    <?php esc_html_e( 'ამჟამად სისტემა მხარს უჭერს 3 საფეხურს. უმეტეს შემთხვევაში ეს საკმარისია საბითუმო ფასდაკლებისთვის.', 'wbim' ); ?>
+                </div>
+            </div>
+
+            <div class="wbim-faq-item">
+                <div class="wbim-faq-question">
+                    <?php esc_html_e( 'მუშაობს თუ არა კალათაში რამდენიმე პროდუქტზე?', 'wbim' ); ?>
+                    <span class="wbim-faq-toggle dashicons dashicons-arrow-down-alt2"></span>
+                </div>
+                <div class="wbim-faq-answer">
+                    <?php esc_html_e( 'დიახ, საბითუმო ფასი გამოითვლება თითოეული პროდუქტისთვის ცალ-ცალკე მისი რაოდენობის მიხედვით.', 'wbim' ); ?>
+                </div>
+            </div>
+
+            <div class="wbim-faq-item">
+                <div class="wbim-faq-question">
+                    <?php esc_html_e( 'როგორ ჩანს ფასი კალათაში?', 'wbim' ); ?>
+                    <span class="wbim-faq-toggle dashicons dashicons-arrow-down-alt2"></span>
+                </div>
+                <div class="wbim-faq-answer">
+                    <?php esc_html_e( 'კალათაში ჩანს საბითუმო ფასი როგორც ერთეულის ფასი. მომხმარებელი ხედავს რა ფასს იხდის რეალურად.', 'wbim' ); ?>
+                </div>
+            </div>
+
+            <div class="wbim-faq-item">
+                <div class="wbim-faq-question">
+                    <?php esc_html_e( 'შემიძლია გამორთო კონკრეტული პროდუქტისთვის?', 'wbim' ); ?>
+                    <span class="wbim-faq-toggle dashicons dashicons-arrow-down-alt2"></span>
+                </div>
+                <div class="wbim-faq-answer">
+                    <?php esc_html_e( 'დიახ, უბრალოდ მოხსენით "საბითუმო ფასების ჩართვა" ჩექბოქსი იმ პროდუქტის საბითუმო ფასების ტაბში.', 'wbim' ); ?>
+                </div>
             </div>
         </div>
         <?php

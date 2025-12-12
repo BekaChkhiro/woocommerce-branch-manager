@@ -87,6 +87,16 @@ class WBIM_Admin {
             array(),
             WBIM_VERSION
         );
+
+        // Load transfers-specific styles
+        if ( isset( $_GET['page'] ) && $_GET['page'] === 'wbim-transfers' ) {
+            wp_enqueue_style(
+                'wbim-transfers',
+                WBIM_PLUGIN_URL . 'admin/css/wbim-transfers.css',
+                array( 'wbim-admin' ),
+                WBIM_VERSION
+            );
+        }
     }
 
     /**

@@ -845,3 +845,217 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* ==========================================================================
+   Bulk/Wholesale Pricing - Product Page
+   ========================================================================== */
+
+.wbim-bulk-pricing-wrapper {
+    margin: 20px 0;
+    padding: 18px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+}
+
+.wbim-bulk-pricing-title {
+    margin: 0 0 15px 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+}
+
+.wbim-qty-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.wbim-qty-btn {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 110px;
+    padding: 14px 18px;
+    background: #fff;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    text-align: center;
+}
+
+.wbim-qty-btn:hover {
+    border-color: #2271b1;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(34, 113, 177, 0.15);
+}
+
+.wbim-qty-btn:focus {
+    outline: none;
+    border-color: #2271b1;
+    box-shadow: 0 0 0 3px rgba(34, 113, 177, 0.2);
+}
+
+.wbim-qty-btn.active {
+    border-color: #2271b1;
+    background: linear-gradient(135deg, #f0f7fc 0%, #e8f4fc 100%);
+    box-shadow: 0 0 0 3px rgba(34, 113, 177, 0.15);
+}
+
+.wbim-qty-btn.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Quantity display */
+.wbim-qty-btn-qty {
+    font-size: 18px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.wbim-qty-btn-qty small {
+    font-size: 12px;
+    font-weight: 500;
+    color: #666;
+    margin-left: 3px;
+}
+
+/* Total price */
+.wbim-qty-btn-total {
+    font-size: 16px;
+    font-weight: 700;
+    color: #2271b1;
+    margin-bottom: 2px;
+}
+
+/* Unit price */
+.wbim-qty-btn-unit {
+    font-size: 12px;
+    color: #666;
+}
+
+/* Savings badge */
+.wbim-savings-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    padding: 3px 8px;
+    background: linear-gradient(135deg, #4caf50 0%, #43a047 100%);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(76, 175, 80, 0.3);
+    white-space: nowrap;
+}
+
+/* Variable product notice */
+.wbim-bulk-variable {
+    display: none;
+}
+
+.wbim-bulk-variable .wbim-select-variation-notice {
+    padding: 12px 15px;
+    background: #fff3cd;
+    border: 1px solid #ffeeba;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #856404;
+    margin-bottom: 15px;
+}
+
+/* Price display adjustments */
+.wbim-bulk-pricing-wrapper + .wbim-branch-selector-wrapper {
+    margin-top: 0;
+    padding-top: 0;
+}
+
+/* Price with discount style */
+p.price del,
+.woocommerce-variation-price .price del {
+    opacity: 0.6;
+    font-size: 0.85em;
+}
+
+p.price ins,
+.woocommerce-variation-price .price ins {
+    text-decoration: none;
+    font-weight: 700;
+    color: #2271b1;
+}
+
+/* ==========================================================================
+   Bulk Pricing - Responsive
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    .wbim-qty-buttons {
+        gap: 10px;
+    }
+
+    .wbim-qty-btn {
+        min-width: 95px;
+        padding: 12px 14px;
+    }
+
+    .wbim-qty-btn-qty {
+        font-size: 16px;
+    }
+
+    .wbim-qty-btn-total {
+        font-size: 14px;
+    }
+
+    .wbim-qty-btn-unit {
+        font-size: 11px;
+    }
+
+    .wbim-savings-badge {
+        font-size: 10px;
+        padding: 2px 6px;
+        top: -6px;
+        right: -6px;
+    }
+}
+
+@media (max-width: 480px) {
+    .wbim-bulk-pricing-wrapper {
+        padding: 15px;
+    }
+
+    .wbim-qty-buttons {
+        flex-direction: column;
+    }
+
+    .wbim-qty-btn {
+        min-width: 100%;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+    }
+
+    .wbim-qty-btn-qty {
+        margin-bottom: 0;
+    }
+
+    .wbim-qty-btn-total {
+        margin-bottom: 0;
+    }
+
+    .wbim-qty-btn-unit {
+        display: none;
+    }
+
+    .wbim-savings-badge {
+        position: static;
+        margin-left: 10px;
+    }
+}

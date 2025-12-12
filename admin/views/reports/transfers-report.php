@@ -139,7 +139,9 @@ $statuses = array(
     <div class="wbim-charts-row">
         <div class="wbim-chart-container">
             <h3><?php esc_html_e( 'გადატანები თვეების მიხედვით', 'wbim' ); ?></h3>
-            <canvas id="wbim-transfers-chart"></canvas>
+            <div style="position: relative; height: 300px; width: 100%;">
+                <canvas id="wbim-transfers-chart"></canvas>
+            </div>
         </div>
     </div>
 

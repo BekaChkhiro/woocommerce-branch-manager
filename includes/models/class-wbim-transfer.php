@@ -428,6 +428,15 @@ class WBIM_Transfer {
 
         $transfer_id = $wpdb->insert_id;
 
+        // Ensure status is set (fallback for column issues)
+        $wpdb->update(
+            $table,
+            array( 'status' => self::STATUS_DRAFT ),
+            array( 'id' => $transfer_id ),
+            array( '%s' ),
+            array( '%d' )
+        );
+
         // Add items if provided
         if ( ! empty( $data['items'] ) && is_array( $data['items'] ) ) {
             foreach ( $data['items'] as $item ) {
@@ -537,6 +546,18 @@ class WBIM_Transfer {
         }
 
         $old_status = $transfer->status;
+
+        // Fix empty status (database migration issue)
+        if ( empty( $old_status ) ) {
+            $old_status = self::STATUS_DRAFT;
+            $wpdb->update(
+                self::get_table(),
+                array( 'status' => self::STATUS_DRAFT ),
+                array( 'id' => $id ),
+                array( '%s' ),
+                array( '%d' )
+            );
+        }
 
         // Validate transition
         $valid_transitions = self::get_valid_transitions( $old_status );

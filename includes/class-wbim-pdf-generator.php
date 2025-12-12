@@ -420,16 +420,50 @@ class WBIM_PDF_Generator {
     }
 
     /**
-     * Display printable HTML (fallback when no PDF library available)
+     * Display printable HTML with auto-download PDF (fallback when no PDF library available)
      *
      * @param string $html     HTML content.
      * @param object $transfer Transfer object.
      */
     private static function display_printable_html( $html, $transfer ) {
-        // Add print button
-        $print_button = '
+        $filename = 'transfer-' . $transfer->transfer_number . '.pdf';
+
+        // Add html2pdf.js library and auto-download script
+        $pdf_script = '
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
         <style>
-            .print-header {
+            .pdf-loading-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(255, 255, 255, 0.95);
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                z-index: 10000;
+                font-family: Arial, sans-serif;
+            }
+            .pdf-loading-spinner {
+                width: 50px;
+                height: 50px;
+                border: 4px solid #f3f3f3;
+                border-top: 4px solid #0073aa;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+                margin-bottom: 20px;
+            }
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+            .pdf-loading-text {
+                font-size: 16px;
+                color: #333;
+            }
+            .pdf-header {
                 position: fixed;
                 top: 0;
                 left: 0;
@@ -438,8 +472,12 @@ class WBIM_PDF_Generator {
                 color: #fff;
                 padding: 10px 20px;
                 z-index: 1000;
+                display: none;
             }
-            .print-header button {
+            .pdf-header.show {
+                display: block;
+            }
+            .pdf-header button {
                 background: #0073aa;
                 color: #fff;
                 border: none;
@@ -447,26 +485,75 @@ class WBIM_PDF_Generator {
                 cursor: pointer;
                 font-size: 14px;
                 margin-right: 10px;
+                border-radius: 4px;
             }
-            .print-header button:hover {
+            .pdf-header button:hover {
                 background: #005177;
             }
+            .pdf-header button.secondary {
+                background: #666;
+            }
+            .pdf-header button.secondary:hover {
+                background: #555;
+            }
             @media print {
-                .print-header {
-                    display: none;
+                .pdf-header, .pdf-loading-overlay {
+                    display: none !important;
                 }
             }
-            body {
+            body.pdf-ready {
                 padding-top: 60px;
             }
         </style>
-        <div class="print-header">
-            <button onclick="window.print();">' . esc_html__( 'ბეჭდვა', 'wbim' ) . '</button>
-            <button onclick="window.close();">' . esc_html__( 'დახურვა', 'wbim' ) . '</button>
-        </div>';
+        <div class="pdf-loading-overlay" id="pdfLoading">
+            <div class="pdf-loading-spinner"></div>
+            <div class="pdf-loading-text">' . esc_html__( 'PDF მზადდება...', 'wbim' ) . '</div>
+        </div>
+        <div class="pdf-header" id="pdfHeader">
+            <button onclick="downloadPDF();">' . esc_html__( 'ხელახლა გადმოწერა', 'wbim' ) . '</button>
+            <button onclick="window.print();" class="secondary">' . esc_html__( 'ბეჭდვა', 'wbim' ) . '</button>
+            <button onclick="window.close();" class="secondary">' . esc_html__( 'დახურვა', 'wbim' ) . '</button>
+        </div>
+        <script>
+            var pdfFilename = "' . esc_js( $filename ) . '";
 
-        // Insert print header after <body>
-        $html = str_replace( '<body>', '<body>' . $print_button, $html );
+            function downloadPDF() {
+                var element = document.querySelector(".container");
+                var loading = document.getElementById("pdfLoading");
+                loading.style.display = "flex";
+
+                var opt = {
+                    margin: 10,
+                    filename: pdfFilename,
+                    image: { type: "jpeg", quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true },
+                    jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
+                };
+
+                html2pdf().set(opt).from(element).save().then(function() {
+                    loading.style.display = "none";
+                }).catch(function(err) {
+                    loading.style.display = "none";
+                    alert("' . esc_js( __( 'PDF გენერაცია ვერ მოხერხდა. გამოიყენეთ ბეჭდვის ფუნქცია.', 'wbim' ) ) . '");
+                    console.error(err);
+                });
+            }
+
+            // Auto-download on page load
+            document.addEventListener("DOMContentLoaded", function() {
+                setTimeout(function() {
+                    downloadPDF();
+                    // Show header after download starts
+                    setTimeout(function() {
+                        document.getElementById("pdfHeader").classList.add("show");
+                        document.body.classList.add("pdf-ready");
+                    }, 500);
+                }, 500);
+            });
+        </script>';
+
+        // Insert script before </body>
+        $html = str_replace( '</body>', $pdf_script . '</body>', $html );
 
         // Output HTML
         echo $html;
