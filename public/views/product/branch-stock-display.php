@@ -30,28 +30,37 @@ if ( empty( $branches ) ) {
         <?php foreach ( $branches as $branch ) : ?>
             <?php
             $stock = WBIM_Stock::get( $product_id, $branch->id, $variation_id );
-            $quantity = $stock ? $stock->quantity : 0;
+            $quantity = $stock ? (int) $stock->quantity : 0;
+            $stock_status = $stock && isset( $stock->stock_status ) ? $stock->stock_status : 'instock';
             $low_threshold = $stock ? $stock->low_stock_threshold : 0;
 
-            $status_class = 'wbim-stock-out';
-            $status_text = __( 'ამოწურულია', 'wbim' );
+            // Map stock status to CSS class and display text
+            $status_classes = array(
+                'instock'    => 'wbim-stock-in',
+                'low'        => 'wbim-stock-low',
+                'outofstock' => 'wbim-stock-out',
+                'preorder'   => 'wbim-stock-preorder',
+            );
 
-            if ( $quantity > 0 ) {
-                if ( $low_threshold > 0 && $quantity <= $low_threshold ) {
-                    $status_class = 'wbim-stock-low';
-                    $status_text = __( 'დაბალი მარაგი', 'wbim' );
-                } else {
-                    $status_class = 'wbim-stock-in';
-                    $status_text = __( 'მარაგშია', 'wbim' );
-                }
-            }
+            $status_texts = array(
+                'instock'    => __( 'მარაგშია', 'wbim' ),
+                'low'        => __( 'მცირე რაოდენობა', 'wbim' ),
+                'outofstock' => __( 'არ არის მარაგში', 'wbim' ),
+                'preorder'   => __( 'წინასწარი შეკვეთით', 'wbim' ),
+            );
+
+            $status_class = isset( $status_classes[ $stock_status ] ) ? $status_classes[ $stock_status ] : 'wbim-stock-out';
+            $status_text = isset( $status_texts[ $stock_status ] ) ? $status_texts[ $stock_status ] : __( 'არ არის მარაგში', 'wbim' );
+
+            // Show quantity only for instock and low statuses
+            $can_show_quantity = in_array( $stock_status, array( 'instock', 'low' ), true );
             ?>
             <div class="wbim-branch-stock-item <?php echo esc_attr( $status_class ); ?>">
                 <span class="wbim-branch-name"><?php echo esc_html( $branch->name ); ?></span>
                 <span class="wbim-stock-status">
-                    <?php if ( $show_quantity && $quantity > 0 ) : ?>
-                        <span class="wbim-stock-quantity"><?php echo esc_html( $quantity ); ?></span>
-                        <span class="wbim-stock-unit"><?php esc_html_e( 'ერთეული', 'wbim' ); ?></span>
+                    <?php if ( $show_quantity && $can_show_quantity && $quantity > 0 ) : ?>
+                        <?php echo esc_html( $status_text ); ?>
+                        <span class="wbim-stock-quantity">(<?php echo esc_html( $quantity ); ?> <?php esc_html_e( 'ცალი', 'wbim' ); ?>)</span>
                     <?php else : ?>
                         <?php echo esc_html( $status_text ); ?>
                     <?php endif; ?>

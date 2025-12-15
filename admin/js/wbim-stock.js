@@ -501,10 +501,16 @@
             var $uploadArea = $('#wbim-upload-area');
             var $fileInput = $('#import_file');
             var $form = $('#wbim-import-form');
+            var $branchSelect = $('#import_branch_id');
 
             if (!$uploadArea.length) {
                 return;
             }
+
+            // Branch selection change
+            $branchSelect.on('change', function() {
+                WBIMStock.updateSubmitButtonState();
+            });
 
             // Drag and drop
             $uploadArea.on('dragover dragenter', function(e) {
@@ -544,6 +550,17 @@
             $form.on('submit', function(e) {
                 e.preventDefault();
 
+                // Validate branch is selected
+                var branchId = $branchSelect.val();
+                if (!branchId) {
+                    if (typeof WBIMAdmin !== 'undefined' && WBIMAdmin.showToast) {
+                        WBIMAdmin.showToast(wbimStock.strings.selectBranch || 'გთხოვთ აირჩიოთ ფილიალი.', 'error');
+                    } else {
+                        alert(wbimStock.strings.selectBranch || 'გთხოვთ აირჩიოთ ფილიალი.');
+                    }
+                    return;
+                }
+
                 // Check if preview was already shown
                 if ($('#wbim-import-preview').is(':visible')) {
                     WBIMStock.handleImportSubmit();
@@ -567,6 +584,24 @@
         },
 
         /**
+         * Update submit button state based on file and branch selection
+         */
+        updateSubmitButtonState: function() {
+            var $fileInput = $('#import_file');
+            var $branchSelect = $('#import_branch_id');
+            var $submitButton = $('#wbim-import-form').find('button[type="submit"]');
+
+            var hasFile = $fileInput[0] && $fileInput[0].files && $fileInput[0].files.length > 0;
+            var hasBranch = $branchSelect.val() && $branchSelect.val() !== '';
+
+            if (hasFile && hasBranch) {
+                $submitButton.prop('disabled', false).text(wbimStock.strings.preview || 'გადახედვა');
+            } else {
+                $submitButton.prop('disabled', true).text(wbimStock.strings.startImport || 'იმპორტის დაწყება');
+            }
+        },
+
+        /**
          * Handle file selection
          *
          * @param {File} file Selected file
@@ -576,13 +611,14 @@
             var $uploadContent = $uploadArea.find('.wbim-upload-content');
             var $fileInfo = $uploadArea.find('.wbim-file-info');
             var $submitButton = $('#wbim-import-form').find('button[type="submit"]');
+            var fileName = file.name.toLowerCase();
 
-            // Validate file
-            if (!file.name.toLowerCase().endsWith('.csv')) {
+            // Validate file - accept both CSV and JSON
+            if (!fileName.endsWith('.csv') && !fileName.endsWith('.json')) {
                 if (typeof WBIMAdmin !== 'undefined' && WBIMAdmin.showToast) {
-                    WBIMAdmin.showToast(wbimStock.strings.invalidFile, 'error');
+                    WBIMAdmin.showToast(wbimStock.strings.invalidFile || 'გთხოვთ აირჩიოთ CSV ან JSON ფაილი.', 'error');
                 } else {
-                    alert(wbimStock.strings.invalidFile);
+                    alert(wbimStock.strings.invalidFile || 'გთხოვთ აირჩიოთ CSV ან JSON ფაილი.');
                 }
                 return;
             }
@@ -590,7 +626,9 @@
             // Show file info
             $uploadContent.hide();
             $fileInfo.show().find('.wbim-file-name').text(file.name);
-            $submitButton.prop('disabled', false).text(wbimStock.strings.preview || 'გადახედვა');
+
+            // Check if branch is selected and enable button
+            WBIMStock.updateSubmitButtonState();
         },
 
         /**
@@ -652,6 +690,9 @@
                         }
                         html += '</div>';
 
+                        // Store total for progress
+                        WBIMStock.importTotalRows = data.valid_rows;
+
                         // Preview table
                         if (data.preview && data.preview.length > 0) {
                             html += '<div class="wbim-preview-table-wrapper">';
@@ -703,11 +744,30 @@
 
                         $preview.html(html);
                     } else {
-                        $preview.html('<div class="notice notice-error"><p>' + (response.data.message || wbimStock.strings.error) + '</p></div><p><button type="button" id="wbim-cancel-preview" class="button">' + (wbimStock.strings.back || 'უკან') + '</button></p>');
+                        // Show detailed error
+                        var errorHtml = '<div class="notice notice-error"><p><strong>' + (response.data.message || wbimStock.strings.error) + '</strong></p>';
+                        if (response.data.debug) {
+                            errorHtml += '<p class="wbim-debug-info"><small>Debug: ' + response.data.debug + '</small></p>';
+                        }
+                        if (response.data.file_info) {
+                            errorHtml += '<p class="wbim-debug-info"><small>File: ' + response.data.file_info.name + ' (' + response.data.file_info.type + ', ' + response.data.file_info.size + ' bytes)</small></p>';
+                        }
+                        errorHtml += '</div>';
+                        errorHtml += '<p><button type="button" id="wbim-cancel-preview" class="button">' + (wbimStock.strings.back || 'უკან') + '</button></p>';
+                        $preview.html(errorHtml);
                     }
                 },
-                error: function() {
-                    $preview.html('<div class="notice notice-error"><p>' + wbimStock.strings.error + '</p></div><p><button type="button" id="wbim-cancel-preview" class="button">' + (wbimStock.strings.back || 'უკან') + '</button></p>');
+                error: function(xhr, status, error) {
+                    var errorHtml = '<div class="notice notice-error">';
+                    errorHtml += '<p><strong>' + wbimStock.strings.error + '</strong></p>';
+                    errorHtml += '<p class="wbim-debug-info"><small>Status: ' + status + '</small></p>';
+                    errorHtml += '<p class="wbim-debug-info"><small>Error: ' + error + '</small></p>';
+                    if (xhr.responseText) {
+                        errorHtml += '<p class="wbim-debug-info"><small>Response: ' + xhr.responseText.substring(0, 500) + '</small></p>';
+                    }
+                    errorHtml += '</div>';
+                    errorHtml += '<p><button type="button" id="wbim-cancel-preview" class="button">' + (wbimStock.strings.back || 'უკან') + '</button></p>';
+                    $preview.html(errorHtml);
                 }
             });
         },
@@ -721,6 +781,7 @@
             var $progress = $('#wbim-import-progress');
             var $results = $('#wbim-import-results');
             var formData = new FormData($form[0]);
+            var totalRows = WBIMStock.importTotalRows || 0;
 
             formData.append('action', 'wbim_import_stock');
             formData.append('nonce', wbimStock.nonce);
@@ -728,8 +789,34 @@
             // Show progress
             $form.hide();
             $preview.hide();
-            $progress.show();
             $results.hide();
+
+            // Create enhanced progress UI
+            var progressHtml = '<div class="wbim-import-progress-container">';
+            progressHtml += '<h3>იმპორტი მიმდინარეობს...</h3>';
+            progressHtml += '<div class="wbim-progress-bar"><div class="wbim-progress-fill" style="width: 0%"></div></div>';
+            progressHtml += '<p class="wbim-progress-text"><span class="wbim-progress-percent">0%</span> - <span class="wbim-progress-status">მზადდება...</span></p>';
+            progressHtml += '<p class="wbim-progress-details"><small>სულ: ' + totalRows + ' პროდუქტი</small></p>';
+            progressHtml += '</div>';
+
+            $progress.html(progressHtml).show();
+
+            // Simulate progress animation
+            var progressInterval;
+            var currentProgress = 0;
+            var $progressFill = $progress.find('.wbim-progress-fill');
+            var $progressPercent = $progress.find('.wbim-progress-percent');
+            var $progressStatus = $progress.find('.wbim-progress-status');
+
+            progressInterval = setInterval(function() {
+                if (currentProgress < 90) {
+                    currentProgress += Math.random() * 10;
+                    if (currentProgress > 90) currentProgress = 90;
+                    $progressFill.css('width', currentProgress + '%');
+                    $progressPercent.text(Math.round(currentProgress) + '%');
+                    $progressStatus.text('იმპორტირდება პროდუქტები...');
+                }
+            }, 500);
 
             $.ajax({
                 url: wbimStock.ajaxUrl,
@@ -737,47 +824,111 @@
                 data: formData,
                 processData: false,
                 contentType: false,
+                timeout: 300000, // 5 minutes timeout for large imports
                 success: function(response) {
-                    $progress.hide();
-                    $results.show();
+                    clearInterval(progressInterval);
 
-                    if (response.success) {
-                        var results = response.data.results;
-                        var summaryHtml = '<div class="notice notice-success inline"><p>' + response.data.message + '</p></div>';
+                    // Complete progress animation
+                    $progressFill.css('width', '100%');
+                    $progressPercent.text('100%');
+                    $progressStatus.text('დასრულდა!');
 
-                        // Show detailed results
-                        summaryHtml += '<ul>';
-                        summaryHtml += '<li>' + wbimStock.strings.imported + ': <strong>' + results.success + '</strong></li>';
-                        summaryHtml += '<li>' + wbimStock.strings.skipped + ': <strong>' + results.skipped + '</strong></li>';
-                        summaryHtml += '<li>' + wbimStock.strings.total + ': <strong>' + results.total_rows + '</strong></li>';
-                        summaryHtml += '</ul>';
+                    setTimeout(function() {
+                        $progress.hide();
+                        $results.show();
 
-                        $results.find('.wbim-results-summary').html(summaryHtml);
+                        if (response.success) {
+                            var results = response.data.results;
+                            var successPercent = results.total_rows > 0 ? Math.round((results.success / results.total_rows) * 100) : 0;
 
-                        // Show errors if any
-                        if (results.errors && results.errors.length > 0) {
-                            var errorsHtml = '<h4>' + wbimStock.strings.errors + '</h4><ul class="wbim-error-list">';
-                            $.each(results.errors.slice(0, 20), function(i, error) {
-                                errorsHtml += '<li>' + error + '</li>';
-                            });
-                            if (results.errors.length > 20) {
-                                errorsHtml += '<li>... ' + (results.errors.length - 20) + ' ' + wbimStock.strings.moreErrors + '</li>';
+                            var summaryHtml = '<div class="notice notice-success inline"><p>' + response.data.message + '</p></div>';
+
+                            // Show detailed results with visual stats
+                            summaryHtml += '<div class="wbim-import-stats">';
+                            summaryHtml += '<div class="wbim-stat wbim-stat-success"><span class="wbim-stat-number">' + results.success + '</span><span class="wbim-stat-label">' + (wbimStock.strings.imported || 'იმპორტირებული') + '</span></div>';
+                            summaryHtml += '<div class="wbim-stat wbim-stat-skipped"><span class="wbim-stat-number">' + results.skipped + '</span><span class="wbim-stat-label">' + (wbimStock.strings.skipped || 'გამოტოვებული') + '</span></div>';
+                            summaryHtml += '<div class="wbim-stat wbim-stat-total"><span class="wbim-stat-number">' + results.total_rows + '</span><span class="wbim-stat-label">' + (wbimStock.strings.total || 'სულ') + '</span></div>';
+                            summaryHtml += '</div>';
+
+                            $results.find('.wbim-results-summary').html(summaryHtml);
+
+                            // Show errors if any
+                            var allMessages = '';
+
+                            if (results.errors && results.errors.length > 0) {
+                                var errorsHtml = '<div class="wbim-results-errors-container">';
+                                errorsHtml += '<h4>' + (wbimStock.strings.errors || 'შეცდომები') + ' (' + results.errors.length + ')</h4>';
+                                errorsHtml += '<div class="wbim-error-list-wrapper"><ul class="wbim-error-list">';
+                                $.each(results.errors.slice(0, 50), function(i, error) {
+                                    errorsHtml += '<li>' + error + '</li>';
+                                });
+                                if (results.errors.length > 50) {
+                                    errorsHtml += '<li class="wbim-more-errors">... და კიდევ ' + (results.errors.length - 50) + ' შეცდომა</li>';
+                                }
+                                errorsHtml += '</ul></div></div>';
+                                allMessages += errorsHtml;
                             }
-                            errorsHtml += '</ul>';
-                            $results.find('.wbim-results-errors').html(errorsHtml);
+
+                            // Show skipped details if any
+                            if (results.skipped_details && results.skipped_details.length > 0) {
+                                var skippedHtml = '<div class="wbim-results-skipped-container">';
+                                skippedHtml += '<h4>გამოტოვებული პროდუქტები (' + results.skipped_details.length + ')</h4>';
+                                skippedHtml += '<div class="wbim-skipped-list-wrapper"><ul class="wbim-skipped-list">';
+                                $.each(results.skipped_details.slice(0, 50), function(i, detail) {
+                                    skippedHtml += '<li>' + detail + '</li>';
+                                });
+                                if (results.skipped_details.length > 50) {
+                                    skippedHtml += '<li class="wbim-more-skipped">... და კიდევ ' + (results.skipped_details.length - 50) + ' გამოტოვებული</li>';
+                                }
+                                skippedHtml += '</ul></div></div>';
+                                allMessages += skippedHtml;
+                            }
+
+                            if (allMessages) {
+                                $results.find('.wbim-results-errors').html(allMessages);
+                            } else {
+                                $results.find('.wbim-results-errors').empty();
+                            }
+                        } else {
+                            // Show detailed error
+                            var errorHtml = '<div class="notice notice-error inline">';
+                            errorHtml += '<p><strong>' + (response.data.message || wbimStock.strings.error) + '</strong></p>';
+                            if (response.data.debug) {
+                                errorHtml += '<p class="wbim-debug-info"><small><strong>Debug:</strong> ' + response.data.debug + '</small></p>';
+                            }
+                            if (response.data.errors && response.data.errors.length > 0) {
+                                errorHtml += '<div class="wbim-error-details"><p><strong>დეტალები:</strong></p><ul>';
+                                $.each(response.data.errors.slice(0, 10), function(i, err) {
+                                    errorHtml += '<li>' + err + '</li>';
+                                });
+                                errorHtml += '</ul></div>';
+                            }
+                            if (response.data.trace) {
+                                errorHtml += '<details><summary>Stack Trace</summary><pre style="font-size:10px;overflow:auto;max-height:200px;">' + response.data.trace + '</pre></details>';
+                            }
+                            errorHtml += '</div>';
+                            $results.find('.wbim-results-summary').html(errorHtml);
+                            $results.find('.wbim-results-errors').empty();
                         }
-                    } else {
-                        $results.find('.wbim-results-summary').html(
-                            '<div class="notice notice-error inline"><p>' + (response.data.message || wbimStock.strings.error) + '</p></div>'
-                        );
-                    }
+                    }, 500);
                 },
-                error: function() {
+                error: function(xhr, status, error) {
+                    clearInterval(progressInterval);
                     $progress.hide();
                     $results.show();
-                    $results.find('.wbim-results-summary').html(
-                        '<div class="notice notice-error inline"><p>' + wbimStock.strings.error + '</p></div>'
-                    );
+
+                    var errorHtml = '<div class="notice notice-error inline">';
+                    errorHtml += '<p><strong>' + (wbimStock.strings.error || 'დაფიქსირდა შეცდომა') + '</strong></p>';
+                    errorHtml += '<p class="wbim-debug-info"><small><strong>Status:</strong> ' + status + '</small></p>';
+                    errorHtml += '<p class="wbim-debug-info"><small><strong>Error:</strong> ' + error + '</small></p>';
+                    if (xhr.responseText) {
+                        var responsePreview = xhr.responseText.substring(0, 1000);
+                        errorHtml += '<details><summary>Server Response</summary><pre style="font-size:10px;overflow:auto;max-height:200px;">' + $('<div>').text(responsePreview).html() + '</pre></details>';
+                    }
+                    errorHtml += '</div>';
+
+                    $results.find('.wbim-results-summary').html(errorHtml);
+                    $results.find('.wbim-results-errors').empty();
                 }
             });
         }

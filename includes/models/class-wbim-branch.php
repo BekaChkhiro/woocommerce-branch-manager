@@ -579,4 +579,94 @@ class WBIM_Branch {
 
         return $user->display_name;
     }
+
+    /**
+     * Get default branch
+     *
+     * @return object|null Default branch or null if none set.
+     */
+    public static function get_default() {
+        global $wpdb;
+
+        $table = self::get_table();
+
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+        return $wpdb->get_row(
+            "SELECT * FROM {$table} WHERE is_default = 1 AND is_active = 1 LIMIT 1"
+        );
+    }
+
+    /**
+     * Set a branch as default (and unset others)
+     *
+     * @param int $id Branch ID to set as default.
+     * @return bool|WP_Error True on success, WP_Error on failure.
+     */
+    public static function set_default( $id ) {
+        global $wpdb;
+
+        $table = self::get_table();
+
+        // Check if branch exists
+        $branch = self::get_by_id( $id );
+        if ( ! $branch ) {
+            return new WP_Error(
+                'branch_not_found',
+                __( 'Branch not found.', 'wbim' ),
+                array( 'status' => 404 )
+            );
+        }
+
+        // First, unset all defaults
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+        $wpdb->update(
+            $table,
+            array( 'is_default' => 0 ),
+            array( 'is_default' => 1 ),
+            array( '%d' ),
+            array( '%d' )
+        );
+
+        // Set the new default
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+        $result = $wpdb->update(
+            $table,
+            array( 'is_default' => 1 ),
+            array( 'id' => $id ),
+            array( '%d' ),
+            array( '%d' )
+        );
+
+        if ( false === $result ) {
+            return new WP_Error(
+                'db_update_error',
+                __( 'Could not set default branch.', 'wbim' ),
+                array( 'status' => 500 )
+            );
+        }
+
+        return true;
+    }
+
+    /**
+     * Clear default branch
+     *
+     * @return bool
+     */
+    public static function clear_default() {
+        global $wpdb;
+
+        $table = self::get_table();
+
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+        $wpdb->update(
+            $table,
+            array( 'is_default' => 0 ),
+            array( 'is_default' => 1 ),
+            array( '%d' ),
+            array( '%d' )
+        );
+
+        return true;
+    }
 }

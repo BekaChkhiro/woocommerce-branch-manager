@@ -240,6 +240,27 @@
     color: #646970;
 }
 
+/* Stock Status Badges */
+.wbim-status-instock {
+    background: #e7f7e7;
+    color: #1e7e1e;
+}
+
+.wbim-status-low {
+    background: #fff8e5;
+    color: #996800;
+}
+
+.wbim-status-outofstock {
+    background: #fde7e7;
+    color: #b32d2e;
+}
+
+.wbim-status-preorder {
+    background: #e5f3ff;
+    color: #0073aa;
+}
+
 /* ==========================================================================
    Branch Edit Form
    ========================================================================== */
@@ -613,6 +634,21 @@
     text-align: center;
 }
 
+/* Branch Cell with Status */
+.wbim-branch-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.wbim-branch-cell .wbim-status-badge {
+    font-size: 9px;
+    padding: 1px 6px;
+    border-radius: 8px;
+    white-space: nowrap;
+}
+
 /* Stock Input */
 .wbim-stock-input {
     width: 70px !important;
@@ -762,6 +798,37 @@
     padding: 0 5px;
 }
 
+/* Branch Selector */
+.wbim-branch-selector {
+    margin: 0 0 20px;
+    padding: 15px;
+    background: #f0f6fc;
+    border: 1px solid #c5d9ed;
+    border-radius: 4px;
+}
+
+.wbim-branch-selector h4 {
+    margin: 0 0 10px;
+    font-size: 14px;
+    color: #1d2327;
+}
+
+.wbim-branch-selector .wbim-branch-select {
+    width: 100%;
+    max-width: 400px;
+    min-height: 36px;
+    padding: 6px 12px;
+    font-size: 14px;
+    border: 1px solid #8c8f94;
+    border-radius: 4px;
+}
+
+.wbim-branch-selector .description {
+    color: #646970;
+    font-size: 12px;
+    margin-top: 8px;
+}
+
 /* Import Options */
 .wbim-import-options {
     margin: 20px 0;
@@ -793,19 +860,191 @@
 /* Progress Bar */
 .wbim-progress-bar {
     width: 100%;
-    height: 20px;
+    height: 24px;
     background: #e0e0e0;
-    border-radius: 10px;
+    border-radius: 12px;
     overflow: hidden;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .wbim-progress-fill {
-    width: 100%;
     height: 100%;
     background: linear-gradient(90deg, #0073aa 0%, #005f8b 50%, #0073aa 100%);
     background-size: 200% 100%;
     animation: wbim-progress 1.5s ease-in-out infinite;
+    transition: width 0.3s ease;
+    border-radius: 12px;
+}
+
+/* Import Progress Container */
+.wbim-import-progress-container {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.wbim-import-progress-container h3 {
+    margin: 0 0 20px;
+    font-size: 18px;
+    color: #1d2327;
+}
+
+.wbim-progress-text {
+    font-size: 16px;
+    color: #1d2327;
+    margin: 0 0 10px;
+}
+
+.wbim-progress-percent {
+    font-weight: 600;
+    color: #0073aa;
+}
+
+.wbim-progress-details {
+    color: #646970;
+    margin: 0;
+}
+
+/* Import Stats */
+.wbim-import-stats {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin: 20px 0;
+    padding: 20px;
+    background: #f6f7f7;
+    border-radius: 8px;
+}
+
+.wbim-import-stats .wbim-stat {
+    text-align: center;
+    padding: 15px 25px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.wbim-import-stats .wbim-stat-number {
+    display: block;
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.wbim-import-stats .wbim-stat-label {
+    display: block;
+    font-size: 12px;
+    color: #646970;
+    text-transform: uppercase;
+    margin-top: 5px;
+}
+
+.wbim-import-stats .wbim-stat-success .wbim-stat-number {
+    color: #00a32a;
+}
+
+.wbim-import-stats .wbim-stat-skipped .wbim-stat-number {
+    color: #dba617;
+}
+
+.wbim-import-stats .wbim-stat-total .wbim-stat-number {
+    color: #0073aa;
+}
+
+/* Debug Info */
+.wbim-debug-info {
+    background: #f0f0f1;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin: 8px 0;
+    word-break: break-all;
+}
+
+.wbim-debug-info small {
+    color: #646970;
+}
+
+/* Error List */
+.wbim-results-errors-container {
+    margin-top: 20px;
+    padding: 15px;
+    background: #fef7f1;
+    border: 1px solid #f0c8a8;
+    border-radius: 4px;
+}
+
+.wbim-results-errors-container h4 {
+    margin: 0 0 10px;
+    color: #9d5c00;
+}
+
+.wbim-error-list-wrapper {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.wbim-error-list {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.wbim-error-list li {
+    margin-bottom: 5px;
+    color: #8a4c00;
+    font-size: 13px;
+}
+
+.wbim-more-errors {
+    font-style: italic;
+    color: #666;
+}
+
+/* Skipped List */
+.wbim-results-skipped-container {
+    margin-top: 20px;
+    padding: 15px;
+    background: #fff8e5;
+    border: 1px solid #f0d78c;
+    border-radius: 4px;
+}
+
+.wbim-results-skipped-container h4 {
+    margin: 0 0 10px;
+    color: #826200;
+}
+
+.wbim-skipped-list-wrapper {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.wbim-skipped-list {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.wbim-skipped-list li {
+    margin-bottom: 5px;
+    color: #6d5200;
+    font-size: 13px;
+}
+
+.wbim-more-skipped {
+    font-style: italic;
+    color: #666;
+}
+
+/* Error Details */
+.wbim-error-details {
+    margin-top: 10px;
+    padding: 10px;
+    background: #fff5f5;
+    border-radius: 4px;
+}
+
+.wbim-error-details ul {
+    margin: 5px 0 0;
+    padding-left: 20px;
 }
 
 @keyframes wbim-progress {

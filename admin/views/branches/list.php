@@ -216,7 +216,11 @@ class WBIM_Branches_List_Table extends WP_List_Table {
                 return esc_html( WBIM_Branch::get_manager_name( $item ) );
 
             case 'status':
-                return WBIM_Utils::get_status_badge( $item->is_active );
+                $badge = WBIM_Utils::get_status_badge( $item->is_active );
+                if ( ! empty( $item->is_default ) && $item->is_default ) {
+                    $badge .= ' <span class="wbim-default-badge" style="background:#2271b1;color:#fff;padding:2px 6px;border-radius:3px;font-size:11px;margin-left:5px;">' . esc_html__( 'ნაგულისხმევი', 'wbim' ) . '</span>';
+                }
+                return $badge;
 
             case 'created_at':
                 return esc_html( WBIM_Utils::format_date( $item->created_at ) );
@@ -279,6 +283,15 @@ class WBIM_Branches_List_Table extends WP_List_Table {
                 '<a href="#" class="wbim-toggle-status" data-branch-id="%d" data-action="activate">%s</a>',
                 $item->id,
                 __( 'გააქტიურება', 'wbim' )
+            );
+        }
+
+        // Set as default action
+        if ( empty( $item->is_default ) || ! $item->is_default ) {
+            $actions['set_default'] = sprintf(
+                '<a href="#" class="wbim-set-default" data-branch-id="%d" style="color:#2271b1;">%s</a>',
+                $item->id,
+                __( 'ნაგულისხმევად', 'wbim' )
             );
         }
 

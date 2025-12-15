@@ -133,13 +133,15 @@ if ( $is_variable ) {
 
     <?php else : ?>
         <!-- Simple Product Interface -->
+        <?php $stock_statuses = WBIM_Stock::get_stock_status_options(); ?>
         <div class="wbim-branch-stock-table">
             <h4><?php esc_html_e( 'ფილიალის მარაგი', 'wbim' ); ?></h4>
 
-            <table class="widefat">
+            <table class="widefat wbim-stock-table-with-status">
                 <thead>
                     <tr>
                         <th><?php esc_html_e( 'ფილიალი', 'wbim' ); ?></th>
+                        <th><?php esc_html_e( 'სტატუსი', 'wbim' ); ?></th>
                         <th><?php esc_html_e( 'რაოდენობა', 'wbim' ); ?></th>
                         <th><?php esc_html_e( 'დაბალი მარაგის ზღვარი', 'wbim' ); ?></th>
                         <th><?php esc_html_e( 'თაროს ადგილმდებარეობა', 'wbim' ); ?></th>
@@ -151,24 +153,42 @@ if ( $is_variable ) {
                     foreach ( $branches as $branch ) :
                         $stock = WBIM_Stock::get( $product_id, $branch->id, 0 );
                         $quantity = $stock ? $stock->quantity : 0;
+                        $current_status = $stock && isset( $stock->stock_status ) ? $stock->stock_status : 'instock';
                         $threshold = $stock ? $stock->low_stock_threshold : 0;
                         $location = $stock ? $stock->shelf_location : '';
                         $total_stock += $quantity;
+                        $show_quantity = in_array( $current_status, array( 'instock', 'low' ), true );
                         ?>
-                        <tr>
+                        <tr data-branch-id="<?php echo esc_attr( $branch->id ); ?>">
                             <td>
                                 <strong><?php echo esc_html( $branch->name ); ?></strong>
                                 <?php if ( $branch->city ) : ?>
                                     <br><small class="description"><?php echo esc_html( $branch->city ); ?></small>
                                 <?php endif; ?>
                             </td>
-                            <td>
+                            <td class="wbim-status-cell">
+                                <div class="wbim-status-select-wrapper" data-status="<?php echo esc_attr( $current_status ); ?>">
+                                    <select name="wbim_branch_stock[<?php echo esc_attr( $branch->id ); ?>][stock_status]"
+                                            class="wbim-status-select wbim-status-<?php echo esc_attr( $current_status ); ?>">
+                                        <?php foreach ( $stock_statuses as $status_key => $status_label ) : ?>
+                                            <option value="<?php echo esc_attr( $status_key ); ?>"
+                                                    <?php selected( $current_status, $status_key ); ?>
+                                                    data-status="<?php echo esc_attr( $status_key ); ?>">
+                                                <?php echo esc_html( $status_label ); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <span class="wbim-status-indicator"></span>
+                                </div>
+                            </td>
+                            <td class="wbim-quantity-cell" <?php echo ! $show_quantity ? 'style="opacity: 0.5;"' : ''; ?>>
                                 <input type="number"
                                        name="wbim_branch_stock[<?php echo esc_attr( $branch->id ); ?>][quantity]"
                                        value="<?php echo esc_attr( $quantity ); ?>"
                                        min="0"
                                        step="1"
-                                       class="short wbim-quantity-input" />
+                                       class="short wbim-quantity-input"
+                                       <?php echo ! $show_quantity ? 'disabled' : ''; ?> />
                             </td>
                             <td>
                                 <input type="number"
@@ -190,7 +210,7 @@ if ( $is_variable ) {
                 </tbody>
                 <tfoot>
                     <tr>
-                        <th><?php esc_html_e( 'ჯამი:', 'wbim' ); ?></th>
+                        <th colspan="2"><?php esc_html_e( 'ჯამი:', 'wbim' ); ?></th>
                         <th colspan="3">
                             <span id="wbim-total-stock"><?php echo esc_html( $total_stock ); ?></span>
                         </th>
@@ -338,6 +358,115 @@ if ( $is_variable ) {
     .wbim-single-variation input.short {
         width: 100px;
     }
+
+    /* Stock Status Select */
+    .wbim-status-cell {
+        min-width: 220px;
+        padding: 12px !important;
+    }
+
+    .wbim-status-select-wrapper {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        width: 100%;
+    }
+
+    .wbim-status-select {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        width: 100%;
+        padding: 12px 40px 12px 16px;
+        font-size: 14px;
+        font-weight: 600;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        background-color: #fff;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .wbim-status-select:hover {
+        border-color: #0073aa;
+    }
+
+    .wbim-status-select:focus {
+        outline: none;
+        border-color: #0073aa;
+        box-shadow: 0 0 0 3px rgba(0, 115, 170, 0.15);
+    }
+
+    .wbim-status-indicator {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 6px;
+        border-radius: 8px 0 0 8px;
+        transition: background-color 0.2s ease;
+    }
+
+    /* Status colors */
+    .wbim-status-select.wbim-status-instock {
+        background-color: #d4edda;
+        border-color: #28a745;
+        color: #155724;
+    }
+    .wbim-status-select-wrapper[data-status="instock"] .wbim-status-indicator {
+        background-color: #28a745;
+    }
+
+    .wbim-status-select.wbim-status-low {
+        background-color: #fff3cd;
+        border-color: #ffc107;
+        color: #856404;
+    }
+    .wbim-status-select-wrapper[data-status="low"] .wbim-status-indicator {
+        background-color: #ffc107;
+    }
+
+    .wbim-status-select.wbim-status-outofstock {
+        background-color: #f8d7da;
+        border-color: #dc3545;
+        color: #721c24;
+    }
+    .wbim-status-select-wrapper[data-status="outofstock"] .wbim-status-indicator {
+        background-color: #dc3545;
+    }
+
+    .wbim-status-select.wbim-status-preorder {
+        background-color: #d1ecf1;
+        border-color: #17a2b8;
+        color: #0c5460;
+    }
+    .wbim-status-select-wrapper[data-status="preorder"] .wbim-status-indicator {
+        background-color: #17a2b8;
+    }
+
+    .wbim-quantity-cell {
+        transition: opacity 0.3s ease;
+    }
+
+    .wbim-quantity-cell.disabled {
+        opacity: 0.4;
+        pointer-events: none;
+    }
+
+    .wbim-stock-table-with-status th {
+        white-space: nowrap;
+    }
+
+    .wbim-stock-table-with-status {
+        table-layout: auto;
+    }
+
+    .wbim-stock-table-with-status td {
+        vertical-align: middle;
+    }
 </style>
 
 <script>
@@ -402,6 +531,34 @@ jQuery(document).ready(function($) {
         var $accordionInput = $('.wbim-variation-stock-input[data-variation-id="' + variationId + '"][data-branch-id="' + branchId + '"]');
         if ($accordionInput.length) {
             $accordionInput.val(newValue);
+        }
+    });
+
+    // Stock status select change handler
+    $('#wbim_inventory_data').on('change', '.wbim-status-select', function() {
+        var $select = $(this);
+        var $row = $select.closest('tr');
+        var $wrapper = $select.closest('.wbim-status-select-wrapper');
+        var $quantityCell = $row.find('.wbim-quantity-cell');
+        var $quantityInput = $quantityCell.find('.wbim-quantity-input');
+        var status = $select.val();
+
+        // Update wrapper data attribute for indicator color
+        $wrapper.attr('data-status', status);
+
+        // Update select class for background color
+        $select.removeClass('wbim-status-instock wbim-status-low wbim-status-outofstock wbim-status-preorder');
+        $select.addClass('wbim-status-' + status);
+
+        // Statuses that show quantity field
+        var showQuantityStatuses = ['instock', 'low'];
+
+        if (showQuantityStatuses.indexOf(status) !== -1) {
+            $quantityCell.css('opacity', '1');
+            $quantityInput.prop('disabled', false);
+        } else {
+            $quantityCell.css('opacity', '0.5');
+            $quantityInput.prop('disabled', true);
         }
     });
 });

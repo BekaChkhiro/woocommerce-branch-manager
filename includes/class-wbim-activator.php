@@ -25,7 +25,7 @@ class WBIM_Activator {
      *
      * @var string
      */
-    const DB_VERSION = '1.1.0';
+    const DB_VERSION = '1.3.0';
 
     /**
      * Activate the plugin
@@ -56,6 +56,7 @@ class WBIM_Activator {
 
         // Always check for missing columns (fixes broken migrations)
         self::ensure_transfers_table_columns();
+        self::ensure_stock_table_columns();
 
         $current_version = get_option( 'wbim_db_version', '1.0.0' );
 
@@ -69,7 +70,40 @@ class WBIM_Activator {
             self::upgrade_to_1_1_0();
         }
 
+        // Upgrade to 1.2.0 - add stock_status column
+        if ( version_compare( $current_version, '1.2.0', '<' ) ) {
+            self::upgrade_to_1_2_0();
+        }
+
+        // Upgrade to 1.3.0 - add is_default column to branches
+        if ( version_compare( $current_version, '1.3.0', '<' ) ) {
+            self::upgrade_to_1_3_0();
+        }
+
         update_option( 'wbim_db_version', self::DB_VERSION );
+    }
+
+    /**
+     * Upgrade to version 1.3.0
+     * Adds is_default column to branches table
+     *
+     * @return void
+     */
+    private static function upgrade_to_1_3_0() {
+        global $wpdb;
+
+        $table_branches = $wpdb->prefix . 'wbim_branches';
+
+        // Check if is_default column exists
+        $column_exists = $wpdb->get_results(
+            "SHOW COLUMNS FROM {$table_branches} LIKE 'is_default'"
+        );
+
+        if ( empty( $column_exists ) ) {
+            $wpdb->query(
+                "ALTER TABLE {$table_branches} ADD COLUMN is_default TINYINT(1) DEFAULT 0 AFTER is_active"
+            );
+        }
     }
 
     /**
@@ -245,6 +279,54 @@ class WBIM_Activator {
     }
 
     /**
+     * Upgrade database to version 1.2.0
+     * Adds stock_status column to stock table
+     *
+     * @return void
+     */
+    private static function upgrade_to_1_2_0() {
+        global $wpdb;
+
+        $table_stock = $wpdb->prefix . 'wbim_stock';
+
+        // Check if stock_status column exists
+        $column_exists = $wpdb->get_results( "SHOW COLUMNS FROM {$table_stock} LIKE 'stock_status'" );
+
+        if ( empty( $column_exists ) ) {
+            $wpdb->query( "ALTER TABLE {$table_stock} ADD COLUMN stock_status VARCHAR(20) DEFAULT 'instock' AFTER quantity" );
+        }
+    }
+
+    /**
+     * Ensure stock table has all required columns
+     *
+     * @return void
+     */
+    private static function ensure_stock_table_columns() {
+        global $wpdb;
+
+        $table_stock = $wpdb->prefix . 'wbim_stock';
+
+        // Check if table exists
+        $table_exists = $wpdb->get_var( "SHOW TABLES LIKE '{$table_stock}'" );
+        if ( ! $table_exists ) {
+            return;
+        }
+
+        // Get existing columns
+        $existing_columns = array();
+        $columns = $wpdb->get_results( "SHOW COLUMNS FROM {$table_stock}" );
+        foreach ( $columns as $column ) {
+            $existing_columns[] = $column->Field;
+        }
+
+        // Add stock_status column if missing
+        if ( ! in_array( 'stock_status', $existing_columns, true ) ) {
+            $wpdb->query( "ALTER TABLE {$table_stock} ADD COLUMN stock_status VARCHAR(20) DEFAULT 'instock' AFTER quantity" );
+        }
+    }
+
+    /**
      * Check plugin requirements
      *
      * @return void
@@ -325,6 +407,7 @@ class WBIM_Activator {
             variation_id BIGINT UNSIGNED DEFAULT 0,
             branch_id INT NOT NULL,
             quantity INT DEFAULT 0,
+            stock_status VARCHAR(20) DEFAULT 'instock',
             low_stock_threshold INT DEFAULT 0,
             shelf_location VARCHAR(50),
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

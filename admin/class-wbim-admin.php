@@ -61,6 +61,7 @@ class WBIM_Admin {
         add_action( 'wp_ajax_wbim_reorder_branches', array( $this, 'ajax_reorder_branches' ) );
         add_action( 'wp_ajax_wbim_toggle_branch_status', array( $this, 'ajax_toggle_branch_status' ) );
         add_action( 'wp_ajax_wbim_delete_branch', array( $this, 'ajax_delete_branch' ) );
+        add_action( 'wp_ajax_wbim_set_default_branch', array( $this, 'ajax_set_default_branch' ) );
 
         // Admin notices
         add_action( 'admin_notices', array( $this, 'display_admin_notices' ) );
@@ -394,6 +395,37 @@ class WBIM_Admin {
         }
 
         wp_send_json_success( array( 'message' => __( 'Branch deleted successfully.', 'wbim' ) ) );
+    }
+
+    /**
+     * AJAX handler for setting default branch
+     *
+     * @return void
+     */
+    public function ajax_set_default_branch() {
+        // Verify nonce
+        check_ajax_referer( 'wbim_admin_nonce', 'nonce' );
+
+        // Check capability
+        if ( ! current_user_can( 'manage_woocommerce' ) ) {
+            wp_send_json_error( array( 'message' => __( 'Permission denied.', 'wbim' ) ) );
+        }
+
+        // Get branch ID
+        $branch_id = isset( $_POST['branch_id'] ) ? absint( $_POST['branch_id'] ) : 0;
+
+        if ( ! $branch_id ) {
+            wp_send_json_error( array( 'message' => __( 'Invalid branch ID.', 'wbim' ) ) );
+        }
+
+        // Set as default
+        $result = WBIM_Branch::set_default( $branch_id );
+
+        if ( is_wp_error( $result ) ) {
+            wp_send_json_error( array( 'message' => $result->get_error_message() ) );
+        }
+
+        wp_send_json_success( array( 'message' => __( 'ფილიალი დაყენდა ნაგულისხმევად.', 'wbim' ) ) );
     }
 
     /**

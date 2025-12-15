@@ -627,26 +627,35 @@ class WBIM_Stock_List_Table extends WP_List_Table {
                 return '<span class="wbim-branch-summary">' . esc_html( $branch_total ) . '</span>';
             }
 
-            // For simple products, show editable input
+            // For simple products, show editable input with status badge
             $quantity = 0;
             $is_low = false;
+            $stock_status = 'instock';
 
             if ( isset( $item->branch_stock[ $branch_id ] ) ) {
                 $stock = $item->branch_stock[ $branch_id ];
                 $quantity = $stock['quantity'];
                 $is_low = $stock['low_stock_threshold'] > 0 && $quantity <= $stock['low_stock_threshold'];
+                $stock_status = isset( $stock['stock_status'] ) ? $stock['stock_status'] : 'instock';
             }
 
             $class = $is_low ? 'wbim-low-stock' : '';
+            $status_label = WBIM_Stock::get_stock_status_label( $stock_status );
+            $status_class = WBIM_Stock::get_stock_status_class( $stock_status );
 
             return sprintf(
-                '<input type="number" class="wbim-stock-input %s" data-product-id="%d" data-variation-id="%d" data-branch-id="%d" data-original="%d" value="%d" min="0" />',
+                '<div class="wbim-branch-cell">
+                    <input type="number" class="wbim-stock-input %s" data-product-id="%d" data-variation-id="%d" data-branch-id="%d" data-original="%d" value="%d" min="0" />
+                    <span class="wbim-status-badge %s">%s</span>
+                </div>',
                 esc_attr( $class ),
                 esc_attr( $item->product_id ),
                 esc_attr( $item->variation_id ),
                 esc_attr( $branch_id ),
                 esc_attr( $quantity ),
-                esc_attr( $quantity )
+                esc_attr( $quantity ),
+                esc_attr( $status_class ),
+                esc_html( $status_label )
             );
         }
 
@@ -679,22 +688,31 @@ class WBIM_Stock_List_Table extends WP_List_Table {
                 foreach ( $this->branches as $branch ) {
                     $quantity = 0;
                     $is_low = false;
+                    $stock_status = 'instock';
                     if ( isset( $var->branch_stock[ $branch->id ] ) ) {
                         $stock = $var->branch_stock[ $branch->id ];
                         $quantity = $stock['quantity'];
                         $is_low = $stock['low_stock_threshold'] > 0 && $quantity <= $stock['low_stock_threshold'];
+                        $stock_status = isset( $stock['stock_status'] ) ? $stock['stock_status'] : 'instock';
                     }
                     $class = $is_low ? 'wbim-low-stock' : '';
+                    $status_label = WBIM_Stock::get_stock_status_label( $stock_status );
+                    $status_class = WBIM_Stock::get_stock_status_class( $stock_status );
 
                     echo '<td class="column-branch_' . esc_attr( $branch->id ) . '">';
                     printf(
-                        '<input type="number" class="wbim-stock-input %s" data-product-id="%d" data-variation-id="%d" data-branch-id="%d" data-original="%d" value="%d" min="0" />',
+                        '<div class="wbim-branch-cell">
+                            <input type="number" class="wbim-stock-input %s" data-product-id="%d" data-variation-id="%d" data-branch-id="%d" data-original="%d" value="%d" min="0" />
+                            <span class="wbim-status-badge %s">%s</span>
+                        </div>',
                         esc_attr( $class ),
                         esc_attr( $var->product_id ),
                         esc_attr( $var->variation_id ),
                         esc_attr( $branch->id ),
                         esc_attr( $quantity ),
-                        esc_attr( $quantity )
+                        esc_attr( $quantity ),
+                        esc_attr( $status_class ),
+                        esc_html( $status_label )
                     );
                     echo '</td>';
                 }

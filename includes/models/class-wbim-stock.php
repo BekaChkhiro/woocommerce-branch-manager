@@ -360,7 +360,7 @@ class WBIM_Stock {
      * @param int   $product_id   Product ID.
      * @param int   $variation_id Variation ID.
      * @param int   $branch_id    Branch ID.
-     * @param array $data         Stock data (quantity, low_stock_threshold, shelf_location).
+     * @param array $data         Stock data (quantity, stock_status, low_stock_threshold, shelf_location).
      * @return bool|WP_Error
      */
     public static function set( $product_id, $variation_id, $branch_id, $data ) {
@@ -368,11 +368,8 @@ class WBIM_Stock {
 
         $table = self::get_table();
 
-        error_log( "WBIM Stock::set() called - product_id: $product_id, variation_id: $variation_id, branch_id: $branch_id, data: " . print_r( $data, true ) );
-
         // Get current stock - note: get() params are (product_id, branch_id, variation_id)
         $current = self::get( $product_id, $branch_id, $variation_id ? $variation_id : 0 );
-        error_log( "WBIM Stock::set() current: " . ( $current ? "id={$current->id}, qty={$current->quantity}" : 'null' ) );
 
         $old_quantity = $current ? (int) $current->quantity : 0;
         $new_quantity = isset( $data['quantity'] ) ? (int) $data['quantity'] : $old_quantity;
@@ -383,6 +380,16 @@ class WBIM_Stock {
             'updated_at' => current_time( 'mysql' ),
         );
         $format = array( '%d', '%s' );
+
+        // Handle stock_status
+        if ( isset( $data['stock_status'] ) ) {
+            $valid_statuses = array( 'instock', 'low', 'outofstock', 'preorder' );
+            $stock_status = sanitize_text_field( $data['stock_status'] );
+            if ( in_array( $stock_status, $valid_statuses, true ) ) {
+                $update_data['stock_status'] = $stock_status;
+                $format[] = '%s';
+            }
+        }
 
         if ( isset( $data['low_stock_threshold'] ) ) {
             $update_data['low_stock_threshold'] = (int) $data['low_stock_threshold'];
@@ -404,7 +411,6 @@ class WBIM_Stock {
                 $format,
                 array( '%d' )
             );
-            error_log( "WBIM Stock::set() UPDATE result: " . var_export( $result, true ) . ", error: " . $wpdb->last_error );
         } else {
             // Insert new record
             $insert_data = array_merge(
@@ -422,18 +428,19 @@ class WBIM_Stock {
                 $insert_data,
                 array_merge( array( '%d', '%d', '%d' ), $format )
             );
-            error_log( "WBIM Stock::set() INSERT result: " . var_export( $result, true ) . ", insert_id: " . $wpdb->insert_id . ", error: " . $wpdb->last_error );
         }
 
         if ( false === $result ) {
-            error_log( "WBIM Stock::set() FAILED!" );
             return new WP_Error(
                 'db_error',
                 __( 'Failed to update stock.', 'wbim' )
             );
         }
 
-        error_log( "WBIM Stock::set() SUCCESS - new quantity: $new_quantity" );
+        // Check if status changed
+        $old_status = $current && isset( $current->stock_status ) ? $current->stock_status : 'instock';
+        $new_status = isset( $update_data['stock_status'] ) ? $update_data['stock_status'] : $old_status;
+        $status_changed = $old_status !== $new_status;
 
         // Log the change if quantity changed
         if ( $new_quantity !== $old_quantity ) {
@@ -450,8 +457,10 @@ class WBIM_Stock {
                     'note'            => $note,
                 )
             );
+        }
 
-            // Trigger action for WC sync
+        // Trigger action for WC sync if quantity OR status changed
+        if ( $new_quantity !== $old_quantity || $status_changed ) {
             do_action( 'wbim_stock_updated', $product_id, $variation_id, $branch_id, $new_quantity );
         }
 
@@ -635,11 +644,17 @@ class WBIM_Stock {
             );
         }
 
-        // Update WooCommerce stock
+        // Update WooCommerce stock quantity
         $product->set_stock_quantity( $total );
         $product->set_manage_stock( true );
 
-        if ( $total > 0 ) {
+        // Check if any branch has purchasable stock status (not just quantity)
+        $has_purchasable_status = self::has_purchasable_stock_status( $product_id, $variation_id );
+
+        // Product is in stock if:
+        // 1. Total quantity > 0, OR
+        // 2. Any branch has a purchasable status (instock, low, preorder)
+        if ( $total > 0 || $has_purchasable_status ) {
             $product->set_stock_status( 'instock' );
         } else {
             $product->set_stock_status( 'outofstock' );
@@ -648,6 +663,38 @@ class WBIM_Stock {
         $product->save();
 
         return true;
+    }
+
+    /**
+     * Check if product has purchasable stock status in any branch
+     *
+     * @param int $product_id   Product ID.
+     * @param int $variation_id Variation ID.
+     * @return bool
+     */
+    public static function has_purchasable_stock_status( $product_id, $variation_id = 0 ) {
+        global $wpdb;
+
+        $table = self::get_table();
+
+        // Purchasable statuses: instock, low, preorder (everything except outofstock)
+        $purchasable_statuses = array( 'instock', 'low', 'preorder' );
+        $placeholders = implode( ', ', array_fill( 0, count( $purchasable_statuses ), '%s' ) );
+
+        $query = $wpdb->prepare(
+            "SELECT COUNT(*) FROM {$table}
+             WHERE product_id = %d AND variation_id = %d
+             AND stock_status IN ({$placeholders})",
+            array_merge(
+                array( $product_id, $variation_id ),
+                $purchasable_statuses
+            )
+        );
+
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
+        $count = (int) $wpdb->get_var( $query );
+
+        return $count > 0;
     }
 
     /**
@@ -792,6 +839,7 @@ class WBIM_Stock {
         foreach ( $stocks as $stock ) {
             $result[ $stock->branch_id ] = array(
                 'quantity'            => (int) $stock->quantity,
+                'stock_status'        => isset( $stock->stock_status ) ? $stock->stock_status : 'instock',
                 'low_stock_threshold' => (int) $stock->low_stock_threshold,
                 'shelf_location'      => $stock->shelf_location,
             );
@@ -834,5 +882,72 @@ class WBIM_Stock {
         }
 
         return false !== $result;
+    }
+
+    /**
+     * Get available stock status options
+     *
+     * @return array
+     */
+    public static function get_stock_status_options() {
+        return array(
+            'instock'    => __( 'მარაგშია', 'wbim' ),
+            'low'        => __( 'მცირე რაოდენობა', 'wbim' ),
+            'outofstock' => __( 'არ არის მარაგში', 'wbim' ),
+            'preorder'   => __( 'წინასწარი შეკვეთით', 'wbim' ),
+        );
+    }
+
+    /**
+     * Get stock status label
+     *
+     * @param string $status Stock status key.
+     * @return string
+     */
+    public static function get_stock_status_label( $status ) {
+        $options = self::get_stock_status_options();
+        return isset( $options[ $status ] ) ? $options[ $status ] : $options['instock'];
+    }
+
+    /**
+     * Check if status allows adding to cart
+     *
+     * @param string $status Stock status.
+     * @return bool
+     */
+    public static function is_purchasable_status( $status ) {
+        // outofstock is the only status that doesn't allow cart
+        return 'outofstock' !== $status;
+    }
+
+    /**
+     * Get stock status CSS class
+     *
+     * @param string $status Stock status.
+     * @return string
+     */
+    public static function get_stock_status_class( $status ) {
+        $classes = array(
+            'instock'    => 'wbim-status-instock',
+            'low'        => 'wbim-status-low',
+            'outofstock' => 'wbim-status-outofstock',
+            'preorder'   => 'wbim-status-preorder',
+        );
+        return isset( $classes[ $status ] ) ? $classes[ $status ] : 'wbim-status-instock';
+    }
+
+    /**
+     * Update stock status
+     *
+     * @param int    $product_id   Product ID.
+     * @param int    $branch_id    Branch ID.
+     * @param string $status       Stock status.
+     * @param int    $variation_id Variation ID.
+     * @return bool|WP_Error
+     */
+    public static function update_stock_status( $product_id, $branch_id, $status, $variation_id = 0 ) {
+        return self::set( $product_id, $variation_id, $branch_id, array(
+            'stock_status' => $status,
+        ) );
     }
 }

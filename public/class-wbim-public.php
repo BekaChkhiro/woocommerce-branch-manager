@@ -105,11 +105,16 @@ class WBIM_Public {
             true
         );
 
+        // Get default branch
+        $default_branch = WBIM_Branch::get_default();
+        $default_branch_id = $default_branch ? $default_branch->id : 0;
+
         // Localize script
         wp_localize_script( 'wbim-public', 'wbim_public', array(
-            'ajax_url' => admin_url( 'admin-ajax.php' ),
-            'nonce'    => wp_create_nonce( 'wbim_public_nonce' ),
-            'i18n'     => array(
+            'ajax_url'          => admin_url( 'admin-ajax.php' ),
+            'nonce'             => wp_create_nonce( 'wbim_public_nonce' ),
+            'default_branch_id' => $default_branch_id,
+            'i18n'              => array(
                 'loading'          => __( 'იტვირთება...', 'wbim' ),
                 'in_stock'         => __( 'მარაგშია', 'wbim' ),
                 'out_of_stock'     => __( 'ამოწურულია', 'wbim' ),
@@ -155,10 +160,24 @@ class WBIM_Public {
 
         foreach ( $branches as $branch ) {
             $stock = WBIM_Stock::get( $product_id, $branch->id );
-            $qty = $stock ? $stock->quantity : 0;
-            $branch_stock[ $branch->id ] = $qty;
+            $qty = $stock ? (int) $stock->quantity : 0;
 
-            if ( $qty > 0 ) {
+            // Default to 'instock' - this allows status-based stock management
+            // where quantity can be 0 but product is still purchasable
+            if ( $stock && ! empty( $stock->stock_status ) ) {
+                $status = $stock->stock_status;
+            } else {
+                // No record or no status set - default to 'instock'
+                $status = 'instock';
+            }
+
+            $branch_stock[ $branch->id ] = array(
+                'quantity' => $qty,
+                'status'   => $status,
+            );
+
+            // Has stock if status is not outofstock OR quantity > 0
+            if ( 'outofstock' !== $status || $qty > 0 ) {
                 $has_any_stock = true;
             }
         }
@@ -169,23 +188,27 @@ class WBIM_Public {
             foreach ( $variations as $variation_id ) {
                 foreach ( $branches as $branch ) {
                     $stock = WBIM_Stock::get( $product_id, $branch->id, $variation_id );
-                    if ( $stock && $stock->quantity > 0 ) {
-                        $has_any_stock = true;
-                        break 2;
+                    if ( $stock ) {
+                        $var_status = ! empty( $stock->stock_status ) ? $stock->stock_status : 'instock';
+                        // Has stock if status is purchasable OR quantity > 0
+                        if ( 'outofstock' !== $var_status || $stock->quantity > 0 ) {
+                            $has_any_stock = true;
+                            break 2;
+                        }
                     }
                 }
             }
         }
 
-        // Don't show branch selector if no stock in any branch
-        if ( ! $has_any_stock && ! $is_variable ) {
-            return;
-        }
-
-        // For variable products without any variation stock, don't show
-        if ( $is_variable && ! $has_any_stock ) {
-            return;
-        }
+        // Always show branch selector if branches exist
+        // Users can see availability status per branch
+        // Comment out the stock check to always display selector:
+        // if ( ! $has_any_stock && ! $is_variable ) {
+        //     return;
+        // }
+        // if ( $is_variable && ! $has_any_stock ) {
+        //     return;
+        // }
 
         $show_quantity = ! empty( $settings['show_exact_quantity'] ) && 'yes' === $settings['show_exact_quantity'];
         $required = ! empty( $settings['require_branch_selection'] ) && 'yes' === $settings['require_branch_selection'];
@@ -208,24 +231,40 @@ class WBIM_Public {
             <div class="wbim-branch-buttons">
                 <?php foreach ( $branches as $branch ) : ?>
                     <?php
-                    $qty = $branch_stock[ $branch->id ];
-                    $is_out_of_stock = $qty <= 0 && ! $is_variable;
-                    $stock_class = '';
+                    $stock_info = $branch_stock[ $branch->id ];
+                    $qty = $stock_info['quantity'];
+                    $status = $stock_info['status'];
+                    $is_out_of_stock = 'outofstock' === $status && ! $is_variable;
 
-                    if ( ! $is_variable ) {
-                        if ( $qty <= 0 ) {
-                            $stock_class = 'wbim-branch-out-of-stock';
-                        } elseif ( $qty <= 5 ) {
-                            $stock_class = 'wbim-branch-low-stock';
-                        } else {
-                            $stock_class = 'wbim-branch-in-stock';
-                        }
-                    }
+                    // Map status to CSS class
+                    $status_class_map = array(
+                        'instock'    => 'wbim-branch-in-stock',
+                        'low'        => 'wbim-branch-low-stock',
+                        'outofstock' => 'wbim-branch-out-of-stock',
+                        'preorder'   => 'wbim-branch-preorder',
+                    );
+
+                    // Map status to display text
+                    $status_text_map = array(
+                        'instock'    => __( 'მარაგშია', 'wbim' ),
+                        'low'        => __( 'მცირე რაოდენობა', 'wbim' ),
+                        'outofstock' => __( 'არ არის მარაგში', 'wbim' ),
+                        'preorder'   => __( 'წინასწარი შეკვეთით', 'wbim' ),
+                    );
+
+                    $stock_class = $is_variable ? '' : ( isset( $status_class_map[ $status ] ) ? $status_class_map[ $status ] : 'wbim-branch-out-of-stock' );
+                    $status_text = isset( $status_text_map[ $status ] ) ? $status_text_map[ $status ] : __( 'არ არის მარაგში', 'wbim' );
+
+                    // Check if we can show quantity (only for instock and low)
+                    $show_quantity = ! empty( get_option( 'wbim_settings', array() )['show_exact_quantity'] )
+                                     && 'yes' === get_option( 'wbim_settings', array() )['show_exact_quantity'];
+                    $can_show_qty = in_array( $status, array( 'instock', 'low' ), true ) && $qty > 0;
                     ?>
                     <div class="wbim-branch-button <?php echo esc_attr( $stock_class ); ?> <?php echo $is_out_of_stock ? 'wbim-branch-disabled' : ''; ?>"
                          data-branch-id="<?php echo esc_attr( $branch->id ); ?>"
                          data-branch-name="<?php echo esc_attr( $branch->name ); ?>"
-                         data-stock="<?php echo esc_attr( $qty ); ?>">
+                         data-stock="<?php echo esc_attr( $qty ); ?>"
+                         data-status="<?php echo esc_attr( $status ); ?>">
 
                         <div class="wbim-branch-button-content">
                             <div class="wbim-branch-button-header">
@@ -237,27 +276,48 @@ class WBIM_Public {
                                 </span>
                             </div>
 
-                            <?php if ( ! empty( $branch->address ) ) : ?>
-                                <div class="wbim-branch-button-address">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                                        <circle cx="12" cy="10" r="3"></circle>
-                                    </svg>
-                                    <?php echo esc_html( $branch->address ); ?>
-                                </div>
-                            <?php endif; ?>
-
                             <div class="wbim-branch-button-stock">
                                 <?php if ( $is_variable ) : ?>
                                     <span class="wbim-stock-variable"><?php esc_html_e( 'აირჩიეთ ვარიაცია', 'wbim' ); ?></span>
-                                <?php elseif ( $qty <= 0 ) : ?>
-                                    <span class="wbim-stock-out"><?php esc_html_e( 'ამოწურულია', 'wbim' ); ?></span>
                                 <?php else : ?>
-                                    <span class="wbim-stock-qty">
-                                        <strong><?php echo esc_html( $qty ); ?></strong> <?php esc_html_e( 'ცალი მარაგში', 'wbim' ); ?>
+                                    <span class="wbim-stock-status wbim-status-<?php echo esc_attr( $status ); ?>">
+                                        <?php echo esc_html( $status_text ); ?>
+                                        <?php if ( $show_quantity && $can_show_qty ) : ?>
+                                            <span class="wbim-stock-qty">(<?php echo esc_html( $qty ); ?> <?php esc_html_e( 'ცალი', 'wbim' ); ?>)</span>
+                                        <?php endif; ?>
                                     </span>
                                 <?php endif; ?>
                             </div>
+
+                            <?php if ( ! empty( $branch->address ) || ! empty( $branch->phone ) ) : ?>
+                                <div class="wbim-branch-contact-toggle">
+                                    <span class="wbim-contact-trigger">
+                                        <?php esc_html_e( 'კონტაქტი', 'wbim' ); ?>
+                                        <svg class="wbim-contact-arrow" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="6 9 12 15 18 9"></polyline>
+                                        </svg>
+                                    </span>
+                                    <div class="wbim-branch-contact-details">
+                                        <?php if ( ! empty( $branch->address ) ) : ?>
+                                            <div class="wbim-contact-row">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                                    <circle cx="12" cy="10" r="3"></circle>
+                                                </svg>
+                                                <span><?php echo esc_html( $branch->address ); ?></span>
+                                            </div>
+                                        <?php endif; ?>
+                                        <?php if ( ! empty( $branch->phone ) ) : ?>
+                                            <div class="wbim-contact-row">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                                                </svg>
+                                                <a href="tel:<?php echo esc_attr( $branch->phone ); ?>"><?php echo esc_html( $branch->phone ); ?></a>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -308,22 +368,41 @@ class WBIM_Public {
 
         // Check stock in selected branch
         $stock = WBIM_Stock::get( $product_id, $branch_id, $variation_id );
-        $available_qty = $stock ? $stock->quantity : 0;
+        $available_qty = $stock ? (int) $stock->quantity : 0;
+        $stock_status = $stock && isset( $stock->stock_status ) ? $stock->stock_status : 'outofstock';
 
-        if ( $available_qty < $quantity ) {
+        // Check stock status - only 'outofstock' prevents purchase
+        if ( 'outofstock' === $stock_status ) {
             $branch = WBIM_Branch::get_by_id( $branch_id );
             $branch_name = $branch ? $branch->name : '';
             wc_add_notice(
                 sprintf(
-                    __( 'არჩეულ ფილიალში "%s" საკმარისი მარაგი არ არის. ხელმისაწვდომია: %d', 'wbim' ),
-                    $branch_name,
-                    $available_qty
+                    __( 'არჩეულ ფილიალში "%s" პროდუქტი არ არის მარაგში.', 'wbim' ),
+                    $branch_name
                 ),
                 'error'
             );
             return false;
         }
 
+        // For statuses with quantity (instock, low), check actual quantity if provided
+        if ( in_array( $stock_status, array( 'instock', 'low' ), true ) && $available_qty > 0 ) {
+            if ( $available_qty < $quantity ) {
+                $branch = WBIM_Branch::get_by_id( $branch_id );
+                $branch_name = $branch ? $branch->name : '';
+                wc_add_notice(
+                    sprintf(
+                        __( 'არჩეულ ფილიალში "%s" საკმარისი მარაგი არ არის. ხელმისაწვდომია: %d', 'wbim' ),
+                        $branch_name,
+                        $available_qty
+                    ),
+                    'error'
+                );
+                return false;
+            }
+        }
+
+        // For instock/low without quantity (status only), or preorder - allow purchase
         return $passed;
     }
 
@@ -343,8 +422,17 @@ class WBIM_Public {
 
         foreach ( $branches as $branch ) {
             $stock = WBIM_Stock::get( $product_id, $branch->id, $variation_id );
-            if ( $stock && $stock->quantity > 0 ) {
-                return true;
+            if ( $stock ) {
+                // Default to 'instock' if record exists but status is not set
+                $status = ! empty( $stock->stock_status ) ? $stock->stock_status : 'instock';
+                // Check stock status - anything except outofstock indicates available
+                if ( 'outofstock' !== $status ) {
+                    return true;
+                }
+                // Also check quantity for backwards compatibility
+                if ( $stock->quantity > 0 ) {
+                    return true;
+                }
             }
         }
 
@@ -588,31 +676,32 @@ class WBIM_Public {
             $stock = WBIM_Stock::get( $product_id, $branch->id, $variation_id );
             $quantity = 0;
             $low_threshold = 0;
+            $stock_status = 'instock'; // Default to instock
 
             if ( $stock && is_object( $stock ) ) {
                 $quantity = isset( $stock->quantity ) ? (int) $stock->quantity : 0;
                 $low_threshold = isset( $stock->low_stock_threshold ) ? (int) $stock->low_stock_threshold : 0;
+                $stock_status = ! empty( $stock->stock_status ) ? $stock->stock_status : 'instock';
             }
 
-            $status = 'out_of_stock';
-            $status_text = __( 'ამოწურულია', 'wbim' );
+            // Map stock_status to display status
+            $status_map = array(
+                'instock'    => array( 'status' => 'in_stock', 'text' => __( 'მარაგშია', 'wbim' ), 'class' => 'wbim-stock-in' ),
+                'low'        => array( 'status' => 'low_stock', 'text' => __( 'მცირე რაოდენობა', 'wbim' ), 'class' => 'wbim-stock-low' ),
+                'outofstock' => array( 'status' => 'out_of_stock', 'text' => __( 'არ არის მარაგში', 'wbim' ), 'class' => 'wbim-stock-out' ),
+                'preorder'   => array( 'status' => 'preorder', 'text' => __( 'წინასწარი შეკვეთით', 'wbim' ), 'class' => 'wbim-stock-preorder' ),
+            );
 
-            if ( $quantity > 0 ) {
-                if ( $low_threshold > 0 && $quantity <= $low_threshold ) {
-                    $status = 'low_stock';
-                    $status_text = __( 'დაბალი მარაგი', 'wbim' );
-                } else {
-                    $status = 'in_stock';
-                    $status_text = __( 'მარაგშია', 'wbim' );
-                }
-            }
+            $status_info = isset( $status_map[ $stock_status ] ) ? $status_map[ $stock_status ] : $status_map['instock'];
 
             $stock_data[] = array(
                 'branch_id'    => $branch->id,
                 'branch_name'  => $branch->name,
                 'quantity'     => $quantity,
-                'status'       => $status,
-                'status_text'  => $status_text,
+                'status'       => $status_info['status'],
+                'status_text'  => $status_info['text'],
+                'status_class' => $status_info['class'],
+                'stock_status' => $stock_status,
             );
         }
 

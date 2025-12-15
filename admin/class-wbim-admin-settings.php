@@ -52,51 +52,116 @@ class WBIM_Admin_Settings {
      * Sanitize settings
      *
      * @param array $input Input settings.
+     * @param string $tab  Current tab being saved.
      * @return array
      */
-    public function sanitize_settings( $input ) {
-        $sanitized = array();
+    public function sanitize_settings( $input, $tab = '' ) {
+        // Get existing settings first
+        $existing = get_option( $this->option_key, array() );
+        $sanitized = wp_parse_args( $existing, $this->get_defaults() );
 
-        // General settings
-        $sanitized['low_stock_threshold'] = isset( $input['low_stock_threshold'] ) ? absint( $input['low_stock_threshold'] ) : 5;
-        $sanitized['default_branch_id'] = isset( $input['default_branch_id'] ) ? absint( $input['default_branch_id'] ) : 0;
-        $sanitized['remove_data_on_uninstall'] = isset( $input['remove_data_on_uninstall'] ) ? (bool) $input['remove_data_on_uninstall'] : false;
+        // Check for tab marker in input
+        if ( isset( $input['_tab_marker'] ) ) {
+            $tab = sanitize_key( $input['_tab_marker'] );
+        }
 
-        // Display settings
-        $sanitized['show_branch_stock_product'] = isset( $input['show_branch_stock_product'] ) ? 'yes' : 'no';
-        $sanitized['show_branch_stock_archive'] = isset( $input['show_branch_stock_archive'] ) ? 'yes' : 'no';
-        $sanitized['show_exact_quantity'] = isset( $input['show_exact_quantity'] ) ? 'yes' : 'no';
-        $sanitized['show_branch_in_cart'] = isset( $input['show_branch_in_cart'] ) ? 'yes' : 'no';
-        $sanitized['show_branch_contact'] = isset( $input['show_branch_contact'] ) ? 'yes' : 'no';
+        // Process settings based on current tab
+        switch ( $tab ) {
+            case 'general':
+                $sanitized['low_stock_threshold'] = isset( $input['low_stock_threshold'] ) ? absint( $input['low_stock_threshold'] ) : 5;
+                $sanitized['default_branch_id'] = isset( $input['default_branch_id'] ) ? absint( $input['default_branch_id'] ) : 0;
+                $sanitized['remove_data_on_uninstall'] = isset( $input['remove_data_on_uninstall'] ) ? true : false;
+                break;
 
-        // Checkout settings
-        $sanitized['enable_checkout_selection'] = isset( $input['enable_checkout_selection'] ) ? 'yes' : 'no';
-        $sanitized['branch_selector_type'] = isset( $input['branch_selector_type'] ) ? sanitize_text_field( $input['branch_selector_type'] ) : 'dropdown';
-        $sanitized['auto_select_method'] = isset( $input['auto_select_method'] ) ? sanitize_text_field( $input['auto_select_method'] ) : 'most_stock';
-        $sanitized['show_stock_at_checkout'] = isset( $input['show_stock_at_checkout'] ) ? 'yes' : 'no';
-        $sanitized['require_branch_selection'] = isset( $input['require_branch_selection'] ) ? 'yes' : 'no';
+            case 'display':
+                $sanitized['show_branch_stock_product'] = isset( $input['show_branch_stock_product'] ) ? 'yes' : 'no';
+                $sanitized['show_branch_stock_archive'] = isset( $input['show_branch_stock_archive'] ) ? 'yes' : 'no';
+                $sanitized['show_exact_quantity'] = isset( $input['show_exact_quantity'] ) ? 'yes' : 'no';
+                $sanitized['show_branch_in_cart'] = isset( $input['show_branch_in_cart'] ) ? 'yes' : 'no';
+                $sanitized['show_branch_contact'] = isset( $input['show_branch_contact'] ) ? 'yes' : 'no';
+                break;
 
-        // Notification settings
-        $sanitized['enable_transfer_notifications'] = isset( $input['enable_transfer_notifications'] ) ? 'yes' : 'no';
-        $sanitized['enable_low_stock_notifications'] = isset( $input['enable_low_stock_notifications'] ) ? 'yes' : 'no';
-        $sanitized['enable_order_notifications'] = isset( $input['enable_order_notifications'] ) ? 'yes' : 'no';
+            case 'checkout':
+                $sanitized['enable_checkout_selection'] = isset( $input['enable_checkout_selection'] ) ? 'yes' : 'no';
+                $sanitized['branch_selector_type'] = isset( $input['branch_selector_type'] ) ? sanitize_text_field( $input['branch_selector_type'] ) : 'dropdown';
+                $sanitized['auto_select_method'] = isset( $input['auto_select_method'] ) ? sanitize_text_field( $input['auto_select_method'] ) : 'most_stock';
+                $sanitized['show_stock_at_checkout'] = isset( $input['show_stock_at_checkout'] ) ? 'yes' : 'no';
+                $sanitized['require_branch_selection'] = isset( $input['require_branch_selection'] ) ? 'yes' : 'no';
+                $sanitized['google_maps_api_key'] = isset( $input['google_maps_api_key'] ) ? sanitize_text_field( $input['google_maps_api_key'] ) : '';
+                break;
 
-        // API settings
-        $sanitized['enable_api'] = isset( $input['enable_api'] ) ? (bool) $input['enable_api'] : true;
+            case 'notifications':
+                $sanitized['enable_transfer_notifications'] = isset( $input['enable_transfer_notifications'] ) ? 'yes' : 'no';
+                $sanitized['enable_low_stock_notifications'] = isset( $input['enable_low_stock_notifications'] ) ? 'yes' : 'no';
+                $sanitized['enable_order_notifications'] = isset( $input['enable_order_notifications'] ) ? 'yes' : 'no';
+                break;
 
-        // PDF/Export settings
-        $sanitized['company_name'] = isset( $input['company_name'] ) ? sanitize_text_field( $input['company_name'] ) : '';
-        $sanitized['pdf_footer_text'] = isset( $input['pdf_footer_text'] ) ? sanitize_textarea_field( $input['pdf_footer_text'] ) : '';
+            case 'api':
+                $sanitized['enable_api'] = isset( $input['enable_api'] ) ? true : false;
+                break;
 
-        // Map settings
-        $sanitized['google_maps_api_key'] = isset( $input['google_maps_api_key'] ) ? sanitize_text_field( $input['google_maps_api_key'] ) : '';
+            case 'export':
+                $sanitized['company_name'] = isset( $input['company_name'] ) ? sanitize_text_field( $input['company_name'] ) : '';
+                $sanitized['pdf_footer_text'] = isset( $input['pdf_footer_text'] ) ? sanitize_textarea_field( $input['pdf_footer_text'] ) : '';
+                break;
 
-        // Bulk Pricing settings
-        $sanitized['enable_bulk_pricing'] = isset( $input['enable_bulk_pricing'] ) ? 'yes' : 'no';
-        $sanitized['show_savings_badge'] = isset( $input['show_savings_badge'] ) ? 'yes' : 'no';
-        $sanitized['bulk_pricing_label'] = isset( $input['bulk_pricing_label'] ) ? sanitize_text_field( $input['bulk_pricing_label'] ) : '';
+            case 'pricing':
+                $sanitized['enable_bulk_pricing'] = isset( $input['enable_bulk_pricing'] ) ? 'yes' : 'no';
+                $sanitized['show_savings_badge'] = isset( $input['show_savings_badge'] ) ? 'yes' : 'no';
+                $sanitized['bulk_pricing_label'] = isset( $input['bulk_pricing_label'] ) ? sanitize_text_field( $input['bulk_pricing_label'] ) : '';
+                break;
+        }
 
         return $sanitized;
+    }
+
+    /**
+     * Check if input has any of the specified keys
+     *
+     * @param array $input Input array.
+     * @param array $keys  Keys to check.
+     * @return bool
+     */
+    private function has_any_key( $input, $keys ) {
+        foreach ( $keys as $key ) {
+            if ( array_key_exists( $key, $input ) ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Get default settings
+     *
+     * @return array
+     */
+    private function get_defaults() {
+        return array(
+            'low_stock_threshold'           => 5,
+            'default_branch_id'             => 0,
+            'remove_data_on_uninstall'      => false,
+            'show_branch_stock_product'     => 'yes',
+            'show_branch_stock_archive'     => 'no',
+            'show_exact_quantity'           => 'no',
+            'show_branch_in_cart'           => 'yes',
+            'show_branch_contact'           => 'no',
+            'enable_checkout_selection'     => 'yes',
+            'branch_selector_type'          => 'dropdown',
+            'auto_select_method'            => 'most_stock',
+            'show_stock_at_checkout'        => 'yes',
+            'require_branch_selection'      => 'no',
+            'enable_transfer_notifications' => 'yes',
+            'enable_low_stock_notifications'=> 'yes',
+            'enable_order_notifications'    => 'yes',
+            'enable_api'                    => true,
+            'company_name'                  => get_bloginfo( 'name' ),
+            'pdf_footer_text'               => '',
+            'google_maps_api_key'           => '',
+            'enable_bulk_pricing'           => 'yes',
+            'show_savings_badge'            => 'yes',
+            'bulk_pricing_label'            => '',
+        );
     }
 
     /**
@@ -125,36 +190,10 @@ class WBIM_Admin_Settings {
      * @return array
      */
     public function get_settings() {
-        $defaults = array(
-            'low_stock_threshold'           => 5,
-            'default_branch_id'             => 0,
-            'remove_data_on_uninstall'      => false,
-            'show_branch_stock_product'     => 'yes',
-            'show_branch_stock_archive'     => 'no',
-            'show_exact_quantity'           => 'no',
-            'show_branch_in_cart'           => 'yes',
-            'show_branch_contact'           => 'no',
-            'enable_checkout_selection'     => 'yes',
-            'branch_selector_type'          => 'dropdown',
-            'auto_select_method'            => 'most_stock',
-            'show_stock_at_checkout'        => 'yes',
-            'require_branch_selection'      => 'no',
-            'enable_transfer_notifications' => 'yes',
-            'enable_low_stock_notifications'=> 'yes',
-            'enable_order_notifications'    => 'yes',
-            'enable_api'                    => true,
-            'company_name'                  => get_bloginfo( 'name' ),
-            'pdf_footer_text'               => '',
-            'google_maps_api_key'           => '',
-            // Bulk Pricing
-            'enable_bulk_pricing'           => 'yes',
-            'show_savings_badge'            => 'yes',
-            'bulk_pricing_label'            => '',
-        );
-
+        // Clear cache to ensure fresh data
+        wp_cache_delete( $this->option_key, 'options' );
         $settings = get_option( $this->option_key, array() );
-
-        return wp_parse_args( $settings, $defaults );
+        return wp_parse_args( $settings, $this->get_defaults() );
     }
 
     /**
@@ -167,17 +206,40 @@ class WBIM_Admin_Settings {
             wp_die( esc_html__( 'You do not have permission to access this page.', 'wbim' ) );
         }
 
+        $tab = isset( $_GET['tab'] ) ? sanitize_key( $_GET['tab'] ) : 'general';
+
         // Handle form submission
         if ( isset( $_POST['wbim_settings_submit'] ) && check_admin_referer( 'wbim_settings_nonce' ) ) {
-            $settings = isset( $_POST['wbim_settings'] ) ? wp_unslash( $_POST['wbim_settings'] ) : array();
-            $sanitized = $this->sanitize_settings( $settings );
-            update_option( $this->option_key, $sanitized );
+            $input = isset( $_POST['wbim_settings'] ) ? wp_unslash( $_POST['wbim_settings'] ) : array();
+            $current_tab = isset( $_POST['wbim_current_tab'] ) ? sanitize_key( $_POST['wbim_current_tab'] ) : $tab;
+
+            $sanitized = $this->sanitize_settings( $input, $current_tab );
+
+            // Clear caches
+            wp_cache_delete( $this->option_key, 'options' );
+            wp_cache_delete( 'alloptions', 'options' );
+
+            // Direct database update (bypasses problematic filters)
+            global $wpdb;
+            $serialized = maybe_serialize( $sanitized );
+
+            $wpdb->update(
+                $wpdb->options,
+                array( 'option_value' => $serialized ),
+                array( 'option_name' => $this->option_key ),
+                array( '%s' ),
+                array( '%s' )
+            );
+
+            // Clear cache after saving
+            wp_cache_delete( $this->option_key, 'options' );
+            wp_cache_delete( 'alloptions', 'options' );
+
             echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'პარამეტრები შენახულია!', 'wbim' ) . '</p></div>';
         }
 
         $settings = $this->get_settings();
         $branches = WBIM_Branch::get_active();
-        $tab = isset( $_GET['tab'] ) ? sanitize_key( $_GET['tab'] ) : 'general';
 
         $tabs = array(
             'general'       => __( 'ზოგადი', 'wbim' ),
@@ -204,6 +266,7 @@ class WBIM_Admin_Settings {
 
             <form method="post" action="" class="wbim-settings-form">
                 <?php wp_nonce_field( 'wbim_settings_nonce' ); ?>
+                <input type="hidden" name="wbim_current_tab" value="<?php echo esc_attr( $tab ); ?>" />
 
                 <div class="wbim-settings-content">
                     <?php
@@ -330,6 +393,7 @@ class WBIM_Admin_Settings {
      */
     private function render_general_settings( $settings, $branches ) {
         ?>
+        <input type="hidden" name="wbim_settings[_tab_marker]" value="general" />
         <div class="wbim-settings-section">
             <h2><?php esc_html_e( 'ზოგადი პარამეტრები', 'wbim' ); ?></h2>
 
@@ -395,6 +459,7 @@ class WBIM_Admin_Settings {
      */
     private function render_display_settings( $settings ) {
         ?>
+        <input type="hidden" name="wbim_settings[_tab_marker]" value="display" />
         <div class="wbim-settings-section">
             <h2><?php esc_html_e( 'ჩვენების პარამეტრები', 'wbim' ); ?></h2>
 
@@ -485,6 +550,7 @@ class WBIM_Admin_Settings {
      */
     private function render_checkout_settings( $settings, $branches ) {
         ?>
+        <input type="hidden" name="wbim_settings[_tab_marker]" value="checkout" />
         <div class="wbim-settings-section">
             <h2><?php esc_html_e( 'გადახდის პარამეტრები', 'wbim' ); ?></h2>
 
@@ -601,6 +667,7 @@ class WBIM_Admin_Settings {
      */
     private function render_notification_settings( $settings ) {
         ?>
+        <input type="hidden" name="wbim_settings[_tab_marker]" value="notifications" />
         <div class="wbim-settings-section">
             <h2><?php esc_html_e( 'შეტყობინებების პარამეტრები', 'wbim' ); ?></h2>
 
@@ -660,6 +727,7 @@ class WBIM_Admin_Settings {
      */
     private function render_api_settings( $settings ) {
         ?>
+        <input type="hidden" name="wbim_settings[_tab_marker]" value="api" />
         <div class="wbim-settings-section">
             <h2><?php esc_html_e( 'API პარამეტრები', 'wbim' ); ?></h2>
 
@@ -727,6 +795,7 @@ class WBIM_Admin_Settings {
      */
     private function render_export_settings( $settings ) {
         ?>
+        <input type="hidden" name="wbim_settings[_tab_marker]" value="export" />
         <div class="wbim-settings-section">
             <h2><?php esc_html_e( 'ექსპორტი და PDF პარამეტრები', 'wbim' ); ?></h2>
 
@@ -766,6 +835,7 @@ class WBIM_Admin_Settings {
      */
     private function render_pricing_settings( $settings ) {
         ?>
+        <input type="hidden" name="wbim_settings[_tab_marker]" value="pricing" />
         <div class="wbim-settings-section">
             <h2><?php esc_html_e( 'საბითუმო/რაოდენობაზე დაფუძნებული ფასდაკლება', 'wbim' ); ?></h2>
 

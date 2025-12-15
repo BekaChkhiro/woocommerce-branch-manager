@@ -73,7 +73,13 @@ class WBIM_Bulk_Pricing {
 
         global $product;
 
-        if ( ! $product ) {
+        // Ensure $product is a valid WC_Product object
+        if ( ! $product || ! is_object( $product ) || ! ( $product instanceof WC_Product ) ) {
+            // Try to get the product from the queried object
+            $product = wc_get_product( get_queried_object_id() );
+        }
+
+        if ( ! $product || ! is_object( $product ) ) {
             return;
         }
 
@@ -149,7 +155,8 @@ class WBIM_Bulk_Pricing {
     public function display_quantity_buttons() {
         global $product;
 
-        if ( ! $product ) {
+        // Ensure $product is a valid WC_Product object
+        if ( ! $product || ! is_object( $product ) || ! ( $product instanceof WC_Product ) ) {
             return;
         }
 

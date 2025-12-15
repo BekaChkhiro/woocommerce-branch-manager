@@ -188,6 +188,11 @@ class WBIM_Admin_Stock {
                     'quantity' => isset( $data['quantity'] ) ? intval( $data['quantity'] ) : 0,
                 );
 
+                // Handle stock status
+                if ( isset( $data['stock_status'] ) ) {
+                    $stock_data['stock_status'] = sanitize_text_field( $data['stock_status'] );
+                }
+
                 if ( isset( $data['low_stock_threshold'] ) ) {
                     $stock_data['low_stock_threshold'] = absint( $data['low_stock_threshold'] );
                 }
@@ -411,6 +416,10 @@ class WBIM_Admin_Stock {
             $stock_data['shelf_location'] = sanitize_text_field( wp_unslash( $_POST['shelf_location'] ) );
         }
 
+        if ( isset( $_POST['stock_status'] ) ) {
+            $stock_data['stock_status'] = sanitize_text_field( wp_unslash( $_POST['stock_status'] ) );
+        }
+
         $result = WBIM_Stock::set( $product_id, $variation_id, $branch_id, $stock_data );
         error_log( "WBIM ajax_update_stock result: " . ( is_wp_error( $result ) ? $result->get_error_message() : 'success' ) );
 
@@ -528,54 +537,100 @@ class WBIM_Admin_Stock {
      * @return void
      */
     public function ajax_import_stock() {
-        check_ajax_referer( 'wbim_admin', 'nonce' );
+        try {
+            // Increase memory and time limits for large imports
+            @ini_set( 'memory_limit', '512M' );
+            @set_time_limit( 300 );
 
-        if ( ! current_user_can( 'wbim_manage_stock' ) ) {
-            wp_send_json_error( array( 'message' => __( 'Permission denied.', 'wbim' ) ) );
-        }
+            check_ajax_referer( 'wbim_admin', 'nonce' );
 
-        if ( ! isset( $_FILES['import_file'] ) ) {
-            wp_send_json_error( array( 'message' => __( 'No file uploaded.', 'wbim' ) ) );
-        }
+            if ( ! current_user_can( 'wbim_manage_stock' ) ) {
+                wp_send_json_error( array(
+                    'message' => __( 'Permission denied.', 'wbim' ),
+                    'debug'   => 'User does not have wbim_manage_stock capability',
+                ) );
+            }
 
-        // Validate file
-        $file_path = WBIM_CSV_Handler::validate_upload( $_FILES['import_file'] );
+            if ( ! isset( $_FILES['import_file'] ) ) {
+                wp_send_json_error( array(
+                    'message' => __( 'ფაილი არ არის ატვირთული.', 'wbim' ),
+                    'debug'   => 'No file in $_FILES[import_file]',
+                ) );
+            }
 
-        if ( is_wp_error( $file_path ) ) {
-            wp_send_json_error( array( 'message' => $file_path->get_error_message() ) );
-        }
+            // Get branch ID
+            $branch_id = isset( $_POST['branch_id'] ) ? absint( $_POST['branch_id'] ) : 0;
 
-        // Import options
-        $options = array(
-            'update_existing' => isset( $_POST['update_existing'] ) && 'true' === $_POST['update_existing'],
-            'skip_empty'      => true,
-        );
+            if ( empty( $branch_id ) ) {
+                wp_send_json_error( array(
+                    'message' => __( 'გთხოვთ აირჩიოთ ფილიალი.', 'wbim' ),
+                    'debug'   => 'branch_id is empty or 0',
+                ) );
+            }
 
-        // Import
-        $results = WBIM_CSV_Handler::import( $file_path, $options );
+            // Validate file
+            $file_path = WBIM_CSV_Handler::validate_upload( $_FILES['import_file'] );
 
-        // Format response
-        $message = sprintf(
-            /* translators: 1: success count, 2: total count */
-            __( 'Import complete: %1$d of %2$d rows imported successfully.', 'wbim' ),
-            $results['success'],
-            $results['total_rows']
-        );
+            if ( is_wp_error( $file_path ) ) {
+                wp_send_json_error( array(
+                    'message' => $file_path->get_error_message(),
+                    'debug'   => 'File validation failed: ' . $file_path->get_error_code(),
+                ) );
+            }
 
-        if ( $results['skipped'] > 0 ) {
-            $message .= ' ' . sprintf(
-                /* translators: %d: skipped count */
-                __( '%d rows skipped.', 'wbim' ),
-                $results['skipped']
+            // Import options
+            $options = array(
+                'update_existing'            => isset( $_POST['update_existing'] ) && 'true' === $_POST['update_existing'],
+                'skip_empty'                 => true,
+                'distribute_to_variations'   => isset( $_POST['distribute_to_variations'] ) && 'true' === $_POST['distribute_to_variations'],
             );
-        }
 
-        wp_send_json_success(
-            array(
-                'message' => $message,
-                'results' => $results,
-            )
-        );
+            // Determine file type and import accordingly
+            $file_type = WBIM_CSV_Handler::get_file_type( $file_path );
+
+            if ( 'json' === $file_type ) {
+                $results = WBIM_CSV_Handler::import_json( $file_path, $branch_id, $options );
+            } else {
+                // For CSV files, update import method to use selected branch
+                $results = WBIM_CSV_Handler::import_with_branch( $file_path, $branch_id, $options );
+            }
+
+            // Check if there were critical errors (no rows processed)
+            if ( $results['total_rows'] === 0 && ! empty( $results['errors'] ) ) {
+                wp_send_json_error( array(
+                    'message' => __( 'იმპორტი ვერ მოხერხდა.', 'wbim' ),
+                    'debug'   => implode( '; ', array_slice( $results['errors'], 0, 5 ) ),
+                    'errors'  => $results['errors'],
+                ) );
+            }
+
+            // Format response
+            $message = sprintf(
+                __( 'იმპორტი დასრულდა: %1$d პროდუქტი %2$d-დან წარმატებით იმპორტირდა.', 'wbim' ),
+                $results['success'],
+                $results['total_rows']
+            );
+
+            if ( $results['skipped'] > 0 ) {
+                $message .= ' ' . sprintf(
+                    __( '%d გამოტოვდა.', 'wbim' ),
+                    $results['skipped']
+                );
+            }
+
+            wp_send_json_success(
+                array(
+                    'message' => $message,
+                    'results' => $results,
+                )
+            );
+        } catch ( Exception $e ) {
+            wp_send_json_error( array(
+                'message' => __( 'დაფიქსირდა შეცდომა.', 'wbim' ),
+                'debug'   => $e->getMessage(),
+                'trace'   => $e->getTraceAsString(),
+            ) );
+        }
     }
 
     /**
@@ -665,44 +720,73 @@ class WBIM_Admin_Stock {
      * @return void
      */
     public function ajax_preview_import() {
-        check_ajax_referer( 'wbim_admin', 'nonce' );
+        try {
+            check_ajax_referer( 'wbim_admin', 'nonce' );
 
-        if ( ! current_user_can( 'wbim_manage_stock' ) ) {
-            wp_send_json_error( array( 'message' => __( 'Permission denied.', 'wbim' ) ) );
-        }
-
-        if ( ! isset( $_FILES['import_file'] ) ) {
-            wp_send_json_error( array( 'message' => __( 'No file uploaded.', 'wbim' ) ) );
-        }
-
-        // Validate file
-        $file_path = WBIM_CSV_Handler::validate_upload( $_FILES['import_file'] );
-
-        if ( is_wp_error( $file_path ) ) {
-            wp_send_json_error( array( 'message' => $file_path->get_error_message() ) );
-        }
-
-        // Preview the CSV
-        $preview_data = WBIM_CSV_Handler::preview( $file_path, 20 );
-
-        if ( is_wp_error( $preview_data ) ) {
-            wp_send_json_error( array( 'message' => $preview_data->get_error_message() ) );
-        }
-
-        // Get branch names for display
-        $branches = WBIM_Branch::get_all();
-        $branch_names = array();
-        foreach ( $branches as $branch ) {
-            $branch_names[ $branch->id ] = $branch->name;
-        }
-
-        // Enhance preview with branch names
-        foreach ( $preview_data['preview'] as &$row ) {
-            if ( isset( $row['branch_id'] ) && isset( $branch_names[ $row['branch_id'] ] ) ) {
-                $row['branch_name'] = $branch_names[ $row['branch_id'] ];
+            if ( ! current_user_can( 'wbim_manage_stock' ) ) {
+                wp_send_json_error( array(
+                    'message' => __( 'Permission denied.', 'wbim' ),
+                    'debug'   => 'User does not have wbim_manage_stock capability',
+                ) );
             }
-        }
 
-        wp_send_json_success( $preview_data );
+            if ( ! isset( $_FILES['import_file'] ) ) {
+                wp_send_json_error( array(
+                    'message' => __( 'ფაილი არ არის ატვირთული.', 'wbim' ),
+                    'debug'   => 'No file in $_FILES[import_file]',
+                ) );
+            }
+
+            // Get branch ID
+            $branch_id = isset( $_POST['branch_id'] ) ? absint( $_POST['branch_id'] ) : 0;
+
+            if ( empty( $branch_id ) ) {
+                wp_send_json_error( array(
+                    'message' => __( 'გთხოვთ აირჩიოთ ფილიალი.', 'wbim' ),
+                    'debug'   => 'branch_id is empty or 0',
+                ) );
+            }
+
+            // Validate file
+            $file_path = WBIM_CSV_Handler::validate_upload( $_FILES['import_file'] );
+
+            if ( is_wp_error( $file_path ) ) {
+                wp_send_json_error( array(
+                    'message' => $file_path->get_error_message(),
+                    'debug'   => 'File validation failed: ' . $file_path->get_error_code(),
+                    'file_info' => array(
+                        'name' => $_FILES['import_file']['name'] ?? 'unknown',
+                        'type' => $_FILES['import_file']['type'] ?? 'unknown',
+                        'size' => $_FILES['import_file']['size'] ?? 0,
+                        'error' => $_FILES['import_file']['error'] ?? 'unknown',
+                    ),
+                ) );
+            }
+
+            // Determine file type and preview accordingly
+            $file_type = WBIM_CSV_Handler::get_file_type( $file_path );
+
+            if ( 'json' === $file_type ) {
+                $preview_data = WBIM_CSV_Handler::preview_json( $file_path, $branch_id, 20 );
+            } else {
+                $preview_data = WBIM_CSV_Handler::preview_with_branch( $file_path, $branch_id, 20 );
+            }
+
+            if ( is_wp_error( $preview_data ) ) {
+                wp_send_json_error( array(
+                    'message' => $preview_data->get_error_message(),
+                    'debug'   => 'Preview failed: ' . $preview_data->get_error_code(),
+                    'file_type' => $file_type,
+                ) );
+            }
+
+            wp_send_json_success( $preview_data );
+        } catch ( Exception $e ) {
+            wp_send_json_error( array(
+                'message' => __( 'დაფიქსირდა შეცდომა.', 'wbim' ),
+                'debug'   => $e->getMessage(),
+                'trace'   => $e->getTraceAsString(),
+            ) );
+        }
     }
 }

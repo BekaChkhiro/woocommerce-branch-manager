@@ -26,6 +26,7 @@
             this.bindEvents();
             this.initVariationHandler();
             this.initProductBranchSelector();
+            this.autoSelectDefaultBranch();
         },
 
         /**
@@ -40,6 +41,11 @@
             // Branch button click on product page
             $(document).on('click', '.wbim-branch-button', function(e) {
                 var $button = $(this);
+
+                // If clicking on contact toggle, don't select the branch
+                if ($(e.target).closest('.wbim-branch-contact-toggle').length) {
+                    return;
+                }
 
                 // Skip if disabled (out of stock)
                 if ($button.hasClass('wbim-branch-disabled')) {
@@ -59,6 +65,95 @@
                 $('#wbim_branch_id').val(branchId);
                 $('#wbim_branch_name').val(branchName);
             });
+
+            // Contact toggle in branch cards
+            $(document).on('click', '.wbim-contact-trigger', function(e) {
+                e.stopPropagation();
+                var $toggle = $(this).closest('.wbim-branch-contact-toggle');
+                $toggle.toggleClass('wbim-contact-open');
+            });
+
+            // Validate branch selection before add to cart
+            $(document).on('submit', 'form.cart', function(e) {
+                var $wrapper = $('.wbim-branch-selector-wrapper');
+
+                // If branch selector exists on page
+                if ($wrapper.length) {
+                    var $branchInput = $('#wbim_branch_id');
+                    var branchId = $branchInput.val();
+                    var isRequired = $branchInput.attr('required') !== undefined;
+                    var hasButtons = $wrapper.find('.wbim-branch-button:not(.wbim-branch-disabled)').length > 0;
+
+                    // If required or has available branches, validate selection
+                    if ((isRequired || hasButtons) && !branchId) {
+                        e.preventDefault();
+
+                        // Show error message
+                        if ($('.wbim-branch-error').length === 0) {
+                            $wrapper.prepend('<div class="wbim-branch-error woocommerce-error" style="color: #e53935; margin-bottom: 10px; padding: 10px; background: #ffebee; border-radius: 4px;">' +
+                                (wbim_public.i18n.select_branch || 'გთხოვთ აირჩიოთ ფილიალი') +
+                            '</div>');
+                        }
+
+                        // Scroll to branch selector
+                        $('html, body').animate({
+                            scrollTop: $wrapper.offset().top - 100
+                        }, 300);
+
+                        // Highlight the branch buttons
+                        $wrapper.find('.wbim-branch-buttons').addClass('wbim-shake');
+                        setTimeout(function() {
+                            $wrapper.find('.wbim-branch-buttons').removeClass('wbim-shake');
+                        }, 500);
+
+                        return false;
+                    }
+                }
+            });
+
+            // Remove error when branch is selected
+            $(document).on('click', '.wbim-branch-button', function() {
+                $('.wbim-branch-error').remove();
+            });
+        },
+
+        /**
+         * Auto-select default branch on page load
+         */
+        autoSelectDefaultBranch: function() {
+            var $wrapper = $('.wbim-branch-selector-wrapper');
+
+            if (!$wrapper.length) {
+                return;
+            }
+
+            // Skip if it's a variable product (wait for variation selection)
+            if ($wrapper.data('is-variable') === 1) {
+                return;
+            }
+
+            // Skip if already selected
+            if ($('#wbim_branch_id').val()) {
+                return;
+            }
+
+            var $branchToSelect = null;
+
+            // Try to find the default branch from settings
+            if (typeof wbim_public !== 'undefined' && wbim_public.default_branch_id) {
+                $branchToSelect = $wrapper.find('.wbim-branch-button[data-branch-id="' + wbim_public.default_branch_id + '"]:not(.wbim-branch-disabled)').first();
+            }
+
+            // Fallback to first available branch if default not found or not available
+            if (!$branchToSelect || !$branchToSelect.length) {
+                $branchToSelect = $wrapper.find('.wbim-branch-button:not(.wbim-branch-disabled)').first();
+            }
+
+            if ($branchToSelect && $branchToSelect.length) {
+                $branchToSelect.addClass('wbim-branch-selected');
+                $('#wbim_branch_id').val($branchToSelect.data('branch-id'));
+                $('#wbim_branch_name').val($branchToSelect.data('branch-name'));
+            }
         },
 
         /**
@@ -137,6 +232,8 @@
          * Update branch buttons with stock data
          */
         updateButtonsWithStock: function($buttons, stockData) {
+            var firstAvailable = null;
+
             $buttons.find('.wbim-branch-button').each(function() {
                 var $button = $(this);
                 var branchId = $button.data('branch-id');
@@ -147,15 +244,21 @@
 
                 if (branchData) {
                     var qty = branchData.quantity;
+                    var stockStatus = branchData.stock_status || 'instock';
+                    var statusClass = branchData.status_class || 'wbim-stock-in';
+                    var statusText = branchData.status_text || wbim_public.i18n.in_stock;
                     var $stockContainer = $button.find('.wbim-branch-button-stock');
 
                     // Remove existing stock classes
-                    $button.removeClass('wbim-branch-in-stock wbim-branch-low-stock wbim-branch-out-of-stock wbim-branch-disabled');
+                    $button.removeClass('wbim-branch-in-stock wbim-branch-low-stock wbim-branch-out-of-stock wbim-branch-preorder wbim-branch-disabled');
 
-                    // Update stock display and classes
-                    if (qty <= 0) {
+                    // Determine availability based on stock_status (not just quantity)
+                    var isAvailable = stockStatus !== 'outofstock';
+
+                    if (!isAvailable) {
+                        // Out of stock - disable
                         $button.addClass('wbim-branch-out-of-stock wbim-branch-disabled');
-                        $stockContainer.html('<span class="wbim-stock-out">' + wbim_public.i18n.out_of_stock + '</span>');
+                        $stockContainer.html('<span class="' + statusClass + '">' + statusText + '</span>');
 
                         // Deselect if was selected
                         if ($button.hasClass('wbim-branch-selected')) {
@@ -163,22 +266,41 @@
                             $('#wbim_branch_id').val('');
                             $('#wbim_branch_name').val('');
                         }
-                    } else if (qty !== null) {
-                        if (qty <= 5) {
+                    } else {
+                        // Available - apply appropriate class
+                        if (stockStatus === 'low') {
                             $button.addClass('wbim-branch-low-stock');
+                        } else if (stockStatus === 'preorder') {
+                            $button.addClass('wbim-branch-preorder');
                         } else {
                             $button.addClass('wbim-branch-in-stock');
                         }
-                        $stockContainer.html('<span class="wbim-stock-qty"><strong>' + qty + '</strong> ' + wbim_public.i18n.available + '</span>');
-                    } else {
-                        $button.addClass('wbim-branch-in-stock');
-                        $stockContainer.html('<span class="wbim-stock-in">' + branchData.status_text + '</span>');
+
+                        // Show quantity if > 0, otherwise just status
+                        if (qty > 0) {
+                            $stockContainer.html('<span class="' + statusClass + '"><strong>' + qty + '</strong> ' + wbim_public.i18n.available + '</span>');
+                        } else {
+                            $stockContainer.html('<span class="' + statusClass + '">' + statusText + '</span>');
+                        }
+
+                        // Track first available for auto-select
+                        if (!firstAvailable) {
+                            firstAvailable = $button;
+                        }
                     }
 
-                    // Update data attribute
+                    // Update data attributes
                     $button.data('stock', qty);
+                    $button.data('stock-status', stockStatus);
                 }
             });
+
+            // Auto-select first available branch if none selected
+            if (firstAvailable && !$('#wbim_branch_id').val()) {
+                firstAvailable.addClass('wbim-branch-selected');
+                $('#wbim_branch_id').val(firstAvailable.data('branch-id'));
+                $('#wbim_branch_name').val(firstAvailable.data('branch-name'));
+            }
         },
 
         /**
@@ -267,20 +389,18 @@
             var html = '';
 
             $.each(stockData, function(index, item) {
-                var statusClass = 'wbim-stock-out';
-                if (item.status === 'in_stock') {
-                    statusClass = 'wbim-stock-in';
-                } else if (item.status === 'low_stock') {
-                    statusClass = 'wbim-stock-low';
-                }
+                // Use status_class from response if available
+                var statusClass = item.status_class || 'wbim-stock-out';
+                var stockStatus = item.stock_status || 'outofstock';
 
-                html += '<div class="wbim-branch-stock-item ' + statusClass + '">';
+                html += '<div class="wbim-branch-stock-item ' + statusClass + '" data-stock-status="' + stockStatus + '">';
                 html += '<span class="wbim-branch-name">' + item.branch_name + '</span>';
                 html += '<span class="wbim-stock-status">';
 
-                if (item.quantity !== null && item.quantity > 0) {
-                    html += '<span class="wbim-stock-quantity">' + item.quantity + '</span>';
-                    html += '<span class="wbim-stock-unit">' + wbim_public.i18n.available + '</span>';
+                // Show quantity only if status allows and quantity > 0
+                if (stockStatus !== 'outofstock' && item.quantity > 0) {
+                    html += item.status_text;
+                    html += ' <span class="wbim-stock-quantity">(' + item.quantity + ' ' + wbim_public.i18n.available + ')</span>';
                 } else {
                     html += item.status_text;
                 }

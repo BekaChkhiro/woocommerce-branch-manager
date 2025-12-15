@@ -41,6 +41,9 @@
             // Delete branch
             $(document).on('click', '.wbim-delete-branch', this.handleDeleteBranch);
 
+            // Set default branch
+            $(document).on('click', '.wbim-set-default', this.handleSetDefault);
+
             // Clear coordinates
             $(document).on('click', '#clear-coordinates', this.handleClearCoordinates);
 
@@ -289,6 +292,45 @@
                         $link.closest('tr').fadeOut(300, function() {
                             $(this).remove();
                         });
+                    } else {
+                        WBIMAdmin.showToast(response.data.message || wbimAdmin.strings.error, 'error');
+                    }
+                },
+                error: function() {
+                    WBIMAdmin.showToast(wbimAdmin.strings.error, 'error');
+                },
+                complete: function() {
+                    $link.removeClass('wbim-loading');
+                }
+            });
+        },
+
+        /**
+         * Handle set default branch
+         *
+         * @param {Event} e Click event
+         */
+        handleSetDefault: function(e) {
+            e.preventDefault();
+
+            var $link = $(this);
+            var branchId = $link.data('branch-id');
+
+            $link.addClass('wbim-loading');
+
+            $.ajax({
+                url: wbimAdmin.ajaxUrl,
+                type: 'POST',
+                data: {
+                    action: 'wbim_set_default_branch',
+                    nonce: wbimAdmin.nonce,
+                    branch_id: branchId
+                },
+                success: function(response) {
+                    if (response.success) {
+                        WBIMAdmin.showToast(response.data.message, 'success');
+                        // Reload page to reflect changes
+                        location.reload();
                     } else {
                         WBIMAdmin.showToast(response.data.message || wbimAdmin.strings.error, 'error');
                     }

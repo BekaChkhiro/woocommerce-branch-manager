@@ -63,6 +63,10 @@
     opacity: 0.7;
 }
 
+.wbim-branch-stock-item.wbim-stock-preorder {
+    border-left-color: #17a2b8;
+}
+
 .wbim-branch-name {
     font-weight: 500;
     color: #333;
@@ -85,6 +89,10 @@
 
 .wbim-stock-out .wbim-stock-status {
     color: #f44336;
+}
+
+.wbim-stock-preorder .wbim-stock-status {
+    color: #17a2b8;
 }
 
 .wbim-stock-quantity {
@@ -114,6 +122,10 @@
 
 .wbim-stock-out .wbim-stock-indicator {
     background: #f44336;
+}
+
+.wbim-stock-preorder .wbim-stock-indicator {
+    background: #17a2b8;
 }
 
 /* Branch Contact Toggle */
@@ -581,10 +593,40 @@
     border: 1px solid #ffeeba;
 }
 
+/* Hide branch selector in Rey sticky Add to Cart */
+.rey-stickyAtc--visible .wbim-branch-selector-wrapper,
+.rey-stickyAtc.rey-stickyAtc--visible .wbim-branch-selector-wrapper,
+.rey-stickyAtc--visible .wbim-branch-buttons,
+.rey-stickyAtc--visible [class*="wbim-branch"] {
+    display: none !important;
+}
+
+/* Shake animation for validation error */
+@keyframes wbim-shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.wbim-shake {
+    animation: wbim-shake 0.3s ease-in-out 2;
+}
+
+/* Branch error message */
+.wbim-branch-error {
+    color: #e53935;
+    margin-bottom: 10px;
+    padding: 10px 15px;
+    background: #ffebee;
+    border-radius: 6px;
+    border-left: 4px solid #e53935;
+    font-size: 14px;
+}
+
 /* Branch Buttons Container */
 .wbim-branch-buttons {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 12px;
 }
 
@@ -632,6 +674,10 @@
 
 .wbim-branch-button.wbim-branch-out-of-stock {
     border-left: 4px solid #f44336;
+}
+
+.wbim-branch-button.wbim-branch-preorder {
+    border-left: 4px solid #17a2b8;
 }
 
 /* Button Content */
@@ -738,10 +784,118 @@
     font-size: 12px;
 }
 
+/* Status badges in branch buttons */
+.wbim-branch-button-stock .wbim-stock-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.wbim-branch-button-stock .wbim-stock-status.wbim-status-instock {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.wbim-branch-button-stock .wbim-stock-status.wbim-status-low {
+    background: #fff3e0;
+    color: #e65100;
+}
+
+.wbim-branch-button-stock .wbim-stock-status.wbim-status-outofstock {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.wbim-branch-button-stock .wbim-stock-status.wbim-status-preorder {
+    background: #e1f5fe;
+    color: #0277bd;
+}
+
+.wbim-branch-button-stock .wbim-stock-status .wbim-stock-qty {
+    font-size: 12px;
+    opacity: 0.85;
+    padding: 0;
+    background: none;
+    border-radius: 0;
+}
+
 /* Low stock style */
 .wbim-branch-button.wbim-branch-low-stock .wbim-stock-qty {
     background: #fff3e0;
     color: #e65100;
+}
+
+/* Branch Contact Toggle in Card */
+.wbim-branch-contact-toggle {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #eee;
+}
+
+.wbim-contact-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: #0073aa;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.wbim-contact-trigger:hover {
+    color: #005177;
+}
+
+.wbim-contact-arrow {
+    transition: transform 0.2s ease;
+}
+
+.wbim-branch-contact-toggle.wbim-contact-open .wbim-contact-arrow {
+    transform: rotate(180deg);
+}
+
+.wbim-branch-contact-details {
+    display: none;
+    margin-top: 8px;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+.wbim-branch-contact-toggle.wbim-contact-open .wbim-branch-contact-details {
+    display: block;
+}
+
+.wbim-contact-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 12px;
+    color: #555;
+    margin-bottom: 6px;
+}
+
+.wbim-contact-row:last-child {
+    margin-bottom: 0;
+}
+
+.wbim-contact-row svg {
+    flex-shrink: 0;
+    margin-top: 1px;
+    color: #888;
+}
+
+.wbim-contact-row a {
+    color: #0073aa;
+    text-decoration: none;
+}
+
+.wbim-contact-row a:hover {
+    text-decoration: underline;
 }
 
 /* Cart item branch display */
@@ -814,7 +968,7 @@
 
     /* Branch buttons responsive */
     .wbim-branch-buttons {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: 1fr;
     }
 
     .wbim-branch-button {
@@ -840,11 +994,6 @@
     }
 }
 
-@media (max-width: 480px) {
-    .wbim-branch-buttons {
-        grid-template-columns: 1fr;
-    }
-}
 
 /* ==========================================================================
    Bulk/Wholesale Pricing - Product Page
