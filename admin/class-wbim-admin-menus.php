@@ -74,6 +74,16 @@ class WBIM_Admin_Menus {
             array( $this, 'render_stock' )
         );
 
+        // Branch Prices submenu
+        add_submenu_page(
+            'wbim',
+            __( 'Branch Prices', 'wbim' ),
+            __( 'ფილიალის ფასები', 'wbim' ),
+            'manage_woocommerce',
+            'wbim-prices',
+            array( $this, 'render_prices' )
+        );
+
         // Transfers submenu
         add_submenu_page(
             'wbim',
@@ -184,6 +194,25 @@ class WBIM_Admin_Menus {
             default:
                 include WBIM_PLUGIN_DIR . 'admin/views/stock/list.php';
                 break;
+        }
+    }
+
+    /**
+     * Render branch prices page
+     *
+     * @return void
+     */
+    public function render_prices() {
+        if ( ! current_user_can( 'manage_woocommerce' ) ) {
+            wp_die( esc_html__( 'You do not have permission to access this page.', 'wbim' ) );
+        }
+
+        // Use the admin prices class
+        if ( class_exists( 'WBIM_Admin_Prices' ) ) {
+            $prices = new WBIM_Admin_Prices();
+            $prices->render_page();
+        } else {
+            include WBIM_PLUGIN_DIR . 'admin/views/prices/list.php';
         }
     }
 

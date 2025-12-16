@@ -87,6 +87,15 @@ $branches = WBIM_Branch::get_active();
                             <p class="description">
                                 <?php esc_html_e( 'თუ ჩართულია და SKU ვარიაბელურ პროდუქტს ეკუთვნის, მარაგი თანაბრად განაწილდება ყველა ვარიაციაზე. თუ გამორთულია, ეს პროდუქტები გამოტოვდება.', 'wbim' ); ?>
                             </p>
+                            <p style="margin-top: 10px;">
+                                <label>
+                                    <input type="checkbox" name="mark_missing_out_of_stock" value="true" />
+                                    <?php esc_html_e( 'ფაილში არარსებული პროდუქტების "არ არის მარაგში" მონიშვნა', 'wbim' ); ?>
+                                </label>
+                            </p>
+                            <p class="description">
+                                <?php esc_html_e( 'თუ ჩართულია, ფაილში არარსებული ყველა პროდუქტი ამ ფილიალში მოინიშნება როგორც "არ არის მარაგში" (რაოდენობა: 0). ვარიაბელური პროდუქტის შემთხვევაში, თუ მშობელი SKU ფაილშია, მისი ვარიაციები არ შეიცვლება.', 'wbim' ); ?>
+                            </p>
                         </div>
 
                         <div class="wbim-import-actions">

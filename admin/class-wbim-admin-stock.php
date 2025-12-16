@@ -539,8 +539,9 @@ class WBIM_Admin_Stock {
     public function ajax_import_stock() {
         try {
             // Increase memory and time limits for large imports
-            @ini_set( 'memory_limit', '512M' );
-            @set_time_limit( 300 );
+            @ini_set( 'memory_limit', '1024M' );
+            @set_time_limit( 600 ); // 10 minutes
+            @ini_set( 'max_execution_time', 600 );
 
             check_ajax_referer( 'wbim_admin', 'nonce' );
 
@@ -585,6 +586,9 @@ class WBIM_Admin_Stock {
                 'distribute_to_variations'   => isset( $_POST['distribute_to_variations'] ) && 'true' === $_POST['distribute_to_variations'],
             );
 
+            // Check if we should mark missing products as out of stock
+            $mark_missing_out_of_stock = isset( $_POST['mark_missing_out_of_stock'] ) && 'true' === $_POST['mark_missing_out_of_stock'];
+
             // Determine file type and import accordingly
             $file_type = WBIM_CSV_Handler::get_file_type( $file_path );
 
@@ -604,6 +608,16 @@ class WBIM_Admin_Stock {
                 ) );
             }
 
+            // Mark missing products as out of stock if option is enabled (via background task)
+            $sync_task_id = null;
+            if ( $mark_missing_out_of_stock && ! empty( $results['imported_product_ids'] ) ) {
+                $sync_task_id = WBIM_Background_Sync::schedule_mark_out_of_stock(
+                    $branch_id,
+                    $results['imported_product_ids'],
+                    get_current_user_id()
+                );
+            }
+
             // Format response
             $message = sprintf(
                 __( 'იმპორტი დასრულდა: %1$d პროდუქტი %2$d-დან წარმატებით იმპორტირდა.', 'wbim' ),
@@ -618,10 +632,16 @@ class WBIM_Admin_Stock {
                 );
             }
 
+            // Add sync info to message
+            if ( $sync_task_id ) {
+                $message .= ' ' . __( 'სინქრონიზაცია მიმდინარეობს ფონურ რეჟიმში.', 'wbim' );
+            }
+
             wp_send_json_success(
                 array(
-                    'message' => $message,
-                    'results' => $results,
+                    'message'      => $message,
+                    'results'      => $results,
+                    'sync_task_id' => $sync_task_id,
                 )
             );
         } catch ( Exception $e ) {

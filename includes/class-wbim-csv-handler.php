@@ -457,11 +457,13 @@ class WBIM_CSV_Handler {
         $options = wp_parse_args( $options, $defaults );
 
         $results = array(
-            'success'         => 0,
-            'skipped'         => 0,
-            'errors'          => array(),
-            'total_rows'      => 0,
-            'skipped_details' => array(),
+            'success'              => 0,
+            'skipped'              => 0,
+            'errors'               => array(),
+            'error_details'        => array(), // Structured error details with SKU, name, reason
+            'total_rows'           => 0,
+            'skipped_details'      => array(), // Structured skipped details with SKU, name, reason
+            'imported_product_ids' => array(), // Track imported product IDs for sync feature
         );
 
         // Validate branch
@@ -560,6 +562,11 @@ class WBIM_CSV_Handler {
             // Skip empty SKUs
             if ( empty( $sku ) && $options['skip_empty'] ) {
                 $results['skipped']++;
+                $results['skipped_details'][] = array(
+                    'sku'    => __( '(ცარიელი)', 'wbim' ),
+                    'name'   => '',
+                    'reason' => sprintf( __( 'ცარიელი SKU (სტრიქონი %d)', 'wbim' ), $row_number ),
+                );
                 continue;
             }
 
@@ -568,6 +575,11 @@ class WBIM_CSV_Handler {
                 $results['errors'][] = sprintf(
                     __( 'სტრიქონი %d: SKU არ არის მითითებული.', 'wbim' ),
                     $row_number
+                );
+                $results['error_details'][] = array(
+                    'sku'    => __( '(ცარიელი)', 'wbim' ),
+                    'name'   => '',
+                    'reason' => sprintf( __( 'SKU არ არის მითითებული (სტრიქონი %d)', 'wbim' ), $row_number ),
                 );
                 continue;
             }
@@ -580,6 +592,11 @@ class WBIM_CSV_Handler {
                     $row_number,
                     $sku
                 );
+                $results['error_details'][] = array(
+                    'sku'    => $sku,
+                    'name'   => '',
+                    'reason' => __( 'პროდუქტი ვერ მოიძებნა', 'wbim' ),
+                );
                 continue;
             }
 
@@ -590,6 +607,11 @@ class WBIM_CSV_Handler {
                     __( 'სტრიქონი %d: პროდუქტის ჩატვირთვა ვერ მოხერხდა SKU "%s".', 'wbim' ),
                     $row_number,
                     $sku
+                );
+                $results['error_details'][] = array(
+                    'sku'    => $sku,
+                    'name'   => '',
+                    'reason' => __( 'პროდუქტის ჩატვირთვა ვერ მოხერხდა', 'wbim' ),
                 );
                 continue;
             }
@@ -607,9 +629,10 @@ class WBIM_CSV_Handler {
 
                 if ( empty( $variations ) ) {
                     $results['skipped']++;
-                    $results['skipped_details'][] = sprintf(
-                        __( 'SKU "%s" - ვარიაბელურ პროდუქტს ვარიაციები არ აქვს', 'wbim' ),
-                        $sku
+                    $results['skipped_details'][] = array(
+                        'sku'    => $sku,
+                        'name'   => $product->get_name(),
+                        'reason' => __( 'ვარიაბელურ პროდუქტს ვარიაციები არ აქვს', 'wbim' ),
                     );
                     continue;
                 }
@@ -617,10 +640,10 @@ class WBIM_CSV_Handler {
                 if ( ! $options['distribute_to_variations'] ) {
                     // Skip variable products if distribution is disabled
                     $results['skipped']++;
-                    $results['skipped_details'][] = sprintf(
-                        __( 'SKU "%s" - ვარიაბელური პროდუქტი (აქვს %d ვარიაცია). ჩართეთ "მარაგის განაწილება ვარიაციებზე" იმპორტისთვის.', 'wbim' ),
-                        $sku,
-                        count( $variations )
+                    $results['skipped_details'][] = array(
+                        'sku'    => $sku,
+                        'name'   => $product->get_name(),
+                        'reason' => sprintf( __( 'ვარიაბელური პროდუქტი (%d ვარიაცია). ჩართეთ განაწილება.', 'wbim' ), count( $variations ) ),
                     );
                     continue;
                 }
@@ -656,8 +679,15 @@ class WBIM_CSV_Handler {
 
                 if ( $distributed_count > 0 ) {
                     $results['success']++;
+                    // Track the parent variable product ID
+                    $results['imported_product_ids'][] = $product_id;
                 } else {
                     $results['skipped']++;
+                    $results['skipped_details'][] = array(
+                        'sku'    => $sku,
+                        'name'   => $product->get_name(),
+                        'reason' => __( 'ვარიაციების განაწილება ვერ მოხერხდა', 'wbim' ),
+                    );
                 }
                 continue;
             }
@@ -667,6 +697,11 @@ class WBIM_CSV_Handler {
 
             if ( $existing && ! $options['update_existing'] ) {
                 $results['skipped']++;
+                $results['skipped_details'][] = array(
+                    'sku'    => $sku,
+                    'name'   => $product->get_name(),
+                    'reason' => __( 'მარაგი უკვე არსებობს და განახლება გამორთულია', 'wbim' ),
+                );
                 continue;
             }
 
@@ -684,10 +719,17 @@ class WBIM_CSV_Handler {
                     $row_number,
                     $result->get_error_message()
                 );
+                $results['error_details'][] = array(
+                    'sku'    => $sku,
+                    'name'   => $product->get_name(),
+                    'reason' => $result->get_error_message(),
+                );
                 continue;
             }
 
             $results['success']++;
+            // Track imported product ID
+            $results['imported_product_ids'][] = $main_product_id;
 
             // Free memory periodically during large imports
             if ( $results['success'] % 100 === 0 ) {
@@ -697,6 +739,9 @@ class WBIM_CSV_Handler {
                 }
             }
         }
+
+        // Remove duplicates from imported product IDs
+        $results['imported_product_ids'] = array_unique( $results['imported_product_ids'] );
 
         return $results;
     }
@@ -853,11 +898,13 @@ class WBIM_CSV_Handler {
         $options = wp_parse_args( $options, $defaults );
 
         $results = array(
-            'success'         => 0,
-            'skipped'         => 0,
-            'errors'          => array(),
-            'total_rows'      => 0,
-            'skipped_details' => array(),
+            'success'              => 0,
+            'skipped'              => 0,
+            'errors'               => array(),
+            'error_details'        => array(), // Structured error details with SKU, name, reason
+            'total_rows'           => 0,
+            'skipped_details'      => array(), // Structured skipped details with SKU, name, reason
+            'imported_product_ids' => array(), // Track imported product IDs for sync feature
         );
 
         // Validate branch
@@ -933,6 +980,11 @@ class WBIM_CSV_Handler {
             // Skip empty rows
             if ( empty( $sku ) && $options['skip_empty'] ) {
                 $results['skipped']++;
+                $results['skipped_details'][] = array(
+                    'sku'    => __( '(ცარიელი)', 'wbim' ),
+                    'name'   => '',
+                    'reason' => sprintf( __( 'ცარიელი SKU (სტრიქონი %d)', 'wbim' ), $row_number ),
+                );
                 continue;
             }
 
@@ -941,6 +993,11 @@ class WBIM_CSV_Handler {
                 $results['errors'][] = sprintf(
                     __( 'სტრიქონი %d: SKU არ არის მითითებული.', 'wbim' ),
                     $row_number
+                );
+                $results['error_details'][] = array(
+                    'sku'    => __( '(ცარიელი)', 'wbim' ),
+                    'name'   => '',
+                    'reason' => sprintf( __( 'SKU არ არის მითითებული (სტრიქონი %d)', 'wbim' ), $row_number ),
                 );
                 continue;
             }
@@ -953,6 +1010,11 @@ class WBIM_CSV_Handler {
                     $row_number,
                     $sku
                 );
+                $results['error_details'][] = array(
+                    'sku'    => $sku,
+                    'name'   => '',
+                    'reason' => __( 'პროდუქტი ვერ მოიძებნა', 'wbim' ),
+                );
                 continue;
             }
 
@@ -963,6 +1025,11 @@ class WBIM_CSV_Handler {
                     __( 'სტრიქონი %d: პროდუქტის ჩატვირთვა ვერ მოხერხდა SKU "%s".', 'wbim' ),
                     $row_number,
                     $sku
+                );
+                $results['error_details'][] = array(
+                    'sku'    => $sku,
+                    'name'   => '',
+                    'reason' => __( 'პროდუქტის ჩატვირთვა ვერ მოხერხდა', 'wbim' ),
                 );
                 continue;
             }
@@ -980,9 +1047,10 @@ class WBIM_CSV_Handler {
 
                 if ( empty( $variations ) ) {
                     $results['skipped']++;
-                    $results['skipped_details'][] = sprintf(
-                        __( 'SKU "%s" - ვარიაბელურ პროდუქტს ვარიაციები არ აქვს', 'wbim' ),
-                        $sku
+                    $results['skipped_details'][] = array(
+                        'sku'    => $sku,
+                        'name'   => $product->get_name(),
+                        'reason' => __( 'ვარიაბელურ პროდუქტს ვარიაციები არ აქვს', 'wbim' ),
                     );
                     continue;
                 }
@@ -990,10 +1058,10 @@ class WBIM_CSV_Handler {
                 if ( ! $options['distribute_to_variations'] ) {
                     // Skip variable products if distribution is disabled
                     $results['skipped']++;
-                    $results['skipped_details'][] = sprintf(
-                        __( 'SKU "%s" - ვარიაბელური პროდუქტი (აქვს %d ვარიაცია). ჩართეთ "მარაგის განაწილება ვარიაციებზე" იმპორტისთვის.', 'wbim' ),
-                        $sku,
-                        count( $variations )
+                    $results['skipped_details'][] = array(
+                        'sku'    => $sku,
+                        'name'   => $product->get_name(),
+                        'reason' => sprintf( __( 'ვარიაბელური პროდუქტი (%d ვარიაცია). ჩართეთ განაწილება.', 'wbim' ), count( $variations ) ),
                     );
                     continue;
                 }
@@ -1041,8 +1109,15 @@ class WBIM_CSV_Handler {
 
                 if ( $distributed_count > 0 ) {
                     $results['success']++;
+                    // Track the parent variable product ID
+                    $results['imported_product_ids'][] = $product_id;
                 } else {
                     $results['skipped']++;
+                    $results['skipped_details'][] = array(
+                        'sku'    => $sku,
+                        'name'   => $product->get_name(),
+                        'reason' => __( 'ვარიაციების განაწილება ვერ მოხერხდა', 'wbim' ),
+                    );
                 }
                 continue;
             }
@@ -1052,6 +1127,11 @@ class WBIM_CSV_Handler {
 
             if ( $existing && ! $options['update_existing'] ) {
                 $results['skipped']++;
+                $results['skipped_details'][] = array(
+                    'sku'    => $sku,
+                    'name'   => $product->get_name(),
+                    'reason' => __( 'მარაგი უკვე არსებობს და განახლება გამორთულია', 'wbim' ),
+                );
                 continue;
             }
 
@@ -1077,6 +1157,11 @@ class WBIM_CSV_Handler {
                     $row_number,
                     $result->get_error_message()
                 );
+                $results['error_details'][] = array(
+                    'sku'    => $sku,
+                    'name'   => $product->get_name(),
+                    'reason' => $result->get_error_message(),
+                );
                 continue;
             }
 
@@ -1084,9 +1169,14 @@ class WBIM_CSV_Handler {
             WBIM_Stock::sync_wc_stock( $main_product_id, $variation_id );
 
             $results['success']++;
+            // Track imported product ID
+            $results['imported_product_ids'][] = $main_product_id;
         }
 
         fclose( $handle );
+
+        // Remove duplicates from imported product IDs
+        $results['imported_product_ids'] = array_unique( $results['imported_product_ids'] );
 
         return $results;
     }
@@ -1417,5 +1507,138 @@ class WBIM_CSV_Handler {
 
         fclose( $output );
         exit;
+    }
+
+    /**
+     * Mark products not in imported list as out of stock for a specific branch
+     *
+     * @param int   $branch_id            Branch ID.
+     * @param array $imported_product_ids Array of imported product IDs.
+     * @return array Results with counts.
+     */
+    public static function mark_missing_out_of_stock( $branch_id, $imported_product_ids = array() ) {
+        global $wpdb;
+
+        // Increase time limit for large operations
+        @set_time_limit( 600 );
+        @ini_set( 'memory_limit', '512M' );
+
+        $results = array(
+            'marked_out_of_stock'         => 0,
+            'skipped_variations'          => 0,
+            'errors'                      => array(),
+            'marked_out_of_stock_details' => array(), // Detailed list of marked products
+        );
+
+        // Validate branch
+        if ( empty( $branch_id ) ) {
+            $results['errors'][] = __( 'ფილიალი არ არის მითითებული.', 'wbim' );
+            return $results;
+        }
+
+        // Convert to integers for safe comparison
+        $imported_product_ids = array_map( 'intval', $imported_product_ids );
+
+        // Get all variation IDs for imported variable products using direct query (faster)
+        $imported_variation_ids = array();
+        if ( ! empty( $imported_product_ids ) ) {
+            $imported_ids_string = implode( ',', $imported_product_ids );
+            $variation_ids = $wpdb->get_col(
+                "SELECT ID FROM {$wpdb->posts}
+                 WHERE post_type = 'product_variation'
+                 AND post_parent IN ({$imported_ids_string})"
+            );
+            $imported_variation_ids = array_map( 'intval', $variation_ids );
+        }
+
+        // Merge imported products and their variations
+        $skip_product_ids = array_unique( array_merge( $imported_product_ids, $imported_variation_ids ) );
+
+        // Get all simple products NOT in the imported list
+        $simple_query = "SELECT DISTINCT p.ID, p.post_title, pm.meta_value as sku
+             FROM {$wpdb->posts} p
+             LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_sku'
+             LEFT JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id
+             LEFT JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+             LEFT JOIN {$wpdb->terms} t ON tt.term_id = t.term_id
+             WHERE p.post_type = 'product'
+             AND p.post_status = 'publish'
+             AND (tt.taxonomy = 'product_type' AND t.slug = 'simple')";
+
+        if ( ! empty( $skip_product_ids ) ) {
+            $simple_query .= " AND p.ID NOT IN (" . implode( ',', $skip_product_ids ) . ")";
+        }
+
+        $simple_products = $wpdb->get_results( $simple_query );
+
+        // Get all variations NOT in the imported list and whose parent is NOT imported
+        $variations = $wpdb->get_results(
+            "SELECT v.ID, v.post_title, v.post_parent, pm.meta_value as sku, p.post_title as parent_title
+             FROM {$wpdb->posts} v
+             LEFT JOIN {$wpdb->posts} p ON v.post_parent = p.ID
+             LEFT JOIN {$wpdb->postmeta} pm ON v.ID = pm.post_id AND pm.meta_key = '_sku'
+             WHERE v.post_type = 'product_variation'
+             AND v.post_status = 'publish'
+             " . ( ! empty( $imported_product_ids ) ? "AND v.post_parent NOT IN (" . implode( ',', $imported_product_ids ) . ")" : "" ) .
+             ( ! empty( $skip_product_ids ) ? " AND v.ID NOT IN (" . implode( ',', $skip_product_ids ) . ")" : "" )
+        );
+
+        // Process simple products (using pre-fetched data - much faster)
+        foreach ( $simple_products as $product_data ) {
+            $result = WBIM_Stock::set( $product_data->ID, 0, $branch_id, array(
+                'quantity'     => 0,
+                'stock_status' => 'outofstock',
+                'note'         => __( 'იმპორტის სინქრონიზაცია - ფაილში ვერ მოიძებნა', 'wbim' ),
+            ) );
+
+            if ( ! is_wp_error( $result ) ) {
+                $results['marked_out_of_stock']++;
+                // Sync with WooCommerce
+                WBIM_Stock::sync_wc_stock( $product_data->ID, 0 );
+
+                // Add to details
+                $results['marked_out_of_stock_details'][] = array(
+                    'sku'    => $product_data->sku ?: '',
+                    'name'   => $product_data->post_title,
+                    'reason' => __( 'ფაილში ვერ მოიძებნა', 'wbim' ),
+                    'type'   => 'simple',
+                );
+            }
+
+            // Free memory periodically
+            if ( $results['marked_out_of_stock'] % 100 === 0 ) {
+                wp_cache_flush();
+            }
+        }
+
+        // Process variations (using pre-fetched data - much faster)
+        foreach ( $variations as $var_data ) {
+            $result = WBIM_Stock::set( $var_data->post_parent, $var_data->ID, $branch_id, array(
+                'quantity'     => 0,
+                'stock_status' => 'outofstock',
+                'note'         => __( 'იმპორტის სინქრონიზაცია - ფაილში ვერ მოიძებნა', 'wbim' ),
+            ) );
+
+            if ( ! is_wp_error( $result ) ) {
+                $results['marked_out_of_stock']++;
+                // Sync with WooCommerce
+                WBIM_Stock::sync_wc_stock( $var_data->post_parent, $var_data->ID );
+
+                // Add to details
+                $results['marked_out_of_stock_details'][] = array(
+                    'sku'    => $var_data->sku ?: '',
+                    'name'   => $var_data->parent_title . ' - ' . $var_data->post_title,
+                    'reason' => __( 'ფაილში ვერ მოიძებნა', 'wbim' ),
+                    'type'   => 'variation',
+                );
+            }
+
+            // Free memory periodically
+            if ( $results['marked_out_of_stock'] % 100 === 0 ) {
+                wp_cache_flush();
+            }
+        }
+
+        return $results;
     }
 }

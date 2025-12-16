@@ -198,17 +198,17 @@
    Archive Page Stock Display
    ========================================================================== */
 
+/* Archive stock - hidden by default */
 .wbim-archive-stock {
-    margin-top: 5px;
-    font-size: 12px;
+    display: none !important;
 }
 
 .wbim-archive-available {
-    color: #4caf50;
+    display: none !important;
 }
 
 .wbim-archive-unavailable {
-    color: #999;
+    display: none !important;
 }
 
 /* ==========================================================================
@@ -593,12 +593,45 @@
     border: 1px solid #ffeeba;
 }
 
-/* Hide branch selector in Rey sticky Add to Cart */
+/* Hide branch selector in Rey sticky Add to Cart - Maximum specificity */
+.rey-stickyAtc .wbim-branch-selector-wrapper,
+.rey-stickyAtc .wbim-branch-buttons,
+.rey-stickyAtc .wbim-branch-button,
+.rey-stickyAtc .wbim-branch-selector-label,
+.rey-stickyAtc .wbim-variable-notice,
+.rey-stickyAtc [class*="wbim-"],
 .rey-stickyAtc--visible .wbim-branch-selector-wrapper,
-.rey-stickyAtc.rey-stickyAtc--visible .wbim-branch-selector-wrapper,
 .rey-stickyAtc--visible .wbim-branch-buttons,
-.rey-stickyAtc--visible [class*="wbim-branch"] {
+.rey-stickyAtc--visible .wbim-branch-button,
+.rey-stickyAtc--visible [class*="wbim-"],
+div.rey-stickyAtc .wbim-branch-selector-wrapper,
+div.rey-stickyAtc [class*="wbim-"],
+html body .rey-stickyAtc .wbim-branch-selector-wrapper,
+html body .rey-stickyAtc [class*="wbim-"],
+html body div.rey-stickyAtc .wbim-branch-selector-wrapper,
+html body div.rey-stickyAtc [class*="wbim-"],
+.rey-stickyAtc form.cart .wbim-branch-selector-wrapper,
+.rey-stickyAtc .cart .wbim-branch-selector-wrapper,
+.rey-stickyAtc .product .wbim-branch-selector-wrapper,
+.rey-stickyAtc-wrapper .wbim-branch-selector-wrapper,
+.rey-stickyAtc-wrapper [class*="wbim-"],
+[class*="rey-stickyAtc"] .wbim-branch-selector-wrapper,
+[class*="rey-stickyAtc"] [class*="wbim-branch"],
+[class*="rey-stickyAtc"] [class*="wbim-"] {
     display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    width: 0 !important;
+    max-height: 0 !important;
+    max-width: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    position: absolute !important;
+    left: -9999px !important;
+    pointer-events: none !important;
 }
 
 /* Shake animation for validation error */
@@ -966,13 +999,14 @@
         padding: 8px 12px;
     }
 
-    /* Branch buttons responsive */
+    /* Branch buttons responsive - keep 2 columns on mobile */
     .wbim-branch-buttons {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
     }
 
     .wbim-branch-button {
-        padding: 14px 15px;
+        padding: 12px 10px;
     }
 
     .wbim-branch-button-name {
@@ -996,63 +1030,61 @@
 
 
 /* ==========================================================================
-   Bulk/Wholesale Pricing - Product Page
+   Bulk/Wholesale Pricing - Product Page (Matching Branch Card Style)
    ========================================================================== */
 
 .wbim-bulk-pricing-wrapper {
     margin: 20px 0;
-    padding: 18px;
-    background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
-    border: 1px solid #e0e0e0;
-    border-radius: 10px;
 }
 
 .wbim-bulk-pricing-title {
-    margin: 0 0 15px 0;
-    font-size: 15px;
+    display: block;
+    margin-bottom: 12px;
     font-weight: 600;
+    font-size: 15px;
     color: #333;
 }
 
+/* Grid layout matching branch buttons */
 .wbim-qty-buttons {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: 12px;
 }
 
+/* Individual Quantity Card - Two Row Layout */
 .wbim-qty-btn {
     position: relative;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-width: 110px;
-    padding: 14px 18px;
-    background: #fff;
-    border: 2px solid #e0e0e0;
-    border-radius: 10px;
+    padding: 14px 16px!important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    border: 2px solid #e0e0e0!important;
+    border-radius: 10px!important;
     cursor: pointer;
     transition: all 0.2s ease;
     font-family: inherit;
-    text-align: center;
+    text-align: left;
+    gap: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
 .wbim-qty-btn:hover {
-    border-color: #2271b1;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(34, 113, 177, 0.15);
+    border-color: #0073aa;
+    box-shadow: 0 2px 8px rgba(0, 115, 170, 0.15);
 }
 
 .wbim-qty-btn:focus {
     outline: none;
-    border-color: #2271b1;
-    box-shadow: 0 0 0 3px rgba(34, 113, 177, 0.2);
+    border-color: #0073aa;
+    box-shadow: 0 0 0 3px rgba(0, 115, 170, 0.15);
 }
 
 .wbim-qty-btn.active {
-    border-color: #2271b1;
-    background: linear-gradient(135deg, #f0f7fc 0%, #e8f4fc 100%);
-    box-shadow: 0 0 0 3px rgba(34, 113, 177, 0.15);
+    border-color: #0073aa;
+    background: #f0f7fc;
+    box-shadow: 0 0 0 3px rgba(0, 115, 170, 0.15);
 }
 
 .wbim-qty-btn.disabled {
@@ -1061,48 +1093,76 @@
     pointer-events: none;
 }
 
-/* Quantity display */
+/* Row 1: Quantity + Savings Badge */
 .wbim-qty-btn-qty {
-    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    font-size: 17px;
     font-weight: 700;
     color: #333;
-    margin-bottom: 4px;
 }
 
 .wbim-qty-btn-qty small {
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 500;
     color: #666;
-    margin-left: 3px;
+    margin-left: 4px;
 }
 
-/* Total price */
+/* Row 2: Price Row Container */
+.wbim-qty-btn-price-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
 .wbim-qty-btn-total {
-    font-size: 16px;
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 12px;
+    background: #e8f5e9;
+    color: #2e7d32;
+    border-radius: 20px;
+    font-size: 15px;
     font-weight: 700;
-    color: #2271b1;
-    margin-bottom: 2px;
 }
 
-/* Unit price */
+/* Unit Price */
 .wbim-qty-btn-unit {
-    font-size: 12px;
+    font-size: 13px;
     color: #666;
 }
 
-/* Savings badge */
+/* Savings Badge - Inline with quantity */
 .wbim-savings-badge {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    padding: 3px 8px;
-    background: linear-gradient(135deg, #4caf50 0%, #43a047 100%);
+    position: static;
+    padding: 4px 10px;
+    background: #4caf50;
     color: #fff;
     font-size: 11px;
     font-weight: 600;
-    border-radius: 12px;
-    box-shadow: 0 2px 6px rgba(76, 175, 80, 0.3);
+    border-radius: 15px;
     white-space: nowrap;
+}
+
+/* Active state checkmark */
+.wbim-qty-btn.active::after {
+    content: '';
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 22px;
+    height: 22px;
+    background: #0073aa url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E") center/12px no-repeat;
+    border-radius: 50%;
+}
+
+/* Hide savings badge when active (show checkmark instead) */
+.wbim-qty-btn.active .wbim-savings-badge {
+    display: none;
 }
 
 /* Variable product notice */
@@ -1141,17 +1201,19 @@ p.price ins,
 }
 
 /* ==========================================================================
-   Bulk Pricing - Responsive
+   Bulk Pricing - Responsive (Horizontal Layout)
    ========================================================================== */
 
 @media (max-width: 768px) {
+    /* Keep 2 columns on tablet */
     .wbim-qty-buttons {
-        gap: 10px;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
     }
 
     .wbim-qty-btn {
-        min-width: 95px;
-        padding: 12px 14px;
+        padding: 12px 10px;
+        gap: 8px;
     }
 
     .wbim-qty-btn-qty {
@@ -1159,44 +1221,8 @@ p.price ins,
     }
 
     .wbim-qty-btn-total {
-        font-size: 14px;
-    }
-
-    .wbim-qty-btn-unit {
-        font-size: 11px;
-    }
-
-    .wbim-savings-badge {
-        font-size: 10px;
-        padding: 2px 6px;
-        top: -6px;
-        right: -6px;
-    }
-}
-
-@media (max-width: 480px) {
-    .wbim-bulk-pricing-wrapper {
-        padding: 15px;
-    }
-
-    .wbim-qty-buttons {
-        flex-direction: column;
-    }
-
-    .wbim-qty-btn {
-        min-width: 100%;
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-        padding: 15px;
-    }
-
-    .wbim-qty-btn-qty {
-        margin-bottom: 0;
-    }
-
-    .wbim-qty-btn-total {
-        margin-bottom: 0;
+        font-size: 13px;
+        padding: 4px 8px;
     }
 
     .wbim-qty-btn-unit {
@@ -1204,7 +1230,79 @@ p.price ins,
     }
 
     .wbim-savings-badge {
-        position: static;
-        margin-left: 10px;
+        font-size: 9px;
+        padding: 2px 6px;
+        top: -6px;
+        right: 8px;
     }
+
+    .wbim-qty-btn.active::after {
+        width: 18px;
+        height: 18px;
+        right: 8px;
+        background-size: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Single column on small mobile */
+    .wbim-qty-buttons {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .wbim-qty-btn {
+        padding: 14px 12px;
+    }
+
+    .wbim-qty-btn-qty {
+        font-size: 17px;
+    }
+
+    .wbim-qty-btn-total {
+        font-size: 14px;
+        padding: 5px 10px;
+    }
+}
+
+/* ==========================================================================
+   Wholesale Tiers Display
+   ========================================================================== */
+
+.wbim-wholesale-tiers {
+    margin: 15px 0;
+    padding: 12px 15px;
+    background: #f0f7ff;
+    border: 1px solid #d0e3f7;
+    border-radius: 6px;
+}
+
+.wbim-wholesale-tiers-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: #1e3a5f;
+    margin-bottom: 8px;
+}
+
+.wbim-wholesale-tiers-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.wbim-wholesale-tiers-list li {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 13px;
+    color: #333;
+    border-bottom: 1px dashed #d0e3f7;
+}
+
+.wbim-wholesale-tiers-list li:last-child {
+    border-bottom: none;
+}
+
+.wbim-wholesale-tiers-list li strong {
+    color: #0073aa;
 }

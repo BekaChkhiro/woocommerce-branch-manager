@@ -1944,3 +1944,209 @@
         grid-template-columns: repeat(2, 1fr);
     }
 }
+
+/* ==========================================================================
+   Import Results - Collapsible Sections
+   ========================================================================== */
+
+.wbim-collapsible-section {
+    margin-top: 20px;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    background: #fff;
+}
+
+.wbim-collapsible-header {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    cursor: pointer;
+    background: #f6f7f7;
+    border-bottom: 1px solid transparent;
+    transition: background-color 0.2s;
+}
+
+.wbim-collapsible-header:hover {
+    background: #f0f0f1;
+}
+
+.wbim-collapsible-toggle {
+    font-size: 16px;
+    color: #646970;
+    margin-right: 10px;
+    transition: transform 0.2s;
+}
+
+.wbim-collapsible-title {
+    font-weight: 600;
+    font-size: 13px;
+    color: #1d2327;
+}
+
+.wbim-collapsible-content {
+    border-top: 1px solid #c3c4c7;
+}
+
+/* Section type colors */
+.wbim-section-errors .wbim-collapsible-header {
+    background: #fde7e7;
+}
+
+.wbim-section-errors .wbim-collapsible-header:hover {
+    background: #fcd6d6;
+}
+
+.wbim-section-errors .wbim-collapsible-title {
+    color: #b32d2e;
+}
+
+.wbim-section-skipped .wbim-collapsible-header {
+    background: #fff8e5;
+}
+
+.wbim-section-skipped .wbim-collapsible-header:hover {
+    background: #fff0cc;
+}
+
+.wbim-section-skipped .wbim-collapsible-title {
+    color: #996800;
+}
+
+.wbim-section-outofstock .wbim-collapsible-header {
+    background: #e5f3ff;
+}
+
+.wbim-section-outofstock .wbim-collapsible-header:hover {
+    background: #d0e8ff;
+}
+
+.wbim-section-outofstock .wbim-collapsible-title {
+    color: #0073aa;
+}
+
+/* Details table */
+.wbim-details-table {
+    margin: 0 !important;
+}
+
+.wbim-details-table thead th {
+    background: #f6f7f7;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.wbim-details-table tbody tr:nth-child(odd) {
+    background: #f9f9f9;
+}
+
+.wbim-details-table td {
+    font-size: 13px;
+    vertical-align: middle;
+}
+
+.wbim-details-table code {
+    background: #f0f0f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 12px;
+}
+
+/* Import Results Pagination */
+.wbim-collapsible-content .wbim-pagination {
+    padding: 15px;
+    background: #f6f7f7;
+    border-top: 1px solid #c3c4c7;
+    margin-top: 0;
+}
+
+.wbim-page-info {
+    margin: 0 15px;
+    font-size: 13px;
+    color: #646970;
+}
+
+.wbim-page-prev,
+.wbim-page-next {
+    min-width: 80px;
+}
+
+.wbim-page-prev:disabled,
+.wbim-page-next:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ==========================================================================
+   Background Sync Status Styles
+   ========================================================================== */
+
+.wbim-background-sync-status {
+    margin-top: 20px;
+    padding: 20px;
+    background: #f0f6fc;
+    border: 1px solid #c3c9d4;
+    border-radius: 4px;
+    border-left: 4px solid #0073aa;
+}
+
+.wbim-sync-status-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.wbim-sync-status-header .dashicons {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    color: #0073aa;
+}
+
+.wbim-sync-status-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: #1d2327;
+}
+
+.wbim-sync-status-text {
+    margin: 8px 0;
+    color: #50575e;
+}
+
+.wbim-sync-status-info {
+    margin: 5px 0 0;
+    color: #646970;
+}
+
+/* Spinner animation */
+.wbim-sync-spinner {
+    animation: wbim-spin 1.5s linear infinite;
+}
+
+@keyframes wbim-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Completed state */
+.wbim-sync-done {
+    background: #e7f7e7;
+    border-color: #b0d9b0;
+    border-left-color: #46b450;
+}
+
+.wbim-sync-completed .dashicons {
+    color: #46b450;
+}
+
+.wbim-sync-completed .wbim-sync-status-title {
+    color: #2e7d32;
+}
+
+/* Error in sync results */
+.wbim-sync-errors {
+    color: #b32d2e;
+}

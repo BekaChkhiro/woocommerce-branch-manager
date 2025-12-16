@@ -237,6 +237,9 @@ final class WBIM {
 
         // Bulk Pricing (frontend and cart)
         new WBIM_Bulk_Pricing();
+
+        // Background Sync Handler (for Action Scheduler hooks)
+        WBIM_Background_Sync::init();
     }
 
     /**

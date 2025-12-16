@@ -25,7 +25,7 @@ class WBIM_Activator {
      *
      * @var string
      */
-    const DB_VERSION = '1.3.0';
+    const DB_VERSION = '1.4.0';
 
     /**
      * Activate the plugin
@@ -80,6 +80,11 @@ class WBIM_Activator {
             self::upgrade_to_1_3_0();
         }
 
+        // Upgrade to 1.4.0 - add branch_prices table
+        if ( version_compare( $current_version, '1.4.0', '<' ) ) {
+            self::upgrade_to_1_4_0();
+        }
+
         update_option( 'wbim_db_version', self::DB_VERSION );
     }
 
@@ -104,6 +109,40 @@ class WBIM_Activator {
                 "ALTER TABLE {$table_branches} ADD COLUMN is_default TINYINT(1) DEFAULT 0 AFTER is_active"
             );
         }
+    }
+
+    /**
+     * Upgrade to version 1.4.0
+     * Adds branch_prices table for branch-specific pricing and wholesale prices
+     *
+     * @return void
+     */
+    private static function upgrade_to_1_4_0() {
+        global $wpdb;
+
+        $charset_collate = $wpdb->get_charset_collate();
+        require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
+        // Branch prices table
+        $table_branch_prices = $wpdb->prefix . 'wbim_branch_prices';
+        $sql_branch_prices   = "CREATE TABLE {$table_branch_prices} (
+            id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+            product_id bigint(20) UNSIGNED NOT NULL,
+            variation_id bigint(20) UNSIGNED DEFAULT 0,
+            branch_id int(11) NOT NULL,
+            regular_price decimal(19,4) DEFAULT NULL,
+            sale_price decimal(19,4) DEFAULT NULL,
+            min_quantity int(11) NOT NULL DEFAULT 1,
+            created_at datetime DEFAULT CURRENT_TIMESTAMP,
+            updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            UNIQUE KEY product_branch_qty (product_id, variation_id, branch_id, min_quantity),
+            KEY branch_id (branch_id),
+            KEY product_id (product_id),
+            KEY min_quantity (min_quantity)
+        ) {$charset_collate};";
+
+        dbDelta( $sql_branch_prices );
     }
 
     /**
@@ -509,6 +548,27 @@ class WBIM_Activator {
         ) {$charset_collate};";
 
         dbDelta( $sql_order_allocation );
+
+        // Branch prices table
+        $table_branch_prices = $wpdb->prefix . 'wbim_branch_prices';
+        $sql_branch_prices   = "CREATE TABLE {$table_branch_prices} (
+            id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+            product_id bigint(20) UNSIGNED NOT NULL,
+            variation_id bigint(20) UNSIGNED DEFAULT 0,
+            branch_id int(11) NOT NULL,
+            regular_price decimal(19,4) DEFAULT NULL,
+            sale_price decimal(19,4) DEFAULT NULL,
+            min_quantity int(11) NOT NULL DEFAULT 1,
+            created_at datetime DEFAULT CURRENT_TIMESTAMP,
+            updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            UNIQUE KEY product_branch_qty (product_id, variation_id, branch_id, min_quantity),
+            KEY branch_id (branch_id),
+            KEY product_id (product_id),
+            KEY min_quantity (min_quantity)
+        ) {$charset_collate};";
+
+        dbDelta( $sql_branch_prices );
 
         // Store database version
         update_option( 'wbim_db_version', self::DB_VERSION );

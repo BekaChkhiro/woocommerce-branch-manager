@@ -773,6 +773,130 @@
         },
 
         /**
+         * Build collapsible section HTML for import results
+         *
+         * @param {string} id Section ID
+         * @param {string} title Section title
+         * @param {Array} items Array of items with sku, name, reason
+         * @param {string} className CSS class name
+         * @return {string} HTML string
+         */
+        buildCollapsibleSection: function(id, title, items, className) {
+            var perPage = 50;
+            var totalPages = Math.ceil(items.length / perPage);
+
+            var html = '<div class="wbim-collapsible-section ' + className + '" data-section-id="' + id + '">';
+            html += '<div class="wbim-collapsible-header">';
+            html += '<span class="wbim-collapsible-toggle dashicons dashicons-arrow-right-alt2"></span>';
+            html += '<span class="wbim-collapsible-title">' + title + ' (' + items.length + ')</span>';
+            html += '</div>';
+            html += '<div class="wbim-collapsible-content" style="display: none;">';
+
+            // Build table
+            html += '<table class="widefat striped wbim-details-table">';
+            html += '<thead><tr>';
+            html += '<th style="width: 120px;">SKU</th>';
+            html += '<th>პროდუქტის სახელი</th>';
+            html += '<th style="width: 250px;">მიზეზი</th>';
+            html += '</tr></thead>';
+            html += '<tbody class="wbim-paginated-content" data-per-page="' + perPage + '" data-total-pages="' + totalPages + '" data-current-page="1">';
+
+            // Store all items as data attribute for pagination
+            $.each(items, function(i, item) {
+                var displayClass = i < perPage ? '' : 'style="display: none;"';
+                html += '<tr class="wbim-paginated-item" data-index="' + i + '" ' + displayClass + '>';
+                html += '<td><code>' + (item.sku || '-') + '</code></td>';
+                html += '<td>' + (item.name || '-') + '</td>';
+                html += '<td>' + (item.reason || '-') + '</td>';
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+
+            // Pagination controls
+            if (totalPages > 1) {
+                html += '<div class="wbim-pagination" data-section="' + id + '">';
+                html += '<button type="button" class="button wbim-page-prev" disabled>&laquo; წინა</button>';
+                html += '<span class="wbim-page-info">გვერდი <span class="wbim-current-page">1</span> / ' + totalPages + '</span>';
+                html += '<button type="button" class="button wbim-page-next"' + (totalPages <= 1 ? ' disabled' : '') + '>შემდეგი &raquo;</button>';
+                html += '</div>';
+            }
+
+            html += '</div></div>';
+
+            return html;
+        },
+
+        /**
+         * Initialize collapsible sections and pagination
+         */
+        initCollapsibleSections: function() {
+            // Toggle collapsible sections
+            $(document).off('click.wbimCollapsible').on('click.wbimCollapsible', '.wbim-collapsible-header', function() {
+                var $section = $(this).closest('.wbim-collapsible-section');
+                var $content = $section.find('.wbim-collapsible-content');
+                var $toggle = $(this).find('.wbim-collapsible-toggle');
+
+                $content.slideToggle(200);
+                $toggle.toggleClass('dashicons-arrow-right-alt2 dashicons-arrow-down-alt2');
+            });
+
+            // Pagination - Previous
+            $(document).off('click.wbimPagPrev').on('click.wbimPagPrev', '.wbim-page-prev', function() {
+                var $pagination = $(this).closest('.wbim-pagination');
+                var $tbody = $pagination.siblings('table').find('.wbim-paginated-content');
+                WBIMStock.changePage($tbody, $pagination, -1);
+            });
+
+            // Pagination - Next
+            $(document).off('click.wbimPagNext').on('click.wbimPagNext', '.wbim-page-next', function() {
+                var $pagination = $(this).closest('.wbim-pagination');
+                var $tbody = $pagination.siblings('table').find('.wbim-paginated-content');
+                WBIMStock.changePage($tbody, $pagination, 1);
+            });
+        },
+
+        /**
+         * Change pagination page
+         *
+         * @param {jQuery} $tbody Table body element
+         * @param {jQuery} $pagination Pagination container
+         * @param {number} direction -1 for previous, 1 for next
+         */
+        changePage: function($tbody, $pagination, direction) {
+            var currentPage = parseInt($tbody.data('current-page')) || 1;
+            var totalPages = parseInt($tbody.data('total-pages')) || 1;
+            var perPage = parseInt($tbody.data('per-page')) || 50;
+            var newPage = currentPage + direction;
+
+            if (newPage < 1 || newPage > totalPages) {
+                return;
+            }
+
+            // Update current page
+            $tbody.data('current-page', newPage);
+
+            // Calculate range
+            var startIndex = (newPage - 1) * perPage;
+            var endIndex = startIndex + perPage - 1;
+
+            // Show/hide rows
+            $tbody.find('.wbim-paginated-item').each(function() {
+                var index = parseInt($(this).data('index'));
+                if (index >= startIndex && index <= endIndex) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+
+            // Update pagination UI
+            $pagination.find('.wbim-current-page').text(newPage);
+            $pagination.find('.wbim-page-prev').prop('disabled', newPage <= 1);
+            $pagination.find('.wbim-page-next').prop('disabled', newPage >= totalPages);
+        },
+
+        /**
          * Handle import form submit
          */
         handleImportSubmit: function() {
@@ -824,7 +948,7 @@
                 data: formData,
                 processData: false,
                 contentType: false,
-                timeout: 300000, // 5 minutes timeout for large imports
+                timeout: 600000, // 10 minutes timeout for large imports
                 success: function(response) {
                     clearInterval(progressInterval);
 
@@ -852,40 +976,52 @@
 
                             $results.find('.wbim-results-summary').html(summaryHtml);
 
-                            // Show errors if any
+                            // Show detailed results in collapsible sections
                             var allMessages = '';
 
-                            if (results.errors && results.errors.length > 0) {
-                                var errorsHtml = '<div class="wbim-results-errors-container">';
-                                errorsHtml += '<h4>' + (wbimStock.strings.errors || 'შეცდომები') + ' (' + results.errors.length + ')</h4>';
-                                errorsHtml += '<div class="wbim-error-list-wrapper"><ul class="wbim-error-list">';
-                                $.each(results.errors.slice(0, 50), function(i, error) {
-                                    errorsHtml += '<li>' + error + '</li>';
-                                });
-                                if (results.errors.length > 50) {
-                                    errorsHtml += '<li class="wbim-more-errors">... და კიდევ ' + (results.errors.length - 50) + ' შეცდომა</li>';
-                                }
-                                errorsHtml += '</ul></div></div>';
-                                allMessages += errorsHtml;
+                            // Error details (products not found, etc.)
+                            if (results.error_details && results.error_details.length > 0) {
+                                allMessages += WBIMStock.buildCollapsibleSection(
+                                    'errors',
+                                    'შეცდომები',
+                                    results.error_details,
+                                    'wbim-section-errors'
+                                );
                             }
 
-                            // Show skipped details if any
+                            // Skipped details (variable products, etc.)
                             if (results.skipped_details && results.skipped_details.length > 0) {
-                                var skippedHtml = '<div class="wbim-results-skipped-container">';
-                                skippedHtml += '<h4>გამოტოვებული პროდუქტები (' + results.skipped_details.length + ')</h4>';
-                                skippedHtml += '<div class="wbim-skipped-list-wrapper"><ul class="wbim-skipped-list">';
-                                $.each(results.skipped_details.slice(0, 50), function(i, detail) {
-                                    skippedHtml += '<li>' + detail + '</li>';
-                                });
-                                if (results.skipped_details.length > 50) {
-                                    skippedHtml += '<li class="wbim-more-skipped">... და კიდევ ' + (results.skipped_details.length - 50) + ' გამოტოვებული</li>';
-                                }
-                                skippedHtml += '</ul></div></div>';
-                                allMessages += skippedHtml;
+                                allMessages += WBIMStock.buildCollapsibleSection(
+                                    'skipped',
+                                    'გამოტოვებული პროდუქტები',
+                                    results.skipped_details,
+                                    'wbim-section-skipped'
+                                );
+                            }
+
+                            // Check for background sync task
+                            var syncTaskId = response.data.sync_task_id;
+                            if (syncTaskId) {
+                                // Show background sync status section
+                                allMessages += '<div class="wbim-background-sync-status" data-task-id="' + syncTaskId + '">';
+                                allMessages += '<div class="wbim-sync-status-header">';
+                                allMessages += '<span class="dashicons dashicons-update wbim-sync-spinner"></span>';
+                                allMessages += '<span class="wbim-sync-status-title">სინქრონიზაცია მიმდინარეობს ფონურ რეჟიმში...</span>';
+                                allMessages += '</div>';
+                                allMessages += '<p class="wbim-sync-status-text">ფაილში არსებული პროდუქტების გარდა დანარჩენი პროდუქტები მოინიშნება "არ არის მარაგში".</p>';
+                                allMessages += '<p class="wbim-sync-status-info"><small>სტატუსი ავტომატურად განახლდება</small></p>';
+                                allMessages += '</div>';
+
+                                // Start polling for sync status
+                                setTimeout(function() {
+                                    WBIMStock.pollSyncStatus(syncTaskId);
+                                }, 3000);
                             }
 
                             if (allMessages) {
                                 $results.find('.wbim-results-errors').html(allMessages);
+                                // Initialize collapsible and pagination
+                                WBIMStock.initCollapsibleSections();
                             } else {
                                 $results.find('.wbim-results-errors').empty();
                             }
@@ -929,6 +1065,81 @@
 
                     $results.find('.wbim-results-summary').html(errorHtml);
                     $results.find('.wbim-results-errors').empty();
+                }
+            });
+        },
+
+        /**
+         * Poll for background sync status
+         *
+         * @param {string} taskId Task ID to check
+         */
+        pollSyncStatus: function(taskId) {
+            var self = this;
+
+            $.ajax({
+                url: wbimStock.ajaxUrl,
+                type: 'POST',
+                data: {
+                    action: 'wbim_check_sync_status',
+                    nonce: wbimStock.nonce,
+                    task_id: taskId
+                },
+                success: function(response) {
+                    var $statusContainer = $('.wbim-background-sync-status[data-task-id="' + taskId + '"]');
+
+                    if (!$statusContainer.length) {
+                        return;
+                    }
+
+                    if (response.success) {
+                        var status = response.data;
+
+                        if (status.status === 'completed') {
+                            // Update UI to show completion
+                            var completedHtml = '<div class="wbim-sync-status-header wbim-sync-completed">';
+                            completedHtml += '<span class="dashicons dashicons-yes-alt"></span>';
+                            completedHtml += '<span class="wbim-sync-status-title">სინქრონიზაცია დასრულდა!</span>';
+                            completedHtml += '</div>';
+
+                            if (status.results) {
+                                completedHtml += '<p class="wbim-sync-status-text"><strong>' + status.results.marked_out_of_stock + '</strong> პროდუქტი მოინიშნა "არ არის მარაგში"</p>';
+                                if (status.results.errors_count > 0) {
+                                    completedHtml += '<p class="wbim-sync-status-text wbim-sync-errors">' + status.results.errors_count + ' შეცდომა</p>';
+                                }
+                            }
+
+                            completedHtml += '<p class="wbim-sync-status-info"><small>დასრულდა: ' + status.completed_at + '</small></p>';
+
+                            $statusContainer.html(completedHtml).addClass('wbim-sync-done');
+                        } else if (status.status === 'processing') {
+                            // Update status text and continue polling
+                            $statusContainer.find('.wbim-sync-status-title').text('სინქრონიზაცია მიმდინარეობს...');
+
+                            // Poll again after 5 seconds
+                            setTimeout(function() {
+                                self.pollSyncStatus(taskId);
+                            }, 5000);
+                        } else if (status.status === 'pending') {
+                            // Still waiting to start, continue polling
+                            $statusContainer.find('.wbim-sync-status-title').text('სინქრონიზაცია მალე დაიწყება...');
+
+                            // Poll again after 3 seconds
+                            setTimeout(function() {
+                                self.pollSyncStatus(taskId);
+                            }, 3000);
+                        }
+                    } else {
+                        // Error - show message but stop polling
+                        $statusContainer.find('.wbim-sync-status-title').text('სტატუსი ვერ მოიძებნა');
+                        $statusContainer.find('.wbim-sync-spinner').removeClass('wbim-sync-spinner').addClass('dashicons-warning');
+                    }
+                },
+                error: function() {
+                    // Network error - try again after longer delay
+                    setTimeout(function() {
+                        self.pollSyncStatus(taskId);
+                    }, 10000);
                 }
             });
         }

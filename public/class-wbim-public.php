@@ -37,6 +37,9 @@ class WBIM_Public {
         // Product page branch selector (before add to cart button)
         add_action( 'woocommerce_before_add_to_cart_button', array( $this, 'display_branch_selector' ), 10 );
 
+        // Also display branch selector for out of stock products (fallback hook)
+        add_action( 'woocommerce_single_product_summary', array( $this, 'display_branch_selector_fallback' ), 35 );
+
         // Product page stock display
         add_action( 'woocommerce_single_product_summary', array( $this, 'display_branch_stock' ), 25 );
 
@@ -46,6 +49,10 @@ class WBIM_Public {
         // Variable product stock display via AJAX
         add_action( 'wp_ajax_wbim_get_variation_stock', array( $this, 'ajax_get_variation_stock' ) );
         add_action( 'wp_ajax_nopriv_wbim_get_variation_stock', array( $this, 'ajax_get_variation_stock' ) );
+
+        // Branch price via AJAX
+        add_action( 'wp_ajax_wbim_get_branch_price', array( $this, 'ajax_get_branch_price' ) );
+        add_action( 'wp_ajax_nopriv_wbim_get_branch_price', array( $this, 'ajax_get_branch_price' ) );
 
         // Add branch data to cart item
         add_filter( 'woocommerce_add_cart_item_data', array( $this, 'add_branch_to_cart_item' ), 10, 3 );
@@ -70,6 +77,9 @@ class WBIM_Public {
 
         // Validate cart item has branch
         add_filter( 'woocommerce_add_to_cart_validation', array( $this, 'validate_branch_selection' ), 10, 5 );
+
+        // Apply branch-specific prices in cart
+        add_action( 'woocommerce_before_calculate_totals', array( $this, 'apply_branch_prices_in_cart' ), 10, 1 );
     }
 
     /**
@@ -114,6 +124,11 @@ class WBIM_Public {
             'ajax_url'          => admin_url( 'admin-ajax.php' ),
             'nonce'             => wp_create_nonce( 'wbim_public_nonce' ),
             'default_branch_id' => $default_branch_id,
+            'currency_symbol'   => get_woocommerce_currency_symbol(),
+            'currency_pos'      => get_option( 'woocommerce_currency_pos', 'left' ),
+            'decimal_sep'       => wc_get_price_decimal_separator(),
+            'thousand_sep'      => wc_get_price_thousand_separator(),
+            'decimals'          => wc_get_price_decimals(),
             'i18n'              => array(
                 'loading'          => __( 'იტვირთება...', 'wbim' ),
                 'in_stock'         => __( 'მარაგშია', 'wbim' ),
@@ -122,6 +137,9 @@ class WBIM_Public {
                 'available'        => __( 'მარაგში', 'wbim' ),
                 'select_branch'    => __( 'აირჩიეთ ფილიალი', 'wbim' ),
                 'select_variation' => __( 'აირჩიეთ ვარიაცია', 'wbim' ),
+                'wholesale_prices' => __( 'საბითუმო ფასები', 'wbim' ),
+                'pcs'              => __( 'ცალი', 'wbim' ),
+                'save'             => __( 'დაზოგე', 'wbim' ),
             ),
         ) );
 
@@ -327,6 +345,30 @@ class WBIM_Public {
             <input type="hidden" name="wbim_branch_name" id="wbim_branch_name" value="">
         </div>
         <?php
+        // Mark that selector was displayed
+        $GLOBALS['wbim_branch_selector_displayed'] = true;
+    }
+
+    /**
+     * Display branch selector fallback for out of stock products
+     * This runs on woocommerce_single_product_summary and only displays
+     * if the main selector wasn't shown (e.g., product is out of stock)
+     */
+    public function display_branch_selector_fallback() {
+        global $product;
+
+        // Skip if selector was already displayed
+        if ( ! empty( $GLOBALS['wbim_branch_selector_displayed'] ) ) {
+            return;
+        }
+
+        // Skip if not a product page
+        if ( ! $product || ! is_product() ) {
+            return;
+        }
+
+        // Display the selector
+        $this->display_branch_selector();
     }
 
     /**
@@ -455,6 +497,24 @@ class WBIM_Public {
             if ( $branch ) {
                 $cart_item_data['wbim_branch_id'] = $branch_id;
                 $cart_item_data['wbim_branch_name'] = $branch->name;
+
+                // Get quantity for wholesale pricing
+                $quantity = isset( $_POST['quantity'] ) ? absint( $_POST['quantity'] ) : 1;
+
+                // Get branch-specific price
+                $branch_prices = WBIM_Branch_Price::get_prices( $product_id, $branch_id, $variation_id, $quantity );
+
+                if ( $branch_prices ) {
+                    $cart_item_data['wbim_branch_price'] = true;
+                    if ( ! empty( $branch_prices['regular_price'] ) ) {
+                        $cart_item_data['wbim_regular_price'] = floatval( $branch_prices['regular_price'] );
+                    }
+                    if ( ! empty( $branch_prices['sale_price'] ) ) {
+                        $cart_item_data['wbim_sale_price'] = floatval( $branch_prices['sale_price'] );
+                    }
+                    $cart_item_data['wbim_min_quantity'] = $branch_prices['min_quantity'];
+                }
+
                 // Make cart items with different branches unique
                 $cart_item_data['unique_key'] = md5( microtime() . rand() );
             }
@@ -477,7 +537,67 @@ class WBIM_Public {
         if ( isset( $values['wbim_branch_name'] ) ) {
             $cart_item['wbim_branch_name'] = $values['wbim_branch_name'];
         }
+        // Restore branch price data
+        if ( isset( $values['wbim_branch_price'] ) ) {
+            $cart_item['wbim_branch_price'] = $values['wbim_branch_price'];
+        }
+        if ( isset( $values['wbim_regular_price'] ) ) {
+            $cart_item['wbim_regular_price'] = $values['wbim_regular_price'];
+        }
+        if ( isset( $values['wbim_sale_price'] ) ) {
+            $cart_item['wbim_sale_price'] = $values['wbim_sale_price'];
+        }
+        if ( isset( $values['wbim_min_quantity'] ) ) {
+            $cart_item['wbim_min_quantity'] = $values['wbim_min_quantity'];
+        }
         return $cart_item;
+    }
+
+    /**
+     * Apply branch-specific prices in cart
+     *
+     * @param WC_Cart $cart Cart object.
+     * @return void
+     */
+    public function apply_branch_prices_in_cart( $cart ) {
+        if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
+            return;
+        }
+
+        if ( did_action( 'woocommerce_before_calculate_totals' ) >= 2 ) {
+            return;
+        }
+
+        foreach ( $cart->get_cart() as $cart_item_key => $cart_item ) {
+            // Check if this cart item has a branch-specific price
+            if ( empty( $cart_item['wbim_branch_id'] ) ) {
+                continue;
+            }
+
+            $product = $cart_item['data'];
+            $product_id = $cart_item['product_id'];
+            $variation_id = isset( $cart_item['variation_id'] ) ? $cart_item['variation_id'] : 0;
+            $branch_id = $cart_item['wbim_branch_id'];
+            $quantity = $cart_item['quantity'];
+
+            // Recalculate price based on current quantity (for wholesale pricing)
+            $prices = WBIM_Branch_Price::get_prices( $product_id, $branch_id, $variation_id, $quantity );
+
+            if ( $prices ) {
+                // Determine the price to apply
+                $price_to_apply = null;
+
+                if ( ! empty( $prices['sale_price'] ) ) {
+                    $price_to_apply = floatval( $prices['sale_price'] );
+                } elseif ( ! empty( $prices['regular_price'] ) ) {
+                    $price_to_apply = floatval( $prices['regular_price'] );
+                }
+
+                if ( null !== $price_to_apply ) {
+                    $product->set_price( $price_to_apply );
+                }
+            }
+        }
     }
 
     /**
@@ -588,16 +708,9 @@ class WBIM_Public {
      * Display branch stock on archive pages
      */
     public function display_branch_stock_archive() {
-        $settings = get_option( 'wbim_settings', array() );
-
-        // Check if archive stock display is enabled
-        if ( empty( $settings['show_branch_stock_archive'] ) || 'yes' !== $settings['show_branch_stock_archive'] ) {
-            return;
-        }
-
         global $product;
 
-        if ( ! $product || $product->is_type( 'variable' ) ) {
+        if ( ! $product ) {
             return;
         }
 
@@ -608,12 +721,16 @@ class WBIM_Public {
             return;
         }
 
-        // Show compact version for archive
+        // Count branches with available stock (based on stock_status, not just quantity)
         $available_count = 0;
         foreach ( $branches as $branch ) {
             $stock = WBIM_Stock::get( $product_id, $branch->id );
-            if ( $stock && $stock->quantity > 0 ) {
-                $available_count++;
+            if ( $stock ) {
+                $status = ! empty( $stock->stock_status ) ? $stock->stock_status : 'instock';
+                // Available if status is not 'outofstock' OR quantity > 0
+                if ( 'outofstock' !== $status || $stock->quantity > 0 ) {
+                    $available_count++;
+                }
             }
         }
 
@@ -630,7 +747,7 @@ class WBIM_Public {
                 </span>
             <?php else : ?>
                 <span class="wbim-archive-unavailable">
-                    <?php esc_html_e( 'ფილიალებში არ არის', 'wbim' ); ?>
+                    <?php esc_html_e( 'არ არის', 'wbim' ); ?>
                 </span>
             <?php endif; ?>
         </div>
@@ -709,6 +826,85 @@ class WBIM_Public {
             'stock'        => $stock_data,
             'product_id'   => $product_id,
             'variation_id' => $variation_id
+        ) );
+    }
+
+    /**
+     * AJAX handler for getting branch price
+     *
+     * @return void
+     */
+    public function ajax_get_branch_price() {
+        // Verify nonce
+        if ( ! check_ajax_referer( 'wbim_public_nonce', 'nonce', false ) ) {
+            wp_send_json_error( array(
+                'message' => __( 'უსაფრთხოების შემოწმება ვერ მოხერხდა.', 'wbim' ),
+            ) );
+        }
+
+        $product_id = isset( $_POST['product_id'] ) ? absint( $_POST['product_id'] ) : 0;
+        $variation_id = isset( $_POST['variation_id'] ) ? absint( $_POST['variation_id'] ) : 0;
+        $branch_id = isset( $_POST['branch_id'] ) ? absint( $_POST['branch_id'] ) : 0;
+        $quantity = isset( $_POST['quantity'] ) ? absint( $_POST['quantity'] ) : 1;
+
+        if ( ! $product_id || ! $branch_id ) {
+            wp_send_json_error( array(
+                'message' => __( 'არასწორი მონაცემები', 'wbim' ),
+            ) );
+        }
+
+        // Get the applicable price for this branch and quantity
+        $prices = WBIM_Branch_Price::get_prices( $product_id, $branch_id, $variation_id, $quantity );
+
+        // If no branch price, get the default WooCommerce price
+        $target_id = $variation_id > 0 ? $variation_id : $product_id;
+        $product = wc_get_product( $target_id );
+
+        if ( ! $product ) {
+            wp_send_json_error( array(
+                'message' => __( 'პროდუქტი ვერ მოიძებნა', 'wbim' ),
+            ) );
+        }
+
+        $regular_price = $product->get_regular_price();
+        $sale_price = $product->get_sale_price();
+        $display_price = $product->get_price();
+
+        // Apply branch price if exists
+        if ( $prices ) {
+            if ( ! empty( $prices['regular_price'] ) ) {
+                $regular_price = $prices['regular_price'];
+                $display_price = $regular_price;
+            }
+            if ( ! empty( $prices['sale_price'] ) ) {
+                $sale_price = $prices['sale_price'];
+                $display_price = $sale_price;
+            }
+        }
+
+        // Get all price tiers for this branch (for wholesale display)
+        $all_tiers = WBIM_Branch_Price::get_price_tiers( $product_id, $branch_id, $variation_id );
+        $tiers_data = array();
+
+        foreach ( $all_tiers as $tier ) {
+            $tiers_data[] = array(
+                'min_quantity'  => (int) $tier->min_quantity,
+                'regular_price' => $tier->regular_price,
+                'sale_price'    => $tier->sale_price,
+                'formatted'     => ! empty( $tier->sale_price ) ? wc_price( $tier->sale_price ) : wc_price( $tier->regular_price ),
+            );
+        }
+
+        wp_send_json_success( array(
+            'has_branch_price'  => ! empty( $prices ),
+            'regular_price'     => $regular_price,
+            'sale_price'        => $sale_price,
+            'display_price'     => $display_price,
+            'formatted_price'   => wc_price( $display_price ),
+            'formatted_regular' => wc_price( $regular_price ),
+            'formatted_sale'    => ! empty( $sale_price ) ? wc_price( $sale_price ) : '',
+            'price_tiers'       => $tiers_data,
+            'applied_tier'      => $prices ? $prices['min_quantity'] : 1,
         ) );
     }
 

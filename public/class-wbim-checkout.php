@@ -129,17 +129,37 @@ class WBIM_Checkout {
                 $quantity = $cart_item['quantity'];
 
                 $stock = WBIM_Stock::get( $product_id, $branch->id, $variation_id );
-                $available = $stock ? $stock->quantity : 0;
+                $available = $stock ? (int) $stock->quantity : 0;
+                $stock_status = $stock && isset( $stock->stock_status ) ? $stock->stock_status : 'instock';
+
+                // Determine if sufficient:
+                // - If no stock record, assume available (product may not use branch stock)
+                // - If stock_status is 'outofstock', mark as insufficient
+                // - If stock_status is 'preorder', always sufficient
+                // - If available = 0, assume unlimited (not tracking quantity)
+                // - Otherwise, check if available >= needed
+                $sufficient = true;
+                if ( ! $stock ) {
+                    $sufficient = true; // No stock record = not tracking
+                } elseif ( 'outofstock' === $stock_status ) {
+                    $sufficient = false;
+                } elseif ( 'preorder' === $stock_status ) {
+                    $sufficient = true;
+                } elseif ( $available === 0 ) {
+                    $sufficient = true; // quantity = 0 means unlimited/not tracking
+                } elseif ( $available < $quantity ) {
+                    $sufficient = false;
+                }
 
                 $branch_stock_info[ $cart_item_key ] = array(
                     'product_id'   => $product_id,
                     'variation_id' => $variation_id,
                     'needed'       => $quantity,
                     'available'    => $available,
-                    'sufficient'   => $available >= $quantity,
+                    'sufficient'   => $sufficient,
                 );
 
-                if ( $available < $quantity ) {
+                if ( ! $sufficient ) {
                     $can_fulfill = false;
                 }
             }
@@ -318,36 +338,72 @@ class WBIM_Checkout {
         }
 
         $required = ! empty( $settings['require_branch_selection'] ) && 'yes' === $settings['require_branch_selection'];
+        $checkout_branch_id = ! empty( $_POST['wbim_branch_id'] ) ? absint( $_POST['wbim_branch_id'] ) : 0;
 
-        if ( $required && empty( $_POST['wbim_branch_id'] ) ) {
+        if ( $required && ! $checkout_branch_id ) {
             wc_add_notice( __( 'გთხოვთ აირჩიოთ ფილიალი.', 'wbim' ), 'error' );
         }
 
-        // Validate selected branch can fulfill the order
-        if ( ! empty( $_POST['wbim_branch_id'] ) ) {
-            $branch_id = absint( $_POST['wbim_branch_id'] );
-            $cart_items = WC()->cart->get_cart();
+        // Validate cart items stock availability
+        $cart_items = WC()->cart->get_cart();
 
-            foreach ( $cart_items as $cart_item ) {
-                $product_id = $cart_item['product_id'];
-                $variation_id = isset( $cart_item['variation_id'] ) ? $cart_item['variation_id'] : 0;
-                $quantity = $cart_item['quantity'];
+        foreach ( $cart_items as $cart_item ) {
+            $product_id   = $cart_item['product_id'];
+            $variation_id = isset( $cart_item['variation_id'] ) ? $cart_item['variation_id'] : 0;
+            $quantity     = $cart_item['quantity'];
 
-                $stock = WBIM_Stock::get( $product_id, $branch_id, $variation_id );
-                $available = $stock ? $stock->quantity : 0;
+            // Use cart item's branch_id if set, otherwise use checkout branch_id
+            $item_branch_id = ! empty( $cart_item['wbim_branch_id'] ) ? absint( $cart_item['wbim_branch_id'] ) : $checkout_branch_id;
 
-                if ( $available < $quantity ) {
-                    $product = wc_get_product( $variation_id ? $variation_id : $product_id );
-                    wc_add_notice(
-                        sprintf(
-                            __( '%s - არასაკმარისი მარაგი არჩეულ ფილიალში. საჭიროა: %d, ხელმისაწვდომია: %d', 'wbim' ),
-                            $product->get_name(),
-                            $quantity,
-                            $available
-                        ),
-                        'error'
-                    );
-                }
+            // Skip validation if no branch is associated
+            if ( ! $item_branch_id ) {
+                continue;
+            }
+
+            $stock = WBIM_Stock::get( $product_id, $item_branch_id, $variation_id );
+
+            // If no stock record exists, skip validation (product may not use branch stock)
+            if ( ! $stock ) {
+                continue;
+            }
+
+            $available    = (int) $stock->quantity;
+            $stock_status = isset( $stock->stock_status ) ? $stock->stock_status : 'instock';
+
+            // Skip quantity validation for preorder status or if stock_status indicates available without quantity tracking
+            if ( 'preorder' === $stock_status ) {
+                continue;
+            }
+
+            // Only validate quantity if stock is being tracked (has quantity > 0 or status is not 'outofstock')
+            if ( 'outofstock' === $stock_status ) {
+                $product = wc_get_product( $variation_id ? $variation_id : $product_id );
+                $branch  = WBIM_Branch::get_by_id( $item_branch_id );
+                wc_add_notice(
+                    sprintf(
+                        __( '%s - პროდუქტი არ არის მარაგში ფილიალში "%s".', 'wbim' ),
+                        $product->get_name(),
+                        $branch ? $branch->name : ''
+                    ),
+                    'error'
+                );
+                continue;
+            }
+
+            // Check quantity only if available > 0 (if 0, assume unlimited or not tracking)
+            if ( $available > 0 && $available < $quantity ) {
+                $product = wc_get_product( $variation_id ? $variation_id : $product_id );
+                $branch  = WBIM_Branch::get_by_id( $item_branch_id );
+                wc_add_notice(
+                    sprintf(
+                        __( '%s - არასაკმარისი მარაგი ფილიალში "%s". საჭიროა: %d, ხელმისაწვდომია: %d', 'wbim' ),
+                        $product->get_name(),
+                        $branch ? $branch->name : '',
+                        $quantity,
+                        $available
+                    ),
+                    'error'
+                );
             }
         }
     }
@@ -458,17 +514,32 @@ class WBIM_Checkout {
                 $quantity = $item['quantity'];
 
                 $stock = WBIM_Stock::get( $product_id, $branch->id, $variation_id );
-                $available = $stock ? $stock->quantity : 0;
+                $available = $stock ? (int) $stock->quantity : 0;
+                $stock_status = $stock && isset( $stock->stock_status ) ? $stock->stock_status : 'instock';
+
+                // Same logic as get_cart_fulfillment_branches
+                $sufficient = true;
+                if ( ! $stock ) {
+                    $sufficient = true;
+                } elseif ( 'outofstock' === $stock_status ) {
+                    $sufficient = false;
+                } elseif ( 'preorder' === $stock_status ) {
+                    $sufficient = true;
+                } elseif ( $available === 0 ) {
+                    $sufficient = true;
+                } elseif ( $available < $quantity ) {
+                    $sufficient = false;
+                }
 
                 $branch_stock_info[ $key ] = array(
                     'product_id'   => $product_id,
                     'variation_id' => $variation_id,
                     'needed'       => $quantity,
                     'available'    => $available,
-                    'sufficient'   => $available >= $quantity,
+                    'sufficient'   => $sufficient,
                 );
 
-                if ( $available < $quantity ) {
+                if ( ! $sufficient ) {
                     $can_fulfill = false;
                 }
             }
@@ -551,12 +622,27 @@ class WBIM_Checkout {
             $quantity = $cart_item['quantity'];
 
             $stock = WBIM_Stock::get( $product_id, $branch_id, $variation_id );
-            $available = $stock ? $stock->quantity : 0;
+            $available = $stock ? (int) $stock->quantity : 0;
+            $stock_status = $stock && isset( $stock->stock_status ) ? $stock->stock_status : 'instock';
+
+            // Determine if sufficient using same logic as other methods
+            $sufficient = true;
+            if ( ! $stock ) {
+                $sufficient = true;
+            } elseif ( 'outofstock' === $stock_status ) {
+                $sufficient = false;
+            } elseif ( 'preorder' === $stock_status ) {
+                $sufficient = true;
+            } elseif ( $available === 0 ) {
+                $sufficient = true;
+            } elseif ( $available < $quantity ) {
+                $sufficient = false;
+            }
 
             $stock_info[ $cart_item_key ] = array(
                 'available'  => $available,
                 'needed'     => $quantity,
-                'sufficient' => $available >= $quantity,
+                'sufficient' => $sufficient,
             );
         }
 

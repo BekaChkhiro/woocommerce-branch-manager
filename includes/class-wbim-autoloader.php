@@ -93,7 +93,7 @@ class WBIM_Autoloader {
             array_unshift( $paths, self::$include_path . 'admin/' );
         }
 
-        if ( strpos( $class, '_model' ) !== false || in_array( $class, array( 'wbim_branch', 'wbim_stock', 'wbim_transfer', 'wbim_transfer_item', 'wbim_stock_log', 'wbim_order_allocation' ), true ) ) {
+        if ( strpos( $class, '_model' ) !== false || in_array( $class, array( 'wbim_branch', 'wbim_stock', 'wbim_transfer', 'wbim_transfer_item', 'wbim_stock_log', 'wbim_order_allocation', 'wbim_branch_price' ), true ) ) {
             array_unshift( $paths, self::$include_path . 'includes/models/' );
         }
 

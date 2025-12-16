@@ -36,6 +36,7 @@ class WBIM_Admin {
     private function includes() {
         require_once WBIM_PLUGIN_DIR . 'admin/class-wbim-admin-menus.php';
         require_once WBIM_PLUGIN_DIR . 'admin/class-wbim-admin-stock.php';
+        require_once WBIM_PLUGIN_DIR . 'admin/class-wbim-admin-prices.php';
     }
 
     /**

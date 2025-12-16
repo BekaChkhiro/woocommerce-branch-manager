@@ -144,6 +144,40 @@ class WBIM_Bulk_Pricing {
             }
         }
 
+        // Check if any branch has wholesale pricing for this product
+        if ( $this->product_has_branch_wholesale_pricing( $product_id ) ) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if product has branch-specific wholesale pricing
+     *
+     * @param int $product_id Product ID.
+     * @return bool
+     */
+    private function product_has_branch_wholesale_pricing( $product_id ) {
+        if ( ! class_exists( 'WBIM_Branch_Price' ) || ! class_exists( 'WBIM_Branch' ) ) {
+            return false;
+        }
+
+        $branches = WBIM_Branch::get_active();
+        if ( empty( $branches ) ) {
+            return false;
+        }
+
+        foreach ( $branches as $branch ) {
+            $tiers = WBIM_Branch_Price::get_price_tiers( $product_id, $branch->id, 0 );
+            // Check if there are wholesale tiers (min_quantity > 1)
+            foreach ( $tiers as $tier ) {
+                if ( (int) $tier->min_quantity > 1 ) {
+                    return true;
+                }
+            }
+        }
+
         return false;
     }
 
@@ -163,25 +197,51 @@ class WBIM_Bulk_Pricing {
         $product_id  = $product->get_id();
         $is_variable = $product->is_type( 'variable' );
 
-        // For simple products, check if bulk pricing is enabled
+        // Check if product has branch-level wholesale pricing
+        $has_branch_wholesale = $this->product_has_branch_wholesale_pricing( $product_id );
+
+        // For simple products
         if ( ! $is_variable ) {
-            if ( ! WBIM_Admin_Bulk_Pricing::is_bulk_pricing_enabled( $product_id ) ||
-                 ! WBIM_Admin_Bulk_Pricing::are_qty_buttons_enabled( $product_id ) ) {
+            $has_product_bulk = WBIM_Admin_Bulk_Pricing::is_bulk_pricing_enabled( $product_id ) &&
+                                WBIM_Admin_Bulk_Pricing::are_qty_buttons_enabled( $product_id );
+
+            // If no product-level bulk pricing and no branch wholesale pricing, skip
+            if ( ! $has_product_bulk && ! $has_branch_wholesale ) {
                 return;
             }
 
             $tiers         = WBIM_Admin_Bulk_Pricing::get_bulk_pricing_tiers( $product_id );
             $regular_price = floatval( $product->get_regular_price() );
 
-            if ( empty( $tiers ) ) {
-                return;
+            // If has product-level tiers, render them
+            if ( ! empty( $tiers ) && $has_product_bulk ) {
+                $this->render_quantity_buttons( $tiers, $regular_price, $product_id );
+            } elseif ( $has_branch_wholesale ) {
+                // Render empty container for branch-specific pricing (populated via JS)
+                $this->render_branch_pricing_container( $product_id );
             }
-
-            $this->render_quantity_buttons( $tiers, $regular_price, $product_id );
         } else {
             // For variable products, render empty container (populated via JS)
             $this->render_variable_buttons_container( $product );
         }
+    }
+
+    /**
+     * Render empty container for branch-specific pricing
+     * Will be populated via JavaScript when a branch is selected
+     *
+     * @param int $product_id Product ID.
+     * @return void
+     */
+    private function render_branch_pricing_container( $product_id ) {
+        ?>
+        <div class="wbim-bulk-pricing-wrapper wbim-branch-pricing-wrapper" data-product-id="<?php echo esc_attr( $product_id ); ?>" style="display: none;">
+            <h4 class="wbim-bulk-pricing-title"><?php esc_html_e( 'აირჩიეთ რაოდენობა:', 'wbim' ); ?></h4>
+            <div class="wbim-qty-buttons">
+                <!-- Buttons populated via JavaScript when branch is selected -->
+            </div>
+        </div>
+        <?php
     }
 
     /**
@@ -337,7 +397,21 @@ class WBIM_Bulk_Pricing {
                 // Determine which ID to check
                 $check_id = $variation_id ? $variation_id : $product_id;
 
-                // Check if bulk pricing is enabled
+                // PRIORITY 1: Check for branch-specific pricing first
+                // If cart item has branch price set via WBIM_Public, skip bulk pricing
+                if ( ! empty( $cart_item['wbim_branch_id'] ) && class_exists( 'WBIM_Branch_Price' ) ) {
+                    $branch_id = $cart_item['wbim_branch_id'];
+                    $branch_prices = WBIM_Branch_Price::get_prices( $product_id, $branch_id, $variation_id, $quantity );
+
+                    if ( $branch_prices ) {
+                        // Branch-specific price exists, let WBIM_Public handle it
+                        // Mark as processed to prevent further processing
+                        self::$processed_items[ $cart_item_key ] = true;
+                        continue;
+                    }
+                }
+
+                // PRIORITY 2: Check if product-level bulk pricing is enabled
                 if ( ! WBIM_Admin_Bulk_Pricing::is_bulk_pricing_enabled( $check_id ) ) {
                     continue;
                 }
